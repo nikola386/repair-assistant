@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { showAlert } from '@/lib/alerts'
 
 export default function ChangePasswordPage() {
   const { t } = useLanguage()
@@ -34,13 +35,17 @@ export default function ChangePasswordPage() {
 
     // Validate passwords match
     if (formData.newPassword !== formData.confirmPassword) {
-      setError(t.profile?.passwordMismatch || 'New passwords do not match')
+      const errorMsg = t.profile?.passwordMismatch || 'New passwords do not match'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       return
     }
 
     // Validate password length
     if (formData.newPassword.length < 6) {
-      setError(t.profile?.passwordTooShort || 'Password must be at least 6 characters long')
+      const errorMsg = t.profile?.passwordTooShort || 'Password must be at least 6 characters long'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       return
     }
 
@@ -61,17 +66,23 @@ export default function ChangePasswordPage() {
       const data = await response.json()
 
       if (response.ok) {
-        setSuccess(t.profile?.passwordChangeSuccess || 'Password changed successfully')
+        const successMsg = t.profile?.passwordChangeSuccess || 'Password changed successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
         setFormData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
         })
       } else {
-        setError(data.error || t.profile?.passwordChangeError || 'Failed to change password')
+        const errorMsg = data.error || t.profile?.passwordChangeError || 'Failed to change password'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.passwordChangeError || 'Failed to change password')
+      const errorMsg = t.profile?.passwordChangeError || 'Failed to change password'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -88,18 +99,6 @@ export default function ChangePasswordPage() {
         <div className="container">
           <div className="profile-page__wrapper">
             <h1>{t.profile?.changePassword || 'Change Password'}</h1>
-
-            {error && (
-              <div className="profile-page__error" role="alert">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="profile-page__success" role="alert">
-                {success}
-              </div>
-            )}
 
             <form onSubmit={handleSubmit} className="profile-page__form">
               <div className="profile-page__field">

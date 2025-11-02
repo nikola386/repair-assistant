@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
+import { showAlert } from '@/lib/alerts'
 
 export default function RegisterPage() {
   const { t } = useLanguage()
@@ -32,19 +33,25 @@ export default function RegisterPage() {
 
     // Validate passwords match
     if (password !== confirmPassword) {
-      setError(t.auth?.passwordMismatch || 'Passwords do not match')
+      const errorMsg = t.auth?.passwordMismatch || 'Passwords do not match'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       return
     }
 
     // Validate password length
     if (password.length < 6) {
-      setError(t.auth?.passwordTooShort || 'Password must be at least 6 characters long')
+      const errorMsg = t.auth?.passwordTooShort || 'Password must be at least 6 characters long'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       return
     }
 
     // Validate name is provided
     if (!name || name.trim().length === 0) {
-      setError(t.auth?.nameRequired || 'Name is required')
+      const errorMsg = t.auth?.nameRequired || 'Name is required'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       return
     }
 
@@ -67,7 +74,9 @@ export default function RegisterPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || t.auth?.registrationError || 'Registration failed')
+        const errorMsg = data.error || t.auth?.registrationError || 'Registration failed'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
         setLoading(false)
         return
       }
@@ -80,7 +89,9 @@ export default function RegisterPage() {
       })
 
       if (result?.error) {
-        setError(t.auth?.loginError || 'Registration successful but login failed. Please try logging in.')
+        const errorMsg = t.auth?.loginError || 'Registration successful but login failed. Please try logging in.'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
         setLoading(false)
       } else if (result?.ok) {
         // Redirect to onboarding
@@ -88,7 +99,9 @@ export default function RegisterPage() {
         router.refresh()
       }
     } catch (err) {
-      setError(t.auth?.registrationError || 'An error occurred during registration')
+      const errorMsg = t.auth?.registrationError || 'An error occurred during registration'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       setLoading(false)
     }
   }
@@ -175,12 +188,6 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
-            {error && (
-              <div className="login-error" role="alert">
-                {error}
-              </div>
-            )}
-
             <div className="form-group">
               <label htmlFor="name" className="form-label">
                 {t.auth?.name || 'Name'}

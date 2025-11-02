@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import Spinner from '../ui/Spinner'
 import QRCode from 'react-qr-code'
 import ExpenseTable from './ExpenseTable'
+import { showAlert } from '../../lib/alerts'
 
 interface TicketDetailProps {
   ticket: RepairTicket
@@ -103,7 +104,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
       }
     } catch (error) {
       console.error('Error updating ticket:', error)
-      alert(t.tickets.updateError)
+      showAlert.error(t.tickets.updateError)
     } finally {
       setIsUpdating(false)
     }
@@ -129,7 +130,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
       }
     } catch (error) {
       console.error('Error updating ticket:', error)
-      alert(t.tickets.updateError || 'Error updating ticket')
+      showAlert.error(t.tickets.updateError || 'Error updating ticket')
     } finally {
       setIsUpdating(false)
     }
@@ -141,14 +142,14 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
     // Validate required fields
     if (!editFormData.customerName || !editFormData.customerEmail || !editFormData.customerPhone || 
         !editFormData.deviceType || !editFormData.issueDescription) {
-      alert('Please fill in all required fields (Customer Name, Email, Phone, Device Type, and Issue Description)')
+      showAlert.error('Please fill in all required fields (Customer Name, Email, Phone, Device Type, and Issue Description)')
       return
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(editFormData.customerEmail || '')) {
-      alert('Please enter a valid email address')
+      showAlert.error('Please enter a valid email address')
       return
     }
 
@@ -200,7 +201,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
       }
     } catch (error) {
       console.error('Error uploading images:', error)
-      alert('Failed to upload some images')
+      showAlert.error('Failed to upload some images')
       // Remove failed files from pending
       setPendingFiles((prev) => prev.filter((file) => !newFiles.includes(file)))
     } finally {
@@ -277,7 +278,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
       }
     } catch (error) {
       console.error('Error deleting image:', error)
-      alert('Failed to delete image')
+      showAlert.error('Failed to delete image')
     }
   }
 
@@ -295,12 +296,12 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
       if (response.ok) {
         router.push('/tickets')
       } else {
-        alert(t.tickets.deleteError)
+        showAlert.error(t.tickets.deleteError)
         setIsDeleting(false)
       }
     } catch (error) {
       console.error('Error deleting ticket:', error)
-      alert(t.tickets.deleteError)
+      showAlert.error(t.tickets.deleteError)
       setIsDeleting(false)
     }
   }

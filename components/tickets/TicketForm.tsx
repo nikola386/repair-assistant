@@ -7,6 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { CreateTicketInput, TicketPriority } from '../../types/ticket'
 import ExpenseTable from './ExpenseTable'
+import { showAlert } from '../../lib/alerts'
 
 interface Customer {
   id: string
@@ -89,7 +90,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
       setUploadedImages((prev) => [...prev, ...uploadedPaths])
     } catch (error) {
       console.error('Error uploading images:', error)
-      alert('Failed to upload some images')
+      showAlert.error('Failed to upload some images')
     } finally {
       setUploadingImages(false)
       if (fileInputRef.current) {
@@ -126,7 +127,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
       setPendingFiles([]) // Clear pending files after successful upload
     } catch (error) {
       console.error('Error uploading pending images:', error)
-      alert('Failed to upload some images')
+      showAlert.error('Failed to upload some images')
     } finally {
       setUploadingImages(false)
     }
@@ -137,7 +138,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
     
     if (!formData.customerName || !formData.customerEmail || !formData.customerPhone || 
         !formData.deviceType || !formData.issueDescription) {
-      alert(t.tickets.form.required)
+      showAlert.error(t.tickets.form.required)
       return
     }
 
@@ -175,7 +176,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
       }
     } catch (error) {
       console.error('Form submission error:', error)
-      alert(t.tickets.form.error)
+      showAlert.error(t.tickets.form.error)
     } finally {
       setIsSubmitting(false)
     }

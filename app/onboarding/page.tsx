@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
 import Steps from '@/components/ui/Steps'
 import LogoUpload from '@/components/ui/LogoUpload'
+import { showAlert } from '@/lib/alerts'
 
 interface Country {
   id: string
@@ -144,7 +145,9 @@ export default function OnboardingPage() {
     
     if (step === 1) {
       if (!storeName.trim()) {
-        setError(t.onboarding?.step1StoreNameRequired || 'Store name is required')
+        const errorMsg = t.onboarding?.step1StoreNameRequired || 'Store name is required'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
         return false
       }
     }
@@ -152,7 +155,9 @@ export default function OnboardingPage() {
     if (step === 2) {
       // Step 2 has no required fields, but validate VAT if EU country
       if (isEUCountry && vatNumber && vatNumber.trim().length < 2) {
-        setError(t.onboarding?.invalidVatNumber || 'Invalid VAT number')
+        const errorMsg = t.onboarding?.invalidVatNumber || 'Invalid VAT number'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
         return false
       }
     }
@@ -219,7 +224,9 @@ export default function OnboardingPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || t.onboarding?.error || 'Failed to complete onboarding')
+        const errorMsg = data.error || t.onboarding?.error || 'Failed to complete onboarding'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
         setLoading(false)
         return
       }
@@ -228,7 +235,9 @@ export default function OnboardingPage() {
       router.push('/dashboard')
       router.refresh()
     } catch (err) {
-      setError(t.onboarding?.error || 'An error occurred during onboarding')
+      const errorMsg = t.onboarding?.error || 'An error occurred during onboarding'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       setLoading(false)
     }
   }
@@ -340,12 +349,6 @@ export default function OnboardingPage() {
           <Steps steps={steps} currentStep={currentStep} />
 
           <form onSubmit={handleSubmit} className="login-form">
-            {error && (
-              <div className="login-error" role="alert">
-                {error}
-              </div>
-            )}
-
             {/* Step 1: Store name and address */}
             {currentStep === 1 && (
               <div className="onboarding-step">

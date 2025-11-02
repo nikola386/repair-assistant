@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { showAlert } from '@/lib/alerts'
 
 import type { User } from '@/lib/userStorage'
 
@@ -73,10 +74,14 @@ export default function ProfilePage() {
           vatNumber: data.store?.vatNumber || '',
         })
       } else {
-        setError(t.profile?.fetchError || 'Failed to load profile')
+        const errorMsg = t.profile?.fetchError || 'Failed to load profile'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.fetchError || 'Failed to load profile')
+      const errorMsg = t.profile?.fetchError || 'Failed to load profile'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -124,7 +129,9 @@ export default function ProfilePage() {
       if (response.ok) {
         setUser(data.user)
         setStore(data.store)
-        setSuccess(t.profile?.updateSuccess || 'Profile updated successfully')
+        const successMsg = t.profile?.updateSuccess || 'Profile updated successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
         // Update session to reflect changes
         await updateSession({
           user: {
@@ -135,10 +142,14 @@ export default function ProfilePage() {
           },
         })
       } else {
-        setError(data.error || t.profile?.updateError || 'Failed to update profile')
+        const errorMsg = data.error || t.profile?.updateError || 'Failed to update profile'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.updateError || 'Failed to update profile')
+      const errorMsg = t.profile?.updateError || 'Failed to update profile'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setSaving(false)
     }
@@ -165,7 +176,9 @@ export default function ProfilePage() {
 
       if (response.ok) {
         setUser(data.user)
-        setSuccess(t.profile?.imageUploadSuccess || 'Profile image updated successfully')
+        const successMsg = t.profile?.imageUploadSuccess || 'Profile image updated successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
         // Update session
         await updateSession({
           user: {
@@ -174,10 +187,14 @@ export default function ProfilePage() {
           },
         })
       } else {
-        setError(data.error || t.profile?.imageUploadError || 'Failed to upload image')
+        const errorMsg = data.error || t.profile?.imageUploadError || 'Failed to upload image'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.imageUploadError || 'Failed to upload image')
+      const errorMsg = t.profile?.imageUploadError || 'Failed to upload image'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setUploadingImage(false)
     }
@@ -201,7 +218,9 @@ export default function ProfilePage() {
 
       if (response.ok) {
         setUser(data.user)
-        setSuccess(t.profile?.imageDeleteSuccess || 'Profile image deleted successfully')
+        const successMsg = t.profile?.imageDeleteSuccess || 'Profile image deleted successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
         await updateSession({
           user: {
             ...session?.user,
@@ -209,10 +228,14 @@ export default function ProfilePage() {
           },
         })
       } else {
-        setError(data.error || t.profile?.imageDeleteError || 'Failed to delete image')
+        const errorMsg = data.error || t.profile?.imageDeleteError || 'Failed to delete image'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.imageDeleteError || 'Failed to delete image')
+      const errorMsg = t.profile?.imageDeleteError || 'Failed to delete image'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setUploadingImage(false)
     }
@@ -249,18 +272,6 @@ export default function ProfilePage() {
         <div className="container">
           <div className="profile-page__wrapper">
             <h1>{t.profile?.title || 'My Profile'}</h1>
-
-            {error && (
-              <div className="profile-page__error" role="alert">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="profile-page__success" role="alert">
-                {success}
-              </div>
-            )}
 
             <div className="profile-page__content">
               <div className="profile-page__image-section">

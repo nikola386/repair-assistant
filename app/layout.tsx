@@ -5,6 +5,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext'
 import CookieBanner from '@/components/ui/CookieBanner'
 import { Providers } from './providers'
 import ProtectedRoutes from '@/components/ProtectedRoutes'
+import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: 'Dashboard - Майстор Жичко',
@@ -25,6 +26,30 @@ export default function RootLayout({
               {children}
             </ProtectedRoutes>
             <CookieBanner />
+            <Toaster 
+              position="bottom-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                },
+                success: {
+                  duration: 3000,
+                  iconTheme: {
+                    primary: '#4ade80',
+                    secondary: '#fff',
+                  },
+                },
+                error: {
+                  duration: 4000,
+                  iconTheme: {
+                    primary: '#ef4444',
+                    secondary: '#fff',
+                  },
+                },
+              }}
+            />
           </LanguageProvider>
         </Providers>
       </body>

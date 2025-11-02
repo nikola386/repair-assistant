@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Expense } from '../../types/ticket'
+import { showAlert } from '../../lib/alerts'
 
 interface ExpenseTableProps {
   ticketId: string
@@ -65,7 +66,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
 
   const handleAddExpense = async () => {
     if (!newExpense.name || !newExpense.quantity || !newExpense.price) {
-      alert('Please fill in all fields')
+      showAlert.error('Please fill in all fields')
       return
     }
 
@@ -73,7 +74,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
     const price = parseFloat(newExpense.price)
 
     if (isNaN(quantity) || quantity < 0 || isNaN(price) || price < 0) {
-      alert('Quantity and price must be valid positive numbers')
+      showAlert.error('Quantity and price must be valid positive numbers')
       return
     }
 
@@ -95,11 +96,11 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
         setIsAdding(false)
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to add expense')
+        showAlert.error(error.error || 'Failed to add expense')
       }
     } catch (error) {
       console.error('Error adding expense:', error)
-      alert('Failed to add expense')
+      showAlert.error('Failed to add expense')
     } finally {
       setIsLoading(false)
     }
@@ -116,7 +117,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
 
   const handleUpdateExpense = async (expenseId: string) => {
     if (!editingExpense.name || !editingExpense.quantity || !editingExpense.price) {
-      alert('Please fill in all fields')
+      showAlert.error('Please fill in all fields')
       return
     }
 
@@ -124,7 +125,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
     const price = parseFloat(editingExpense.price)
 
     if (isNaN(quantity) || quantity < 0 || isNaN(price) || price < 0) {
-      alert('Quantity and price must be valid positive numbers')
+      showAlert.error('Quantity and price must be valid positive numbers')
       return
     }
 
@@ -146,11 +147,11 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
         setEditingExpense({ name: '', quantity: '', price: '' })
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to update expense')
+        showAlert.error(error.error || 'Failed to update expense')
       }
     } catch (error) {
       console.error('Error updating expense:', error)
-      alert('Failed to update expense')
+      showAlert.error('Failed to update expense')
     } finally {
       setIsLoading(false)
     }
@@ -170,11 +171,11 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
       if (response.ok) {
         await fetchExpenses()
       } else {
-        alert('Failed to delete expense')
+        showAlert.error('Failed to delete expense')
       }
     } catch (error) {
       console.error('Error deleting expense:', error)
-      alert('Failed to delete expense')
+      showAlert.error('Failed to delete expense')
     } finally {
       setIsLoading(false)
     }

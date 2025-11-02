@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LogoUpload from '@/components/ui/LogoUpload'
+import { showAlert } from '@/lib/alerts'
 
 import type { User } from '@/lib/userStorage'
 
@@ -88,10 +89,14 @@ export default function SettingsPage() {
           email: data.user.email || '',
         })
       } else {
-        setError(t.profile?.fetchError || 'Failed to load profile')
+        const errorMsg = t.profile?.fetchError || 'Failed to load profile'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.fetchError || 'Failed to load profile')
+      const errorMsg = t.profile?.fetchError || 'Failed to load profile'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -181,7 +186,9 @@ export default function SettingsPage() {
 
       if (response.ok) {
         setUser(data.user)
-        setSuccess(t.profile?.updateSuccess || 'Profile updated successfully')
+        const successMsg = t.profile?.updateSuccess || 'Profile updated successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
         await updateSession({
           user: {
             ...session?.user,
@@ -191,10 +198,14 @@ export default function SettingsPage() {
           },
         })
       } else {
-        setError(data.error || t.profile?.updateError || 'Failed to update profile')
+        const errorMsg = data.error || t.profile?.updateError || 'Failed to update profile'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.updateError || 'Failed to update profile')
+      const errorMsg = t.profile?.updateError || 'Failed to update profile'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setSaving(false)
     }
@@ -206,12 +217,16 @@ export default function SettingsPage() {
     setSuccess('')
 
     if (passwordFormData.newPassword !== passwordFormData.confirmPassword) {
-      setError(t.profile?.passwordMismatch || 'New passwords do not match')
+      const errorMsg = t.profile?.passwordMismatch || 'New passwords do not match'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       return
     }
 
     if (passwordFormData.newPassword.length < 6) {
-      setError(t.profile?.passwordTooShort || 'Password must be at least 6 characters long')
+      const errorMsg = t.profile?.passwordTooShort || 'Password must be at least 6 characters long'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       return
     }
 
@@ -232,17 +247,23 @@ export default function SettingsPage() {
       const data = await response.json()
 
       if (response.ok) {
-        setSuccess(t.profile?.passwordChangeSuccess || 'Password changed successfully')
+        const successMsg = t.profile?.passwordChangeSuccess || 'Password changed successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
         setPasswordFormData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
         })
       } else {
-        setError(data.error || t.profile?.passwordChangeError || 'Failed to change password')
+        const errorMsg = data.error || t.profile?.passwordChangeError || 'Failed to change password'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.passwordChangeError || 'Failed to change password')
+      const errorMsg = t.profile?.passwordChangeError || 'Failed to change password'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setSaving(false)
     }
@@ -269,7 +290,9 @@ export default function SettingsPage() {
 
       if (response.ok) {
         setUser(data.user)
-        setSuccess(t.profile?.imageUploadSuccess || 'Profile image updated successfully')
+        const successMsg = t.profile?.imageUploadSuccess || 'Profile image updated successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
         await updateSession({
           user: {
             ...session?.user,
@@ -277,10 +300,14 @@ export default function SettingsPage() {
           },
         })
       } else {
-        setError(data.error || t.profile?.imageUploadError || 'Failed to upload image')
+        const errorMsg = data.error || t.profile?.imageUploadError || 'Failed to upload image'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.imageUploadError || 'Failed to upload image')
+      const errorMsg = t.profile?.imageUploadError || 'Failed to upload image'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setUploadingImage(false)
     }
@@ -304,7 +331,9 @@ export default function SettingsPage() {
 
       if (response.ok) {
         setUser(data.user)
-        setSuccess(t.profile?.imageDeleteSuccess || 'Profile image deleted successfully')
+        const successMsg = t.profile?.imageDeleteSuccess || 'Profile image deleted successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
         await updateSession({
           user: {
             ...session?.user,
@@ -312,10 +341,14 @@ export default function SettingsPage() {
           },
         })
       } else {
-        setError(data.error || t.profile?.imageDeleteError || 'Failed to delete image')
+        const errorMsg = data.error || t.profile?.imageDeleteError || 'Failed to delete image'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.profile?.imageDeleteError || 'Failed to delete image')
+      const errorMsg = t.profile?.imageDeleteError || 'Failed to delete image'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setUploadingImage(false)
     }
@@ -348,7 +381,9 @@ export default function SettingsPage() {
         const data = await response.json()
 
         if (response.ok) {
-          setSuccess(t.settings?.appearanceUpdateSuccess || 'Appearance updated successfully')
+          const successMsg = t.settings?.appearanceUpdateSuccess || 'Appearance updated successfully'
+          setSuccess(successMsg)
+          showAlert.success(successMsg)
           // Apply colors immediately
           applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
           // Update logo preview if logo was uploaded
@@ -362,7 +397,9 @@ export default function SettingsPage() {
             setRemoveLogo(false)
           }
         } else {
-          setError(data.error || t.settings?.appearanceUpdateError || 'Failed to update appearance')
+          const errorMsg = data.error || t.settings?.appearanceUpdateError || 'Failed to update appearance'
+          setError(errorMsg)
+          showAlert.error(errorMsg)
         }
       } else {
         // No logo changes, just update colors with JSON
@@ -377,15 +414,21 @@ export default function SettingsPage() {
         const data = await response.json()
 
         if (response.ok) {
-          setSuccess(t.settings?.colorsUpdateSuccess || 'Colors updated successfully')
+          const successMsg = t.settings?.colorsUpdateSuccess || 'Colors updated successfully'
+          setSuccess(successMsg)
+          showAlert.success(successMsg)
           // Apply colors immediately
           applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
         } else {
-          setError(data.error || t.settings?.colorsUpdateError || 'Failed to update colors')
+          const errorMsg = data.error || t.settings?.colorsUpdateError || 'Failed to update colors'
+          setError(errorMsg)
+          showAlert.error(errorMsg)
         }
       }
     } catch (err) {
-      setError(t.settings?.appearanceUpdateError || 'Failed to update appearance')
+      const errorMsg = t.settings?.appearanceUpdateError || 'Failed to update appearance'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setSettingsLoading(false)
     }
@@ -448,12 +491,18 @@ export default function SettingsPage() {
       const data = await response.json()
 
       if (response.ok) {
-        setSuccess(t.settings?.storeUpdateSuccess || 'Store information updated successfully')
+        const successMsg = t.settings?.storeUpdateSuccess || 'Store information updated successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
       } else {
-        setError(data.error || t.settings?.storeUpdateError || 'Failed to update store information')
+        const errorMsg = data.error || t.settings?.storeUpdateError || 'Failed to update store information'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
       }
     } catch (err) {
-      setError(t.settings?.storeUpdateError || 'Failed to update store information')
+      const errorMsg = t.settings?.storeUpdateError || 'Failed to update store information'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
     } finally {
       setStoreLoading(false)
     }
@@ -539,18 +588,6 @@ export default function SettingsPage() {
             </aside>
 
             <div className="settings-page__main">
-              {error && (
-                <div className="settings-page__alert settings-page__alert--error" role="alert">
-                  {error}
-                </div>
-              )}
-
-              {success && (
-                <div className="settings-page__alert settings-page__alert--success" role="alert">
-                  {success}
-                </div>
-              )}
-
               {activeTab === 'profile' && (
                 <div className="settings-page__section">
                   <div className="settings-page__card">

@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
+import { showAlert } from '@/lib/alerts'
 
 export default function LoginPage() {
   const { t } = useLanguage()
@@ -30,7 +31,9 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError(t.auth?.loginError || 'Invalid email or password')
+        const errorMsg = t.auth?.loginError || 'Invalid email or password'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
         setLoading(false)
       } else if (result?.ok) {
         // Check onboarding status and redirect accordingly
@@ -47,7 +50,9 @@ export default function LoginPage() {
         router.refresh()
       }
     } catch (err) {
-      setError(t.auth?.loginError || 'An error occurred during login')
+      const errorMsg = t.auth?.loginError || 'An error occurred during login'
+      setError(errorMsg)
+      showAlert.error(errorMsg)
       setLoading(false)
     }
   }
@@ -116,12 +121,6 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
-            {error && (
-              <div className="login-error" role="alert">
-                {error}
-              </div>
-            )}
-
             <div className="form-group">
               <label htmlFor="email" className="form-label">
                 {t.auth?.email || 'Email'}
