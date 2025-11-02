@@ -49,18 +49,10 @@ DB_SSL=false
 NEXTAUTH_SECRET=your-secret-key-change-in-production
 NEXTAUTH_URL=http://localhost:3001
 
-# Home app URL (for redirects)
-NEXT_PUBLIC_HOME_URL=http://localhost:3000
-
 # Vercel Blob Storage (for ticket images)
 BLOB_READ_WRITE_TOKEN=your-token
 
 # Email configuration
-SMTP_HOST=your-smtp-host
-SMTP_PORT=587
-SMTP_USER=your-smtp-user
-SMTP_PASS=your-smtp-password
-SMTP_SECURE=false
 ```
 
 3. Run database migrations:
