@@ -16,17 +16,15 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import {
-  HiWrench,
   HiCog,
   HiClock,
-  HiStopwatch,
   HiCheckCircle,
   HiTrendingUp,
-  HiCurrencyDollar,
   HiTrendingDown,
   HiChartBar,
-  HiMagnifyingGlass,
+  HiSearch,
 } from 'react-icons/hi'
+import { FaWrench, FaStopwatch, FaDollarSign } from 'react-icons/fa'
 
 interface ChartDataPoint {
   date: string
@@ -308,7 +306,7 @@ export default function DashboardPage() {
               <div className="dashboard-stats-grid">
                 <div className="stat-card stat-card--repairs">
                   <div className="stat-card__icon">
-                    <HiWrench />
+                    <FaWrench />
                   </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
@@ -344,7 +342,7 @@ export default function DashboardPage() {
 
                 <div className="stat-card stat-card--repair-time">
                   <div className="stat-card__icon">
-                    <HiStopwatch />
+                    <FaStopwatch />
                   </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
@@ -381,7 +379,7 @@ export default function DashboardPage() {
                 <div className="stat-card stat-card--income stat-card--with-chart">
                   <div className="stat-card__header">
                     <div className="stat-card__icon">
-                      <HiCurrencyDollar />
+                      <FaDollarSign />
                     </div>
                     <div className="stat-card__content">
                       <h3 className="stat-card__label">
@@ -396,7 +394,7 @@ export default function DashboardPage() {
                         aria-label="Zoom chart"
                         title="View full chart"
                       >
-                        <HiMagnifyingGlass />
+                        <HiSearch />
                       </button>
                     )}
                   </div>
@@ -454,7 +452,7 @@ export default function DashboardPage() {
                         aria-label="Zoom chart"
                         title="View full chart"
                       >
-                        <HiMagnifyingGlass />
+                        <HiSearch />
                       </button>
                     )}
                   </div>
@@ -512,7 +510,7 @@ export default function DashboardPage() {
                         aria-label="Zoom chart"
                         title="View full chart"
                       >
-                        <HiMagnifyingGlass />
+                        <HiSearch />
                       </button>
                     )}
                   </div>

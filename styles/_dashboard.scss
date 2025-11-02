@@ -119,10 +119,20 @@
     padding: 0;
     flex-shrink: 0;
 
+    svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-dark);
+    }
+
     &:hover {
       background: var(--primary-yellow);
       border-color: var(--primary-yellow);
       transform: scale(1.1);
+
+      svg {
+        color: var(--text-dark);
+      }
     }
 
     &:active {
@@ -141,6 +151,12 @@
     background: var(--bg-gray);
     border-radius: 12px;
     transition: all 0.3s ease;
+
+    svg {
+      width: 32px;
+      height: 32px;
+      color: var(--text-dark);
+    }
   }
 
   &__content {
@@ -460,6 +476,11 @@
       font-size: 2.5rem;
       width: 60px;
       height: 60px;
+
+      svg {
+        width: 28px;
+        height: 28px;
+      }
     }
 
     &__value {
@@ -494,6 +515,11 @@
       font-size: 2.5rem;
       width: 60px;
       height: 60px;
+
+      svg {
+        width: 28px;
+        height: 28px;
+      }
     }
 
     &__value {
