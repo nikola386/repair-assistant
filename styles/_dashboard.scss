@@ -87,12 +87,6 @@
   gap: 20px;
   border: 2px solid transparent;
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px var(--shadow-hover);
-    border-color: var(--primary-yellow);
-  }
-
   &--with-chart {
     flex-direction: column;
     align-items: stretch;

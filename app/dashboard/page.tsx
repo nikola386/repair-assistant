@@ -15,6 +15,18 @@ import {
   Brush,
   ResponsiveContainer,
 } from 'recharts'
+import {
+  HiWrench,
+  HiCog,
+  HiClock,
+  HiStopwatch,
+  HiCheckCircle,
+  HiTrendingUp,
+  HiCurrencyDollar,
+  HiTrendingDown,
+  HiChartBar,
+  HiMagnifyingGlass,
+} from 'react-icons/hi'
 
 interface ChartDataPoint {
   date: string
@@ -295,7 +307,9 @@ export default function DashboardPage() {
             <div className="dashboard-page__stats">
               <div className="dashboard-stats-grid">
                 <div className="stat-card stat-card--repairs">
-                  <div className="stat-card__icon">🔧</div>
+                  <div className="stat-card__icon">
+                    <HiWrench />
+                  </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
                       {t.dashboard?.stats?.totalRepairs || 'Total Repairs'}
@@ -305,7 +319,9 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="stat-card stat-card--in-progress">
-                  <div className="stat-card__icon">⚙️</div>
+                  <div className="stat-card__icon">
+                    <HiCog />
+                  </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
                       {t.dashboard?.stats?.inProgress || 'In Progress'}
@@ -315,7 +331,9 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="stat-card stat-card--waiting">
-                  <div className="stat-card__icon">⏳</div>
+                  <div className="stat-card__icon">
+                    <HiClock />
+                  </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
                       {t.dashboard?.stats?.waiting || 'Waiting'}
@@ -325,7 +343,9 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="stat-card stat-card--repair-time">
-                  <div className="stat-card__icon">⏱️</div>
+                  <div className="stat-card__icon">
+                    <HiStopwatch />
+                  </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
                       {'Average Repair Time'}
@@ -335,7 +355,9 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="stat-card stat-card--completion">
-                  <div className="stat-card__icon">✅</div>
+                  <div className="stat-card__icon">
+                    <HiCheckCircle />
+                  </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
                       {'Completion Rate'}
@@ -345,7 +367,9 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="stat-card stat-card--profit-percentage">
-                  <div className="stat-card__icon">📈</div>
+                  <div className="stat-card__icon">
+                    <HiTrendingUp />
+                  </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
                       {t.dashboard?.stats?.grossProfitPercentage || 'Gross Profit %'}
@@ -356,7 +380,9 @@ export default function DashboardPage() {
 
                 <div className="stat-card stat-card--income stat-card--with-chart">
                   <div className="stat-card__header">
-                    <div className="stat-card__icon">💰</div>
+                    <div className="stat-card__icon">
+                      <HiCurrencyDollar />
+                    </div>
                     <div className="stat-card__content">
                       <h3 className="stat-card__label">
                         {t.dashboard?.stats?.income || 'Income'}
@@ -370,7 +396,7 @@ export default function DashboardPage() {
                         aria-label="Zoom chart"
                         title="View full chart"
                       >
-                        🔍
+                        <HiMagnifyingGlass />
                       </button>
                     )}
                   </div>
@@ -412,7 +438,9 @@ export default function DashboardPage() {
 
                 <div className="stat-card stat-card--expenses stat-card--with-chart">
                   <div className="stat-card__header">
-                    <div className="stat-card__icon">📉</div>
+                    <div className="stat-card__icon">
+                      <HiTrendingDown />
+                    </div>
                     <div className="stat-card__content">
                       <h3 className="stat-card__label">
                         {t.dashboard?.stats?.expenses || 'Expenses'}
@@ -426,7 +454,7 @@ export default function DashboardPage() {
                         aria-label="Zoom chart"
                         title="View full chart"
                       >
-                        🔍
+                        <HiMagnifyingGlass />
                       </button>
                     )}
                   </div>
@@ -468,7 +496,9 @@ export default function DashboardPage() {
 
                 <div className="stat-card stat-card--profit stat-card--with-chart">
                   <div className="stat-card__header">
-                    <div className="stat-card__icon">📊</div>
+                    <div className="stat-card__icon">
+                      <HiChartBar />
+                    </div>
                     <div className="stat-card__content">
                       <h3 className="stat-card__label">
                         {t.dashboard?.stats?.grossProfit || 'Gross Profit'}
@@ -482,7 +512,7 @@ export default function DashboardPage() {
                         aria-label="Zoom chart"
                         title="View full chart"
                       >
-                        🔍
+                        <HiMagnifyingGlass />
                       </button>
                     )}
                   </div>
