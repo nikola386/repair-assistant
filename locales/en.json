@@ -406,7 +406,6 @@
     "vatNumberPlaceholderNonEU": "VAT Number (only for EU countries)",
     "vatNumberPlaceholderCountry": "Enter country in step 1 first",
     "vatNumberNonEU": "VAT numbers are only required for EU countries",
-    "requiredForEU": "Required for EU",
     "invalidVatNumber": "Invalid VAT number",
     "logo": "Logo",
     "primaryColor": "Primary Color",

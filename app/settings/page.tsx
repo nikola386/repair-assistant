@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
+import LogoUpload from '@/components/ui/LogoUpload'
 
 import type { User } from '@/lib/userStorage'
 
@@ -397,16 +398,18 @@ export default function SettingsPage() {
     })
   }
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleLogoChange = (file: File | null) => {
+    setLogo(file)
     if (file) {
-      setLogo(file)
       setRemoveLogo(false)
       const reader = new FileReader()
       reader.onloadend = () => {
         setLogoPreview(reader.result as string)
       }
       reader.readAsDataURL(file)
+    } else {
+      setLogoPreview('')
+      setRemoveLogo(true)
     }
   }
 
@@ -414,11 +417,6 @@ export default function SettingsPage() {
     setLogo(null)
     setLogoPreview('')
     setRemoveLogo(true)
-    // Reset file input
-    const fileInput = document.getElementById('logo') as HTMLInputElement
-    if (fileInput) {
-      fileInput.value = ''
-    }
   }
 
   const handleStoreSubmit = async (e: React.FormEvent) => {
@@ -946,9 +944,6 @@ export default function SettingsPage() {
                           <div className="settings-page__field">
                             <label htmlFor="vatNumber" className="settings-page__label">
                               {t.onboarding?.vatNumber || 'VAT Number'}
-                              <span className="settings-page__label-hint">
-                                ({t.onboarding?.requiredForEU || 'Required for EU'})
-                              </span>
                             </label>
                             <input
                               id="vatNumber"
@@ -1070,35 +1065,14 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="settings-page__field">
-                          <label htmlFor="logo" className="settings-page__label">
-                            {t.onboarding?.logo || 'Logo'}
-                          </label>
-                          <input
-                            id="logo"
-                            type="file"
-                            accept="image/*"
+                          <LogoUpload
+                            preview={logoPreview}
                             onChange={handleLogoChange}
-                            className="settings-page__input"
+                            onRemove={handleRemoveLogo}
                             disabled={settingsLoading}
+                            labelClassName="settings-page__label"
+                            inputClassName="settings-page__input"
                           />
-                          {logoPreview && (
-                            <div className="settings-page__logo-preview-container">
-                              <img
-                                src={logoPreview}
-                                alt="Logo preview"
-                                className="settings-page__logo-preview"
-                              />
-                              <button
-                                type="button"
-                                onClick={handleRemoveLogo}
-                                disabled={settingsLoading}
-                                className="settings-page__logo-remove-btn"
-                                aria-label={t.profile?.deleteImage || 'Remove logo'}
-                              >
-                                ×
-                              </button>
-                            </div>
-                          )}
                         </div>
 
                         <div className="settings-page__form-actions">

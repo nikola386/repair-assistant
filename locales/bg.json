@@ -406,7 +406,6 @@
     "vatNumberPlaceholderNonEU": "ДДС Номер (само за ЕС държави)",
     "vatNumberPlaceholderCountry": "Въведете държава в стъпка 1 първо",
     "vatNumberNonEU": "ДДС номерата са задължителни само за ЕС държави",
-    "requiredForEU": "Задължително за ЕС",
     "invalidVatNumber": "Невалиден ДДС номер",
     "logo": "Лого",
     "primaryColor": "Основен Цвят",

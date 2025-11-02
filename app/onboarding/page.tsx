@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
 import Steps from '@/components/ui/Steps'
+import LogoUpload from '@/components/ui/LogoUpload'
 
 interface Country {
   id: string
@@ -120,26 +121,22 @@ export default function OnboardingPage() {
   }, [status, session, router, fetchCountries])
 
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleLogoChange = (file: File | null) => {
+    setLogo(file)
     if (file) {
-      setLogo(file)
       const reader = new FileReader()
       reader.onloadend = () => {
         setLogoPreview(reader.result as string)
       }
       reader.readAsDataURL(file)
+    } else {
+      setLogoPreview('')
     }
   }
 
   const handleRemoveLogo = () => {
     setLogo(null)
     setLogoPreview('')
-    // Reset file input
-    const fileInput = document.getElementById('logo') as HTMLInputElement
-    if (fileInput) {
-      fileInput.value = ''
-    }
   }
 
   const validateStep = (step: number): boolean => {
@@ -519,9 +516,6 @@ export default function OnboardingPage() {
                   <div className="form-group">
                     <label htmlFor="vatNumber" className="form-label">
                       {t.onboarding?.vatNumber || 'VAT Number'}
-                      <span style={{ fontSize: '0.85rem', color: 'var(--gray-medium)', marginLeft: '0.5rem' }}>
-                        ({t.onboarding?.requiredForEU || 'Required for EU'})
-                      </span>
                     </label>
                     <input
                       id="vatNumber"
@@ -541,75 +535,12 @@ export default function OnboardingPage() {
             {currentStep === 3 && (
               <div className="onboarding-step">
                 <div className="form-group">
-                  <label htmlFor="logo" className="form-label">
-                    {t.onboarding?.logo || 'Logo'}
-                  </label>
-                  <input
-                    id="logo"
-                    type="file"
-                    accept="image/*"
+                  <LogoUpload
+                    preview={logoPreview}
                     onChange={handleLogoChange}
-                    className="form-input"
+                    onRemove={handleRemoveLogo}
                     disabled={loading}
                   />
-                  {logoPreview && (
-                    <div style={{ marginTop: '0.75rem', position: 'relative', display: 'inline-block', width: 'fit-content' }}>
-                      <img
-                        src={logoPreview}
-                        alt="Logo preview"
-                        style={{
-                          maxWidth: '200px',
-                          maxHeight: '200px',
-                          width: 'auto',
-                          height: 'auto',
-                          objectFit: 'contain',
-                          borderRadius: '6px',
-                          border: '1px solid #d1d5db',
-                          display: 'block',
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={handleRemoveLogo}
-                        disabled={loading}
-                        style={{
-                          position: 'absolute',
-                          top: '-8px',
-                          right: '-8px',
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '50%',
-                          backgroundColor: '#ef4444',
-                          color: 'white',
-                          border: '2px solid white',
-                          cursor: loading ? 'not-allowed' : 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '16px',
-                          fontWeight: 'bold',
-                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                          padding: 0,
-                          lineHeight: 1,
-                          zIndex: 10,
-                          transition: 'all 0.2s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!loading) {
-                            e.currentTarget.style.backgroundColor = '#dc2626'
-                            e.currentTarget.style.transform = 'scale(1.1)'
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#ef4444'
-                          e.currentTarget.style.transform = 'scale(1)'
-                        }}
-                        aria-label={t.onboarding?.removeLogo || 'Remove logo'}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
                 </div>
 
                 <div className="form-group">
