@@ -1,0 +1,124 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { withAuth } from '@/lib/auth.middleware'
+import { db } from '@/lib/db'
+import { logger, generateRequestId } from '@/lib/logger'
+import { ticketStorage } from '@/lib/ticketStorage'
+import { TicketStatus, TicketPriority } from '@/types/ticket'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const requestId = request.headers.get('X-Request-ID') || generateRequestId()
+  const startTime = Date.now()
+  
+  const authResult = await withAuth(request, { action: 'customer detail access' })
+  if (authResult.response) {
+    return authResult.response
+  }
+  const session = authResult.session
+
+  try {
+    const customerId = params.id
+
+    logger.info('Fetching customer details', { userId: session.user.id, customerId }, requestId)
+
+    // Get customer with ticket count
+    const customer = await db.customer.findUnique({
+      where: { id: customerId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            repairTickets: true,
+          },
+        },
+      },
+    })
+
+    if (!customer) {
+      logger.warn('Customer not found', { customerId }, requestId)
+      return NextResponse.json(
+        { error: 'Customer not found' },
+        { status: 404 }
+      )
+    }
+
+    // Get all tickets for this customer
+    const ticketsData = await db.repairTicket.findMany({
+      where: { customerId },
+      include: {
+        customer: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
+
+    // Load images for tickets
+    const ticketsWithImages = await Promise.all(
+      ticketsData.map(async (ticket) => {
+        const images = await ticketStorage.getImagesByTicketId(ticket.id)
+        return {
+          id: ticket.id,
+          ticketNumber: ticket.ticketNumber,
+          customerId: ticket.customerId,
+          customerName: ticket.customer.name,
+          customerEmail: ticket.customer.email,
+          customerPhone: ticket.customer.phone,
+          deviceType: ticket.deviceType,
+          deviceBrand: ticket.deviceBrand || undefined,
+          deviceModel: ticket.deviceModel || undefined,
+          issueDescription: ticket.issueDescription,
+          status: ticket.status as TicketStatus,
+          priority: ticket.priority as TicketPriority,
+          estimatedCost: ticket.estimatedCost ? Number(ticket.estimatedCost) : undefined,
+          actualCost: ticket.actualCost ? Number(ticket.actualCost) : undefined,
+          estimatedCompletionDate: ticket.estimatedCompletionDate
+            ? ticket.estimatedCompletionDate.toISOString().split('T')[0]
+            : undefined,
+          actualCompletionDate: ticket.actualCompletionDate
+            ? ticket.actualCompletionDate.toISOString().split('T')[0]
+            : undefined,
+          notes: ticket.notes || undefined,
+          images,
+          createdAt: ticket.createdAt.toISOString(),
+          updatedAt: ticket.updatedAt.toISOString(),
+        }
+      })
+    )
+
+    const duration = Date.now() - startTime
+    logger.info('Customer details fetched successfully', { customerId, ticketCount: ticketsWithImages.length, duration }, requestId)
+
+    return NextResponse.json(
+      {
+        customer: {
+          id: customer.id,
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone,
+          ticketCount: customer._count.repairTickets,
+          createdAt: customer.createdAt.toISOString(),
+          updatedAt: customer.updatedAt.toISOString(),
+        },
+        tickets: ticketsWithImages,
+      },
+      { status: 200 }
+    )
+  } catch (error) {
+    const duration = Date.now() - startTime
+    logger.error('Error fetching customer details', error, requestId)
+    logger.error('Error fetching customer details info', { duration }, requestId)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+

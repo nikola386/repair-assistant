@@ -1,0 +1,58 @@
+// Animations
+@keyframes rotate {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+    }
+}
+
+@keyframes meshPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.95;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes floatSvg {
+    0% {
+        transform: translate(-50%, -50%) translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(-50%, -50%) translate(30px, -25px) rotate(90deg);
+    }
+    50% {
+        transform: translate(-50%, -50%) translate(-20px, 30px) rotate(180deg);
+    }
+    75% {
+        transform: translate(-50%, -50%) translate(25px, 25px) rotate(270deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) translate(0, 0) rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

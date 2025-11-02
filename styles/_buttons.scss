@@ -1,0 +1,103 @@
+// Buttons
+.btn {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px solid transparent;
+    cursor: pointer;
+    box-sizing: border-box;
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .spinner {
+        flex-shrink: 0;
+    }
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, #ffd54f 100%);
+    color: var(--black);
+    font-weight: 700;
+    border: none;
+    box-shadow: 0 4px 15px rgba(255, 235, 59, 0.3);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    &:hover::before {
+        left: 100%;
+    }
+
+    &:hover:not(:disabled) {
+        background: linear-gradient(135deg, #ffd54f 0%, var(--primary-yellow) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 235, 59, 0.4);
+    }
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--black);
+    border: 2px solid var(--gray-light);
+
+    &:hover {
+        background: transparent;
+        border-color: var(--black);
+        color: var(--black);
+        transform: none;
+    }
+}
+
+.btn-danger {
+    background: #DC3545;
+    color: var(--white);
+    border: none;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+
+    &:hover:not(:disabled) {
+        background: #C82333;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-dark);
+    border: 2px solid var(--border-gray);
+
+    &:hover:not(:disabled) {
+        background: var(--bg-gray);
+        border-color: var(--gray-medium);
+    }
+
+    &.btn-primary {
+        border-color: var(--primary-yellow);
+        color: var(--primary-yellow);
+
+        &:hover:not(:disabled) {
+            background: var(--primary-yellow);
+            color: var(--black);
+        }
+    }
+}

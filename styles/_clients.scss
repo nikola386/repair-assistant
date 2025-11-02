@@ -1,0 +1,232 @@
+// Clients Page Styles
+
+.clients-page {
+  padding: 120px 0 60px;
+  min-height: 80vh;
+
+  &__header {
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--text-dark);
+      margin: 0;
+    }
+  }
+
+  &__content {
+    background: var(--bg-white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+
+  &__search {
+    margin-bottom: 2rem;
+
+    &-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border-gray);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-yellow);
+      }
+    }
+  }
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-gray);
+  }
+
+  &__list {
+    overflow-x: auto;
+  }
+}
+
+.clients-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background: var(--bg-gray);
+
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-dark);
+      border-bottom: 2px solid var(--border-gray);
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid var(--border-gray);
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background: var(--bg-gray);
+      }
+    }
+
+    td {
+      padding: 1rem;
+      color: var(--text-dark);
+    }
+  }
+
+  &__row {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--bg-gray) !important;
+    }
+  }
+
+  &__link {
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--primary-yellow);
+      text-decoration: underline;
+    }
+  }
+}
+
+// Client Detail Page Styles
+
+.client-detail-page {
+  padding: 120px 0 60px;
+  min-height: 80vh;
+
+  &__header {
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--text-dark);
+      margin: 0.5rem 0;
+    }
+  }
+
+  &__back {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--primary-yellow);
+      text-decoration: underline;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  &__info {
+    background: var(--bg-white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+
+  &__section {
+    h2 {
+      font-size: 1.8rem;
+      color: var(--text-dark);
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  &__info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+
+    div {
+      label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      p {
+        margin: 0;
+        color: var(--text-gray);
+        font-size: 1rem;
+
+        a {
+          color: var(--text-dark);
+          text-decoration: none;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: var(--primary-yellow);
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  &__tickets {
+    background: var(--bg-white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+
+    h2 {
+      font-size: 1.8rem;
+      color: var(--text-dark);
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  &__loading,
+  &__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+
+    p {
+      color: var(--text-gray);
+      font-size: 1.1rem;
+    }
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-gray);
+  }
+}
+

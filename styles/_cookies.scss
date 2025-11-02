@@ -1,0 +1,27 @@
+/* Cookie Banner Styles */
+// Additional custom styling for cookie consent if needed
+
+:global(#rcc-confirm-button) {
+  &:hover {
+    background: linear-gradient(135deg, #ffd54f 0%, var(--primary-yellow) 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 235, 59, 0.4) !important;
+  }
+}
+
+:global(#rcc-decline-button) {
+  &:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    color: var(--white) !important;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  :global(#rcc-confirm-button),
+  :global(#rcc-decline-button) {
+    padding: 0.6rem 1.5rem !important;
+    font-size: 0.9rem !important;
+  }
+}

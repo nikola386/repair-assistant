@@ -1,0 +1,5 @@
+{
+  "debug.javascript.usePreview": true,
+  "debug.javascript.autoAttachFilter": "smart"
+}
+

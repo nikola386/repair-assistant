@@ -1,0 +1,433 @@
+// Profile Dropdown
+.profile-dropdown {
+  position: relative;
+  display: inline-block;
+
+  &__trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  &__avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  &__avatar-placeholder {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, #ffd54f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--black);
+    font-weight: 700;
+    font-size: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  &__name {
+    font-weight: 600;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+  }
+
+  &__chevron {
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 220px;
+    background: rgba(30, 30, 30, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 0.5rem;
+    z-index: 1000;
+    animation: fadeInDown 0.2s ease-out;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--white);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+
+    svg {
+      flex-shrink: 0;
+      opacity: 0.8;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--white);
+    }
+
+    &--danger {
+      color: #fca5a5;
+
+      &:hover {
+        background: rgba(220, 38, 38, 0.2);
+        color: #fca5a5;
+      }
+    }
+  }
+
+  &__divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0.5rem 0;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Profile Page
+.profile-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(255, 235, 59, 0.12) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(255, 235, 59, 0.1) 0%, transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(255, 235, 59, 0.08) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 249, 230, 0.6) 50%, rgba(245, 245, 245, 0.8) 100%);
+    z-index: 0;
+    animation: meshPulse 15s ease-in-out infinite;
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__wrapper {
+    max-width: 800px;
+    width: 100%;
+    margin: auto;
+    background: rgba(30, 30, 30, 0.95);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    color: var(--white);
+
+    // Override any inherited text colors
+    * {
+      color: inherit;
+    }
+
+    // But buttons need special handling
+    .btn-secondary {
+      color: var(--white);
+      border-color: rgba(255, 255, 255, 0.3);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: var(--white);
+      }
+    }
+  }
+
+  &__loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--white);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--primary-yellow) !important;
+    font-size: 2rem;
+  }
+
+  // Ensure all text is visible
+  p, span, div, label, input {
+    color: var(--white);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  &__image-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  &__image-wrapper {
+    position: relative;
+  }
+
+  &__image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--primary-yellow);
+    box-shadow: 0 4px 20px rgba(255, 235, 59, 0.3);
+  }
+
+  &__image-placeholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, #ffd54f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--black);
+    font-weight: 700;
+    font-size: 3rem;
+    border: 4px solid var(--primary-yellow);
+    box-shadow: 0 4px 20px rgba(255, 235, 59, 0.3);
+  }
+
+  &__image-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      color: var(--white) !important;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    input {
+      padding: 0.75rem 1rem;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--white);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-yellow);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+
+    .btn {
+      flex: 1;
+      min-width: 150px;
+    }
+  }
+
+  &__error {
+    padding: 0.75rem 1rem;
+    background: rgba(220, 38, 38, 0.2);
+    border: 1px solid rgba(220, 38, 38, 0.5);
+    border-radius: 8px;
+    color: #fca5a5;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  &__success {
+    padding: 0.75rem 1rem;
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.5);
+    border-radius: 8px;
+    color: #86efac;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .profile-dropdown {
+    &__trigger {
+      padding: 0.4rem 0.75rem;
+      gap: 0.5rem;
+    }
+
+    &__name {
+      max-width: 100px;
+      font-size: 0.9rem;
+    }
+
+    &__menu {
+      right: 0;
+      left: auto;
+      min-width: 200px;
+    }
+  }
+
+  .profile-page {
+    padding: 1rem;
+
+    &::before {
+      min-height: 100vh;
+    }
+
+    .container {
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    &__wrapper {
+      padding: 2rem 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+    }
+
+    &__image-section {
+      padding-bottom: 1.5rem;
+    }
+
+    &__image,
+    &__image-placeholder {
+      width: 120px;
+      height: 120px;
+      font-size: 2.5rem;
+    }
+
+    &__actions {
+      flex-direction: column;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-dropdown {
+    &__name {
+      display: none;
+    }
+  }
+
+  .profile-page {
+    &__image,
+    &__image-placeholder {
+      width: 100px;
+      height: 100px;
+      font-size: 2rem;
+    }
+
+    &__image-actions {
+      flex-direction: column;
+      width: 100%;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+}
+

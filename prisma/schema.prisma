@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users         User[]
+  customers     Customer[]
+  repairTickets RepairTicket[]
+
+  @@map("stores")
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String       @map("password_hash")
+  name         String?
+  profileImage String?      @map("profile_image")
+  storeId      String       @map("store_id")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  store         Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  sessions      Session[]
+  accounts      Account[]
+  userSettings  UserSettings?
+
+  @@index([storeId])
+  @@map("users")
+}
+
+model UserSettings {
+  id             String   @id @default(uuid())
+  userId         String   @unique @map("user_id")
+  primaryColor   String   @default("#FFD700") @map("primary_color")
+  secondaryColor String   @default("#000000") @map("secondary_color")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_settings")
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String
+  storeId   String   @map("store_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  store         Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  repairTickets RepairTicket[]
+
+  @@unique([storeId, email])
+  @@index([storeId])
+  @@map("customers")
+}
+
+model RepairTicket {
+  id                      String    @id @default(uuid())
+  ticketNumber            String    @unique @map("ticket_number")
+  customerId              String    @map("customer_id")
+  storeId                 String    @map("store_id")
+  deviceType              String    @map("device_type")
+  deviceBrand             String?   @map("device_brand")
+  deviceModel             String?   @map("device_model")
+  issueDescription        String    @map("issue_description") @db.Text
+  status                  String    @default("pending")
+  priority                String    @default("medium")
+  estimatedCost           Decimal?  @map("estimated_cost") @db.Decimal(10, 2)
+  actualCost              Decimal?  @map("actual_cost") @db.Decimal(10, 2)
+  estimatedCompletionDate DateTime? @map("estimated_completion_date") @db.Date
+  actualCompletionDate    DateTime? @map("actual_completion_date") @db.Date
+  notes                   String?   @db.Text
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+
+  store        Store         @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  ticketImages TicketImage[]
+  expenses     Expense[]
+
+  @@index([customerId])
+  @@index([storeId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt(sort: Desc)])
+  @@index([ticketNumber])
+  @@map("repair_tickets")
+}
+
+model TicketImage {
+  id        String   @id @default(uuid())
+  ticketId  String   @map("ticket_id")
+  fileName  String   @map("file_name")
+  filePath  String   @map("file_path")
+  fileSize  Int?     @map("file_size")
+  mimeType  String?   @map("mime_type")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket RepairTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("ticket_images")
+}
+
+model Expense {
+  id        String       @id @default(uuid())
+  ticketId  String       @map("ticket_id")
+  name      String
+  quantity  Decimal      @db.Decimal(10, 2)
+  price     Decimal      @db.Decimal(10, 2)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  ticket RepairTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("expenses")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@map("sessions")
+}
+
+model Account {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String   @map("provider_account_id")
+  refreshToken      String?  @map("refresh_token") @db.Text
+  accessToken       String?  @map("access_token") @db.Text
+  expiresAt         Int?     @map("expires_at")
+  tokenType         String?  @map("token_type")
+  scope             String?   @db.Text
+  idToken           String?   @map("id_token") @db.Text
+  sessionState      String?   @map("session_state") @db.Text
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+

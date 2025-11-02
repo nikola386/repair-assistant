@@ -1,0 +1,51 @@
+{
+  "name": "repair-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "prisma generate && prisma migrate deploy && next build",
+    "start": "next start -p 3001",
+    "lint": "next lint",
+    "migrate": "npx tsx ../../scripts/migrate.ts",
+    "migrate:optional": "npx tsx ../../scripts/migrate.ts || echo 'Migration skipped (database may not be accessible during build)'",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.18.0",
+    "@tanstack/react-table": "^8.21.3",
+    "@types/leaflet": "^1.9.21",
+    "@types/nodemailer": "^7.0.3",
+    "@types/react-datepicker": "^6.2.0",
+    "@vercel/blob": "^0.21.0",
+    "bcryptjs": "^3.0.2",
+    "leaflet": "^1.9.4",
+    "next": "^14.2.5",
+    "next-auth": "^5.0.0-beta.30",
+    "nodemailer": "^7.0.10",
+    "pg": "^8.11.3",
+    "react": "^18.3.1",
+    "react-cookie-consent": "^9.0.0",
+    "react-datepicker": "^8.8.0",
+    "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1",
+    "react-qr-code": "^2.0.18",
+    "recharts": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.14.12",
+    "@types/pg": "^8.15.6",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.5",
+    "prisma": "^6.18.0",
+    "sass": "^1.93.2",
+    "typescript": "^5.5.4"
+  }
+}
+
