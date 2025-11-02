@@ -10,50 +10,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Country {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  requiresVat Boolean  @default(false) @map("requires_vat")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@map("countries")
+}
+
 model Store {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(uuid())
+  name       String
+  address    String?
+  street     String?
+  city       String?
+  state      String?
+  postalCode String?  @map("postal_code")
+  country    String?
+  logo       String?
+  website    String?
+  phone      String?
+  email      String?
+  currency   String?  @default("USD")
+  vatNumber  String?  @map("vat_number")
+  onboarded  Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   users         User[]
   customers     Customer[]
   repairTickets RepairTicket[]
+  settings      Settings?
 
   @@map("stores")
 }
 
 model User {
-  id           String       @id @default(uuid())
-  email        String       @unique
-  passwordHash String       @map("password_hash")
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
   name         String?
-  profileImage String?      @map("profile_image")
-  storeId      String       @map("store_id")
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
+  profileImage String?  @map("profile_image")
+  storeId      String   @map("store_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  store         Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
-  sessions      Session[]
-  accounts      Account[]
-  userSettings  UserSettings?
+  store    Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  sessions Session[]
+  accounts Account[]
 
   @@index([storeId])
   @@map("users")
 }
 
-model UserSettings {
+model Settings {
   id             String   @id @default(uuid())
-  userId         String   @unique @map("user_id")
+  storeId        String   @unique @map("store_id")
   primaryColor   String   @default("#FFD700") @map("primary_color")
   secondaryColor String   @default("#000000") @map("secondary_color")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@map("user_settings")
+  @@index([storeId])
+  @@map("settings")
 }
 
 model Customer {
@@ -112,7 +137,7 @@ model TicketImage {
   fileName  String   @map("file_name")
   filePath  String   @map("file_path")
   fileSize  Int?     @map("file_size")
-  mimeType  String?   @map("mime_type")
+  mimeType  String?  @map("mime_type")
   createdAt DateTime @default(now()) @map("created_at")
 
   ticket RepairTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
@@ -122,13 +147,13 @@ model TicketImage {
 }
 
 model Expense {
-  id        String       @id @default(uuid())
-  ticketId  String       @map("ticket_id")
+  id        String   @id @default(uuid())
+  ticketId  String   @map("ticket_id")
   name      String
-  quantity  Decimal      @db.Decimal(10, 2)
-  price     Decimal      @db.Decimal(10, 2)
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
+  quantity  Decimal  @db.Decimal(10, 2)
+  price     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   ticket RepairTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
@@ -160,11 +185,11 @@ model Account {
   accessToken       String?  @map("access_token") @db.Text
   expiresAt         Int?     @map("expires_at")
   tokenType         String?  @map("token_type")
-  scope             String?   @db.Text
-  idToken           String?   @map("id_token") @db.Text
-  sessionState      String?   @map("session_state") @db.Text
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  scope             String?  @db.Text
+  idToken           String?  @map("id_token") @db.Text
+  sessionState      String?  @map("session_state") @db.Text
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -172,4 +197,3 @@ model Account {
   @@index([userId])
   @@map("accounts")
 }
-

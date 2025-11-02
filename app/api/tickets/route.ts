@@ -68,8 +68,18 @@ export async function POST(request: NextRequest) {
   }
   const session = authResult.session
 
+  // Get user's storeId
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    logger.error('User or store not found', { userId: session.user.id }, requestId)
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
   try {
-    logger.info('Creating new ticket', { userId: session.user.id }, requestId)
+    logger.info('Creating new ticket', { userId: session.user.id, storeId: user.storeId }, requestId)
     const body = await request.json()
     const {
       customerName,
@@ -130,7 +140,7 @@ export async function POST(request: NextRequest) {
       notes,
     }
 
-    const ticket = await ticketStorage.create(ticketInput)
+    const ticket = await ticketStorage.create(ticketInput, user.storeId)
     const duration = Date.now() - startTime
     logger.info('Ticket created successfully', { ticketId: ticket.id, ticketNumber: ticket.ticketNumber, duration }, requestId)
 

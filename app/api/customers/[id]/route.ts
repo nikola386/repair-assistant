@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth.middleware'
+import { userStorage } from '@/lib/userStorage'
 import { db } from '@/lib/db'
 import { logger, generateRequestId } from '@/lib/logger'
 import { ticketStorage } from '@/lib/ticketStorage'
@@ -18,14 +19,27 @@ export async function GET(
   }
   const session = authResult.session
 
+  // Get user's storeId
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    logger.error('User or store not found', { userId: session.user.id }, requestId)
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
   try {
     const customerId = params.id
 
-    logger.info('Fetching customer details', { userId: session.user.id, customerId }, requestId)
+    logger.info('Fetching customer details', { userId: session.user.id, customerId, storeId: user.storeId }, requestId)
 
-    // Get customer with ticket count
-    const customer = await db.customer.findUnique({
-      where: { id: customerId },
+    // Get customer with ticket count - ensure it belongs to the store
+    const customer = await db.customer.findFirst({
+      where: {
+        id: customerId,
+        storeId: user.storeId,
+      },
       select: {
         id: true,
         name: true,
@@ -49,9 +63,12 @@ export async function GET(
       )
     }
 
-    // Get all tickets for this customer
+    // Get all tickets for this customer - ensure they belong to the store
     const ticketsData = await db.repairTicket.findMany({
-      where: { customerId },
+      where: {
+        customerId,
+        storeId: user.storeId,
+      },
       include: {
         customer: true,
       },

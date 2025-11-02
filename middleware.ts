@@ -38,6 +38,15 @@ export async function middleware(request: NextRequest) {
   }
   console.log(JSON.stringify({ ...logData, type: 'request-start' }))
 
+  // Redirect authenticated users away from login/register pages
+  const authPages = ['/login', '/register']
+  const isAuthPage = authPages.includes(request.nextUrl.pathname)
+  
+  if (isAuthPage && hasValidSession(request)) {
+    // Redirect to onboarding or dashboard (client-side will handle onboarding check)
+    return NextResponse.redirect(new URL('/dashboard', request.nextUrl.origin))
+  }
+
   // Protect all application routes
   const protectedPaths = ['/dashboard', '/tickets', '/clients', '/reports', '/settings', '/profile']
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
@@ -87,6 +96,8 @@ export const config = {
     '/reports/:path*',
     '/settings/:path*',
     '/profile/:path*',
+    '/login',
+    '/register',
     '/api/:path*',
   ],
 }

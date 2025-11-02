@@ -1,28 +1,78 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const { t } = useLanguage()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  const { data: session, status } = useSession()
   
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/onboarding')
+    }
+  }, [status, router])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setError(t.auth?.passwordMismatch || 'Passwords do not match')
+      return
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      setError(t.auth?.passwordTooShort || 'Password must be at least 6 characters long')
+      return
+    }
+
+    // Validate name is provided
+    if (!name || name.trim().length === 0) {
+      setError(t.auth?.nameRequired || 'Name is required')
+      return
+    }
+
     setLoading(true)
 
     try {
+      // Register user
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          name: name.trim(),
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || t.auth?.registrationError || 'Registration failed')
+        setLoading(false)
+        return
+      }
+
+      // Auto-login after registration
       const result = await signIn('credentials', {
         email,
         password,
@@ -30,26 +80,35 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError(t.auth?.loginError || 'Invalid email or password')
+        setError(t.auth?.loginError || 'Registration successful but login failed. Please try logging in.')
         setLoading(false)
       } else if (result?.ok) {
-        // Check onboarding status and redirect accordingly
-        const onboardingResponse = await fetch('/api/onboarding')
-        const onboardingData = await onboardingResponse.json()
-        
-        if (!onboardingData.isComplete) {
-          // Redirect to onboarding if not complete
-          router.push('/onboarding')
-        } else {
-          // Redirect to the callback URL or dashboard
-          router.push(callbackUrl)
-        }
+        // Redirect to onboarding
+        router.push('/onboarding')
         router.refresh()
       }
     } catch (err) {
-      setError(t.auth?.loginError || 'An error occurred during login')
+      setError(t.auth?.registrationError || 'An error occurred during registration')
       setLoading(false)
     }
+  }
+
+  // Show loading state while checking session
+  if (status === 'loading') {
+    return (
+      <div className="login-page">
+        <div className="login-container">
+          <div className="login-card">
+            <Spinner size="small" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't show registration if already logged in (will redirect)
+  if (status === 'authenticated') {
+    return null
   }
 
   return (
@@ -111,7 +170,7 @@ export default function LoginPage() {
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
-            <h1 className="login-title">{t.auth?.loginTitle || 'Login'}</h1>
+            <h1 className="login-title">{t.auth?.registerTitle || 'Create Account'}</h1>
             <p className="login-subtitle">Welcome to Repair Assistant</p>
           </div>
 
@@ -121,6 +180,23 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+
+            <div className="form-group">
+              <label htmlFor="name" className="form-label">
+                {t.auth?.name || 'Name'}
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="form-input"
+                required
+                autoComplete="name"
+                disabled={loading}
+                placeholder={t.auth?.namePlaceholder || 'Enter your name'}
+              />
+            </div>
 
             <div className="form-group">
               <label htmlFor="email" className="form-label">
@@ -150,9 +226,28 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="form-input"
                 required
-                autoComplete="current-password"
+                autoComplete="new-password"
                 disabled={loading}
                 placeholder={t.auth?.password || 'Enter your password'}
+                minLength={6}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="confirmPassword" className="form-label">
+                {t.auth?.confirmPassword || 'Confirm Password'}
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="form-input"
+                required
+                autoComplete="new-password"
+                disabled={loading}
+                placeholder={t.auth?.confirmPassword || 'Confirm your password'}
+                minLength={6}
               />
             </div>
 
@@ -164,12 +259,21 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <Spinner size="small" />
-                  {t.auth?.loggingIn || 'Logging in...'}
+                  {t.auth?.registering || 'Creating account...'}
                 </>
               ) : (
-                t.auth?.login || 'Login'
+                t.auth?.register || 'Create Account'
               )}
             </button>
+
+            <div className="login-footer">
+              <p>
+                {t.auth?.alreadyHaveAccount || 'Already have an account?'}{' '}
+                <a href="/login" className="login-link">
+                  {t.auth?.login || 'Login'}
+                </a>
+              </p>
+            </div>
           </form>
         </div>
       </div>

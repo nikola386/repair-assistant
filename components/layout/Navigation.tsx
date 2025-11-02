@@ -110,7 +110,7 @@ export default function Navigation() {
       <div className="container">
         <Link href="/" className="logo">
           <span className="logo-icon">⚡</span>
-          <span className="logo-text">{t.businessName}</span>
+          <span className="logo-text">Repair Assistant</span>
         </Link>
         <ul className={`nav-menu ${navMenuActive ? 'active' : ''}`}>
           {status !== 'loading' && session ? (
@@ -144,9 +144,14 @@ export default function Navigation() {
           ) : session ? (
             <ProfileDropdown />
           ) : (
-            <Link href="/login" className="btn btn-primary btn-sm">
-              {t.auth.login}
-            </Link>
+            <>
+              <Link href="/register" className="btn btn-secondary btn-sm" style={{ marginRight: '0.5rem' }}>
+                {t.auth.register || 'Sign Up'}
+              </Link>
+              <Link href="/login" className="btn btn-primary btn-sm">
+                {t.auth.login}
+              </Link>
+            </>
           )}
           <div className="language-switcher">
             <button

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth.middleware'
+import { userStorage } from '@/lib/userStorage'
 import { db } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
@@ -8,6 +9,15 @@ export async function GET(request: NextRequest) {
     return authResult.response
   }
   const session = authResult.session
+
+  // Get user's storeId
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
 
   try {
     const searchParams = request.nextUrl.searchParams
@@ -20,6 +30,7 @@ export async function GET(request: NextRequest) {
 
     const customers = await db.customer.findMany({
       where: {
+        storeId: user.storeId, // Filter by store
         OR: [
           { phone: { contains: query, mode: 'insensitive' } },
           { name: { contains: query, mode: 'insensitive' } },

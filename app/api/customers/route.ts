@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth.middleware'
+import { userStorage } from '@/lib/userStorage'
 import { db } from '@/lib/db'
 import { logger, generateRequestId } from '@/lib/logger'
 
@@ -13,8 +14,18 @@ export async function GET(request: NextRequest) {
   }
   const session = authResult.session
 
+  // Get user's storeId
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    logger.error('User or store not found', { userId: session.user.id }, requestId)
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
   try {
-    logger.info('Fetching customers', { userId: session.user.id }, requestId)
+    logger.info('Fetching customers', { userId: session.user.id, storeId: user.storeId }, requestId)
     
     const searchParams = request.nextUrl.searchParams
     const search = searchParams.get('search') || undefined
@@ -23,8 +34,10 @@ export async function GET(request: NextRequest) {
 
     const offset = (page - 1) * limit
 
-    // Build where clause
-    const where: any = {}
+    // Build where clause - always filter by storeId
+    const where: any = {
+      storeId: user.storeId,
+    }
     if (search && search.trim()) {
       const searchTerm = search.trim()
       where.OR = [

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { userStorage } from '@/lib/userStorage'
 import { withAuth } from '@/lib/auth.middleware'
 import { logger, generateRequestId } from '@/lib/logger'
 import { Decimal } from '@prisma/client/runtime/library'
@@ -171,6 +172,16 @@ export async function GET(request: NextRequest) {
   }
   const session = authResult.session
 
+  // Get user's storeId
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    logger.error('User or store not found', { userId: session.user.id }, requestId)
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams
     const period = searchParams.get('period') || '30d'
@@ -196,16 +207,17 @@ export async function GET(request: NextRequest) {
 
     const startDate = getDateRange(days)
 
-    logger.info('Fetching dashboard stats', { userId: session.user.id, period, days }, requestId)
+    logger.info('Fetching dashboard stats', { userId: session.user.id, storeId: user.storeId, period, days }, requestId)
 
-    // Build where clause for date filtering
+    // Build where clause for date filtering and store filtering
     const dateFilter = {
+      storeId: user.storeId, // Filter by store
       createdAt: {
         gte: startDate,
       },
     }
 
-    // Get all tickets in the date range
+    // Get all tickets in the date range for this store
     const tickets = await db.repairTicket.findMany({
       where: dateFilter,
       select: {

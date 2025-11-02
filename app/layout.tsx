@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import CookieBanner from '@/components/ui/CookieBanner'
 import { Providers } from './providers'
+import ProtectedRoutes from '@/components/ProtectedRoutes'
 
 export const metadata: Metadata = {
   title: 'Dashboard - Майстор Жичко',
@@ -20,7 +21,9 @@ export default function RootLayout({
       <body>
         <Providers>
           <LanguageProvider>
-            {children}
+            <ProtectedRoutes>
+              {children}
+            </ProtectedRoutes>
             <CookieBanner />
           </LanguageProvider>
         </Providers>

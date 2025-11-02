@@ -1,0 +1,139 @@
+// Steps Component Styles
+.steps-container {
+    margin-bottom: 2rem;
+}
+
+.steps-list {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 1rem;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+}
+
+.step-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.step-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 3px solid var(--border-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--gray-medium);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+
+    svg {
+        width: 20px;
+        height: 20px;
+        color: var(--white);
+    }
+
+    &.active {
+        background: var(--primary-yellow);
+        border-color: var(--primary-yellow);
+        color: var(--black);
+        box-shadow: 0 0 0 4px rgba(255, 235, 59, 0.2);
+    }
+
+    &.completed {
+        background: var(--primary-yellow);
+        border-color: var(--primary-yellow);
+    }
+}
+
+.step-info {
+    text-align: center;
+    min-width: 100px;
+}
+
+.step-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-medium);
+    transition: color 0.3s ease;
+
+    &.active {
+        color: var(--text-dark);
+    }
+}
+
+.step-description {
+    font-size: 0.75rem;
+    color: var(--gray-medium);
+    margin-top: 0.25rem;
+}
+
+.step-connector {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    right: -50%;
+    height: 3px;
+    background: var(--border-gray);
+    z-index: 1;
+    transition: background 0.3s ease;
+    margin-left: 24px;
+    margin-right: 24px;
+
+    &.completed {
+        background: var(--primary-yellow);
+    }
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .steps-list {
+        padding: 0 0.5rem;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+
+        svg {
+            width: 18px;
+            height: 18px;
+        }
+    }
+
+    .step-info {
+        min-width: 80px;
+    }
+
+    .step-title {
+        font-size: 0.75rem;
+    }
+
+    .step-description {
+        font-size: 0.7rem;
+    }
+
+    .step-connector {
+        top: 20px;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+}
+

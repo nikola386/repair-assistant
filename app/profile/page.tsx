@@ -10,11 +10,27 @@ import { useLanguage } from '@/contexts/LanguageContext'
 
 import type { User } from '@/lib/userStorage'
 
+interface Country {
+  id: string
+  code: string
+  name: string
+  requiresVat: boolean
+}
+
+interface Store {
+  id: string
+  name: string
+  country: string | null
+  vatNumber: string | null
+}
+
 export default function ProfilePage() {
   const { t } = useLanguage()
   const { data: session, update: updateSession } = useSession()
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
+  const [store, setStore] = useState<Store | null>(null)
+  const [countries, setCountries] = useState<Country[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -24,7 +40,24 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    country: '',
+    vatNumber: '',
   })
+
+  const selectedCountry = countries.find(c => c.code === formData.country)
+  const requiresVat = selectedCountry?.requiresVat || false
+
+  const fetchCountries = useCallback(async () => {
+    try {
+      const response = await fetch('/api/countries')
+      if (response.ok) {
+      const data = await response.json()
+      setCountries(data.countries || [])
+      }
+    } catch (err) {
+      console.error('Error fetching countries:', err)
+    }
+  }, [])
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -32,9 +65,12 @@ export default function ProfilePage() {
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)
+        setStore(data.store)
         setFormData({
           name: data.user.name || '',
           email: data.user.email || '',
+          country: data.store?.country || '',
+          vatNumber: data.store?.vatNumber || '',
         })
       } else {
         setError(t.profile?.fetchError || 'Failed to load profile')
@@ -51,13 +87,27 @@ export default function ProfilePage() {
       router.push('/login')
       return
     }
-    fetchProfile()
-  }, [session, router, fetchProfile])
+    fetchCountries()
+  }, [session, router, fetchCountries])
+
+  useEffect(() => {
+    if (countries.length > 0 && session) {
+      fetchProfile()
+    }
+  }, [session, countries, fetchProfile])
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSuccess('')
+    
+    // Validate VAT if required
+    if (requiresVat && !formData.vatNumber?.trim()) {
+      setError(t.profile?.vatRequired || 'VAT number is required for the selected country')
+      return
+    }
+
     setSaving(true)
 
     try {
@@ -73,6 +123,7 @@ export default function ProfilePage() {
 
       if (response.ok) {
         setUser(data.user)
+        setStore(data.store)
         setSuccess(t.profile?.updateSuccess || 'Profile updated successfully')
         // Update session to reflect changes
         await updateSession({
@@ -278,6 +329,48 @@ export default function ProfilePage() {
                     disabled={saving}
                   />
                 </div>
+
+                <div className="profile-page__field">
+                  <label htmlFor="country">{t.profile?.country || 'Country'}</label>
+                  <select
+                    id="country"
+                    value={formData.country}
+                    onChange={(e) => {
+                      const selectedCode = e.target.value
+                      const selectedCountry = countries.find(c => c.code === selectedCode)
+                      setFormData({
+                        ...formData,
+                        country: selectedCode,
+                        vatNumber: selectedCountry?.requiresVat && !formData.vatNumber ? '' : formData.vatNumber,
+                      })
+                    }}
+                    disabled={saving}
+                  >
+                    <option value="">{t.profile?.countryPlaceholder || 'Select a country...'}</option>
+                    {countries.map((country) => (
+                      <option key={country.id} value={country.code}>
+                        {country.name} {country.requiresVat && '(VAT required)'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {requiresVat && (
+                  <div className="profile-page__field">
+                    <label htmlFor="vatNumber">
+                      {t.profile?.vatNumber || 'VAT Number'} *
+                    </label>
+                    <input
+                      id="vatNumber"
+                      type="text"
+                      value={formData.vatNumber}
+                      onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
+                      required={requiresVat}
+                      disabled={saving}
+                      placeholder={t.profile?.vatNumberPlaceholder || 'Enter VAT number'}
+                    />
+                  </div>
+                )}
 
                 <div className="profile-page__actions">
                   <button

@@ -1,40 +1,40 @@
 import { db } from './db'
-// Prisma generates UserSettings type automatically from schema
+// Prisma generates Settings type automatically from schema
 // Import will work after TypeScript server reloads (Cmd+Shift+P → "TypeScript: Restart TS Server")
 // @ts-expect-error - Prisma types available after generate, TS server may need restart
-import type { UserSettings } from '@prisma/client'
+import type { Settings } from '@prisma/client'
 
-export type { UserSettings }
+export type { Settings }
 export interface UpdateSettingsInput {
   primaryColor?: string
   secondaryColor?: string
 }
 
-export class UserSettingsStorage {
-  async findByUserId(userId: string): Promise<UserSettings | null> {
-    // @ts-expect-error - userSettings available after Prisma generate
-    return db.userSettings.findUnique({
-      where: { userId },
+export class SettingsStorage {
+  async findByStoreId(storeId: string): Promise<Settings | null> {
+    // @ts-expect-error - settings available after Prisma generate
+    return db.settings.findUnique({
+      where: { storeId },
     })
   }
 
-  async createOrUpdate(userId: string, data: UpdateSettingsInput): Promise<UserSettings> {
-    // @ts-expect-error - userSettings available after Prisma generate  
-    return db.userSettings.upsert({
-      where: { userId },
+  async createOrUpdate(storeId: string, data: UpdateSettingsInput): Promise<Settings> {
+    // @ts-expect-error - settings available after Prisma generate  
+    return db.settings.upsert({
+      where: { storeId },
       update: {
         primaryColor: data.primaryColor ?? undefined,
         secondaryColor: data.secondaryColor ?? undefined,
       },
       create: {
-        userId,
+        storeId,
         primaryColor: data.primaryColor ?? '#FFD700',
         secondaryColor: data.secondaryColor ?? '#000000',
       },
     })
   }
 
-  async updateColors(userId: string, primaryColor?: string, secondaryColor?: string): Promise<UserSettings> {
+  async updateColors(storeId: string, primaryColor?: string, secondaryColor?: string): Promise<Settings> {
     const updateData: UpdateSettingsInput = {}
     
     if (primaryColor !== undefined) {
@@ -45,9 +45,9 @@ export class UserSettingsStorage {
       updateData.secondaryColor = secondaryColor
     }
 
-    return this.createOrUpdate(userId, updateData)
+    return this.createOrUpdate(storeId, updateData)
   }
 }
 
-export const settingsStorage = new UserSettingsStorage()
+export const settingsStorage = new SettingsStorage()
 

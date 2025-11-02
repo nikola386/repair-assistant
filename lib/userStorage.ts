@@ -61,9 +61,6 @@ export class UserStorage {
   async findById(id: string): Promise<User | null> {
     return db.user.findUnique({
       where: { id },
-      include: {
-        store: true,
-      },
     })
   }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ticketStorage } from '@/lib/ticketStorage'
+import { userStorage } from '@/lib/userStorage'
 import { UpdateExpenseInput } from '@/types/ticket'
 import { withAuth } from '@/lib/auth.middleware'
 import { logger, generateRequestId } from '@/lib/logger'
@@ -17,8 +18,28 @@ export async function PATCH(
   }
   const session = authResult.session
 
+  // Get user's storeId and verify ticket belongs to store
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    logger.error('User or store not found', { userId: session.user.id }, requestId)
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
+  // Verify ticket belongs to store
+  const ticket = await ticketStorage.getById(params.id, user.storeId)
+  if (!ticket) {
+    logger.warn('Ticket not found for expense update', { ticketId: params.id, storeId: user.storeId }, requestId)
+    return NextResponse.json(
+      { error: 'Ticket not found' },
+      { status: 404 }
+    )
+  }
+
   try {
-    logger.info('Updating expense', { expenseId: params.expenseId, ticketId: params.id, userId: session.user.id }, requestId)
+    logger.info('Updating expense', { expenseId: params.expenseId, ticketId: params.id, userId: session.user.id, storeId: user.storeId }, requestId)
     const body = await request.json()
     const { name, quantity, price } = body
 
@@ -97,8 +118,28 @@ export async function DELETE(
   }
   const session = authResult.session
 
+  // Get user's storeId and verify ticket belongs to store
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    logger.error('User or store not found', { userId: session.user.id }, requestId)
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
+  // Verify ticket belongs to store
+  const ticket = await ticketStorage.getById(params.id, user.storeId)
+  if (!ticket) {
+    logger.warn('Ticket not found for expense deletion', { ticketId: params.id, storeId: user.storeId }, requestId)
+    return NextResponse.json(
+      { error: 'Ticket not found' },
+      { status: 404 }
+    )
+  }
+
   try {
-    logger.info('Deleting expense', { expenseId: params.expenseId, ticketId: params.id, userId: session.user.id }, requestId)
+    logger.info('Deleting expense', { expenseId: params.expenseId, ticketId: params.id, userId: session.user.id, storeId: user.storeId }, requestId)
     const deleted = await ticketStorage.deleteExpense(params.expenseId)
     
     if (!deleted) {

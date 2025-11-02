@@ -9,7 +9,23 @@ import { useLanguage } from '@/contexts/LanguageContext'
 
 import type { User } from '@/lib/userStorage'
 
-type Tab = 'profile' | 'password' | 'appearance'
+interface Country {
+  id: string
+  code: string
+  name: string
+  requiresVat: boolean
+}
+
+const CURRENCIES = [
+  { code: 'USD', name: 'US Dollar' },
+  { code: 'EUR', name: 'Euro' },
+  { code: 'GBP', name: 'British Pound' },
+  { code: 'BGN', name: 'Bulgarian Lev' },
+  { code: 'CAD', name: 'Canadian Dollar' },
+  { code: 'AUD', name: 'Australian Dollar' },
+]
+
+type Tab = 'profile' | 'password' | 'store' | 'appearance'
 
 export default function SettingsPage() {
   const { t } = useLanguage()
@@ -39,6 +55,25 @@ export default function SettingsPage() {
     secondaryColor: '#000000',
   })
 
+  const [storeFormData, setStoreFormData] = useState({
+    storeName: '',
+    street: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+    website: '',
+    phone: '',
+    currency: 'USD',
+    vatNumber: '',
+  })
+
+  const [logo, setLogo] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string>('')
+  const [removeLogo, setRemoveLogo] = useState(false)
+  const [countries, setCountries] = useState<Country[]>([])
+  const [storeLoading, setStoreLoading] = useState(false)
+
   const [settingsLoading, setSettingsLoading] = useState(false)
 
   const fetchProfile = useCallback(async () => {
@@ -61,6 +96,18 @@ export default function SettingsPage() {
     }
   }, [t.profile?.fetchError])
 
+  const fetchCountries = useCallback(async () => {
+    try {
+      const response = await fetch('/api/countries')
+      if (response.ok) {
+        const data = await response.json()
+        setCountries(data.countries || [])
+      }
+    } catch (err) {
+      console.error('Error fetching countries:', err)
+    }
+  }, [])
+
   const fetchSettings = useCallback(async () => {
     try {
       const response = await fetch('/api/settings')
@@ -73,6 +120,23 @@ export default function SettingsPage() {
           })
           // Apply colors immediately
           applyColors(data.settings.primaryColor || '#FFD700', data.settings.secondaryColor || '#000000')
+        }
+        if (data.store) {
+          setStoreFormData({
+            storeName: data.store.name || '',
+            street: data.store.street || '',
+            city: data.store.city || '',
+            state: data.store.state || '',
+            postalCode: data.store.postalCode || '',
+            country: data.store.country || '',
+            website: data.store.website || '',
+            phone: data.store.phone || '',
+            currency: data.store.currency || 'USD',
+            vatNumber: data.store.vatNumber || '',
+          })
+          if (data.store.logo) {
+            setLogoPreview(data.store.logo)
+          }
         }
       }
     } catch (err) {
@@ -94,7 +158,8 @@ export default function SettingsPage() {
     }
     fetchProfile()
     fetchSettings()
-  }, [session, router, fetchProfile, fetchSettings])
+    fetchCountries()
+  }, [session, router, fetchProfile, fetchSettings, fetchCountries])
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -262,25 +327,64 @@ export default function SettingsPage() {
     setSettingsLoading(true)
 
     try {
-      const response = await fetch('/api/settings', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(appearanceFormData),
-      })
+      // Use FormData if logo is being uploaded or removed, otherwise use JSON
+      if (logo || removeLogo) {
+        const formData = new FormData()
+        formData.append('primaryColor', appearanceFormData.primaryColor)
+        formData.append('secondaryColor', appearanceFormData.secondaryColor)
+        if (logo) {
+          formData.append('logo', logo)
+        }
+        if (removeLogo) {
+          formData.append('removeLogo', 'true')
+        }
 
-      const data = await response.json()
+        const response = await fetch('/api/settings', {
+          method: 'PATCH',
+          body: formData,
+        })
 
-      if (response.ok) {
-        setSuccess(t.settings?.colorsUpdateSuccess || 'Colors updated successfully')
-        // Apply colors immediately
-        applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
+        const data = await response.json()
+
+        if (response.ok) {
+          setSuccess(t.settings?.appearanceUpdateSuccess || 'Appearance updated successfully')
+          // Apply colors immediately
+          applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
+          // Update logo preview if logo was uploaded
+          if (data.store?.logo) {
+            setLogoPreview(data.store.logo)
+            setLogo(null)
+          } else if (removeLogo && data.store?.logo === null) {
+            // Logo was removed
+            setLogoPreview('')
+            setLogo(null)
+            setRemoveLogo(false)
+          }
+        } else {
+          setError(data.error || t.settings?.appearanceUpdateError || 'Failed to update appearance')
+        }
       } else {
-        setError(data.error || t.settings?.colorsUpdateError || 'Failed to update colors')
+        // No logo changes, just update colors with JSON
+        const response = await fetch('/api/settings', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(appearanceFormData),
+        })
+
+        const data = await response.json()
+
+        if (response.ok) {
+          setSuccess(t.settings?.colorsUpdateSuccess || 'Colors updated successfully')
+          // Apply colors immediately
+          applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
+        } else {
+          setError(data.error || t.settings?.colorsUpdateError || 'Failed to update colors')
+        }
       }
     } catch (err) {
-      setError(t.settings?.colorsUpdateError || 'Failed to update colors')
+      setError(t.settings?.appearanceUpdateError || 'Failed to update appearance')
     } finally {
       setSettingsLoading(false)
     }
@@ -292,6 +396,73 @@ export default function SettingsPage() {
       secondaryColor: '#000000',
     })
   }
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setLogo(file)
+      setRemoveLogo(false)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveLogo = () => {
+    setLogo(null)
+    setLogoPreview('')
+    setRemoveLogo(true)
+    // Reset file input
+    const fileInput = document.getElementById('logo') as HTMLInputElement
+    if (fileInput) {
+      fileInput.value = ''
+    }
+  }
+
+  const handleStoreSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+    setStoreLoading(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('storeName', storeFormData.storeName)
+      if (storeFormData.street) formData.append('street', storeFormData.street)
+      if (storeFormData.city) formData.append('city', storeFormData.city)
+      if (storeFormData.state) formData.append('state', storeFormData.state)
+      if (storeFormData.postalCode) formData.append('postalCode', storeFormData.postalCode)
+      if (storeFormData.country) formData.append('country', storeFormData.country)
+      if (storeFormData.website) formData.append('website', storeFormData.website)
+      if (storeFormData.phone) formData.append('phone', storeFormData.phone)
+      formData.append('currency', storeFormData.currency)
+      if (storeFormData.vatNumber) formData.append('vatNumber', storeFormData.vatNumber)
+      formData.append('primaryColor', appearanceFormData.primaryColor)
+      formData.append('secondaryColor', appearanceFormData.secondaryColor)
+
+      const response = await fetch('/api/settings', {
+        method: 'PATCH',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setSuccess(t.settings?.storeUpdateSuccess || 'Store information updated successfully')
+      } else {
+        setError(data.error || t.settings?.storeUpdateError || 'Failed to update store information')
+      }
+    } catch (err) {
+      setError(t.settings?.storeUpdateError || 'Failed to update store information')
+    } finally {
+      setStoreLoading(false)
+    }
+  }
+
+  const selectedCountry = countries.find(c => c.code === storeFormData.country)
+  const isEUCountry = selectedCountry?.requiresVat || false
 
   if (loading) {
     return (
@@ -345,6 +516,16 @@ export default function SettingsPage() {
                   }}
                 >
                   {t.settings?.security || 'Security'}
+                </button>
+                <button
+                  className={`settings-page__nav-item ${activeTab === 'store' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('store')
+                    setError('')
+                    setSuccess('')
+                  }}
+                >
+                  {t.settings?.store || 'Store'}
                 </button>
                 <button
                   className={`settings-page__nav-item ${activeTab === 'appearance' ? 'active' : ''}`}
@@ -412,7 +593,7 @@ export default function SettingsPage() {
                               accept="image/*"
                               onChange={handleImageUpload}
                               disabled={uploadingImage}
-                              style={{ display: 'none' }}
+                              className="settings-page__hidden-input"
                             />
                           </label>
                           {user?.profileImage && (
@@ -573,6 +754,231 @@ export default function SettingsPage() {
                 </div>
               )}
 
+              {activeTab === 'store' && (
+                <div className="settings-page__section">
+                  <div className="settings-page__card">
+                    <div className="settings-page__card-header">
+                      <h3 className="settings-page__card-title">
+                        {t.settings?.store || 'Store Information'}
+                      </h3>
+                      <p className="settings-page__card-description">
+                        {t.settings?.storeDescription || 'Update your store information.'}
+                      </p>
+                    </div>
+
+                    <div className="settings-page__card-content">
+                      <form onSubmit={handleStoreSubmit} className="settings-page__form">
+                        <div className="settings-page__field">
+                          <label htmlFor="storeName" className="settings-page__label">
+                            {t.onboarding?.storeName || 'Store Name'} *
+                          </label>
+                          <input
+                            id="storeName"
+                            type="text"
+                            value={storeFormData.storeName}
+                            onChange={(e) =>
+                              setStoreFormData({ ...storeFormData, storeName: e.target.value })
+                            }
+                            required
+                            disabled={storeLoading}
+                            className="settings-page__input"
+                            placeholder={t.onboarding?.storeNamePlaceholder || 'Enter your store name'}
+                          />
+                        </div>
+
+                        <div className="settings-page__field">
+                          <label htmlFor="street" className="settings-page__label">
+                            {t.onboarding?.street || 'Street Address'}
+                          </label>
+                          <input
+                            id="street"
+                            type="text"
+                            value={storeFormData.street}
+                            onChange={(e) =>
+                              setStoreFormData({ ...storeFormData, street: e.target.value })
+                            }
+                            disabled={storeLoading}
+                            className="settings-page__input"
+                            placeholder={t.onboarding?.streetPlaceholder || 'Street address'}
+                          />
+                        </div>
+
+                        <div className="settings-page__form-row">
+                          <div className="settings-page__field">
+                            <label htmlFor="city" className="settings-page__label">
+                              {t.onboarding?.city || 'City'}
+                            </label>
+                            <input
+                              id="city"
+                              type="text"
+                              value={storeFormData.city}
+                              onChange={(e) =>
+                                setStoreFormData({ ...storeFormData, city: e.target.value })
+                              }
+                              disabled={storeLoading}
+                              className="settings-page__input"
+                              placeholder={t.onboarding?.cityPlaceholder || 'City'}
+                            />
+                          </div>
+
+                          <div className="settings-page__field">
+                            <label htmlFor="state" className="settings-page__label">
+                              {t.onboarding?.state || 'State/Province'}
+                            </label>
+                            <input
+                              id="state"
+                              type="text"
+                              value={storeFormData.state}
+                              onChange={(e) =>
+                                setStoreFormData({ ...storeFormData, state: e.target.value })
+                              }
+                              disabled={storeLoading}
+                              className="settings-page__input"
+                              placeholder={t.onboarding?.statePlaceholder || 'State/Province'}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="settings-page__form-row">
+                          <div className="settings-page__field">
+                            <label htmlFor="postalCode" className="settings-page__label">
+                              {t.onboarding?.postalCode || 'Postal Code'}
+                            </label>
+                            <input
+                              id="postalCode"
+                              type="text"
+                              value={storeFormData.postalCode}
+                              onChange={(e) =>
+                                setStoreFormData({ ...storeFormData, postalCode: e.target.value })
+                              }
+                              disabled={storeLoading}
+                              className="settings-page__input"
+                              placeholder={t.onboarding?.postalCodePlaceholder || 'Postal Code'}
+                            />
+                          </div>
+
+                          <div className="settings-page__field">
+                            <label htmlFor="country" className="settings-page__label">
+                              {t.onboarding?.country || 'Country'}
+                            </label>
+                            <select
+                              id="country"
+                              value={storeFormData.country}
+                              onChange={(e) => {
+                                const selectedCode = e.target.value
+                                const selectedCountry = countries.find(c => c.code === selectedCode)
+                                setStoreFormData({ ...storeFormData, country: selectedCode })
+                                // Clear VAT number if country doesn't require VAT
+                                if (!selectedCountry?.requiresVat) {
+                                  setStoreFormData(prev => ({ ...prev, vatNumber: '' }))
+                                }
+                              }}
+                              className="settings-page__input"
+                              disabled={storeLoading}
+                            >
+                              <option value="">{t.onboarding?.countryPlaceholder || 'Select a country...'}</option>
+                              {countries.map((c) => (
+                                <option key={c.id} value={c.code}>
+                                  {c.name} {c.requiresVat && '(VAT required)'}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="settings-page__field">
+                          <label htmlFor="website" className="settings-page__label">
+                            {t.onboarding?.website || 'Website'}
+                          </label>
+                          <input
+                            id="website"
+                            type="url"
+                            value={storeFormData.website}
+                            onChange={(e) =>
+                              setStoreFormData({ ...storeFormData, website: e.target.value })
+                            }
+                            disabled={storeLoading}
+                            className="settings-page__input"
+                            placeholder={t.onboarding?.websitePlaceholder || 'https://example.com'}
+                          />
+                        </div>
+
+                        <div className="settings-page__field">
+                          <label htmlFor="phone" className="settings-page__label">
+                            {t.onboarding?.phone || 'Phone'}
+                          </label>
+                          <input
+                            id="phone"
+                            type="tel"
+                            value={storeFormData.phone}
+                            onChange={(e) =>
+                              setStoreFormData({ ...storeFormData, phone: e.target.value })
+                            }
+                            disabled={storeLoading}
+                            className="settings-page__input"
+                            placeholder={t.onboarding?.phonePlaceholder || 'Enter phone number'}
+                          />
+                        </div>
+
+                        <div className="settings-page__field">
+                          <label htmlFor="currency" className="settings-page__label">
+                            {t.onboarding?.currency || 'Currency'} *
+                          </label>
+                          <select
+                            id="currency"
+                            value={storeFormData.currency}
+                            onChange={(e) =>
+                              setStoreFormData({ ...storeFormData, currency: e.target.value })
+                            }
+                            className="settings-page__input"
+                            disabled={storeLoading}
+                            required
+                          >
+                            {CURRENCIES.map((curr) => (
+                              <option key={curr.code} value={curr.code}>
+                                {curr.name} ({curr.code})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {isEUCountry && (
+                          <div className="settings-page__field">
+                            <label htmlFor="vatNumber" className="settings-page__label">
+                              {t.onboarding?.vatNumber || 'VAT Number'}
+                              <span className="settings-page__label-hint">
+                                ({t.onboarding?.requiredForEU || 'Required for EU'})
+                              </span>
+                            </label>
+                            <input
+                              id="vatNumber"
+                              type="text"
+                              value={storeFormData.vatNumber}
+                              onChange={(e) =>
+                                setStoreFormData({ ...storeFormData, vatNumber: e.target.value })
+                              }
+                              disabled={storeLoading || !storeFormData.country}
+                              className="settings-page__input"
+                              placeholder={t.onboarding?.vatNumberPlaceholder || 'VAT Number (optional)'}
+                            />
+                          </div>
+                        )}
+
+                        <div className="settings-page__form-actions">
+                          <button
+                            type="submit"
+                            className="settings-page__submit-btn"
+                            disabled={storeLoading || !storeFormData.storeName.trim()}
+                          >
+                            {storeLoading ? t.profile?.saving || 'Saving...' : t.profile?.save || 'Save Changes'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'appearance' && (
                 <div className="settings-page__section">
                   <div className="settings-page__card">
@@ -581,7 +987,7 @@ export default function SettingsPage() {
                         {t.settings?.appearance || 'Appearance'}
                       </h3>
                       <p className="settings-page__card-description">
-                        {t.settings?.appearanceDescription || 'Customize the primary and secondary colors of your application.'}
+                        {t.settings?.appearanceDescription || 'Customize the logo and colors of your application.'}
                       </p>
                     </div>
 
@@ -591,7 +997,7 @@ export default function SettingsPage() {
                           <label htmlFor="primaryColor" className="settings-page__label">
                             {t.settings?.primaryColor || 'Primary Color'}
                           </label>
-                          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                          <div className="settings-page__color-container">
                             <input
                               id="primaryColor"
                               type="color"
@@ -605,13 +1011,6 @@ export default function SettingsPage() {
                                 applyColors(newColor, appearanceFormData.secondaryColor)
                               }}
                               className="settings-page__color-input"
-                              style={{
-                                width: '60px',
-                                height: '40px',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                              }}
                             />
                             <input
                               type="text"
@@ -627,8 +1026,7 @@ export default function SettingsPage() {
                                 }
                               }}
                               placeholder="#FFD700"
-                              className="settings-page__input"
-                              style={{ flex: 1 }}
+                              className="settings-page__input settings-page__color-text-input"
                             />
                           </div>
                         </div>
@@ -637,7 +1035,7 @@ export default function SettingsPage() {
                           <label htmlFor="secondaryColor" className="settings-page__label">
                             {t.settings?.secondaryColor || 'Secondary Color'}
                           </label>
-                          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                          <div className="settings-page__color-container">
                             <input
                               id="secondaryColor"
                               type="color"
@@ -651,13 +1049,6 @@ export default function SettingsPage() {
                                 applyColors(appearanceFormData.primaryColor, newColor)
                               }}
                               className="settings-page__color-input"
-                              style={{
-                                width: '60px',
-                                height: '40px',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                              }}
                             />
                             <input
                               type="text"
@@ -673,10 +1064,41 @@ export default function SettingsPage() {
                                 }
                               }}
                               placeholder="#000000"
-                              className="settings-page__input"
-                              style={{ flex: 1 }}
+                              className="settings-page__input settings-page__color-text-input"
                             />
                           </div>
+                        </div>
+
+                        <div className="settings-page__field">
+                          <label htmlFor="logo" className="settings-page__label">
+                            {t.onboarding?.logo || 'Logo'}
+                          </label>
+                          <input
+                            id="logo"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoChange}
+                            className="settings-page__input"
+                            disabled={settingsLoading}
+                          />
+                          {logoPreview && (
+                            <div className="settings-page__logo-preview-container">
+                              <img
+                                src={logoPreview}
+                                alt="Logo preview"
+                                className="settings-page__logo-preview"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleRemoveLogo}
+                                disabled={settingsLoading}
+                                className="settings-page__logo-remove-btn"
+                                aria-label={t.profile?.deleteImage || 'Remove logo'}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         <div className="settings-page__form-actions">

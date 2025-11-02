@@ -376,6 +376,105 @@
       cursor: not-allowed;
     }
   }
+
+  // Form row grid layout
+  &__form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // Hidden input (for file uploads)
+  &__hidden-input {
+    display: none;
+  }
+
+  // Label hint text
+  &__label-hint {
+    font-size: 0.85rem;
+    color: var(--gray-medium);
+    margin-left: 0.5rem;
+  }
+
+  // Color input container
+  &__color-container {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  // Color input
+  &__color-input {
+    width: 60px;
+    height: 40px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  // Color text input
+  &__color-text-input {
+    flex: 1;
+  }
+
+  // Logo preview container
+  &__logo-preview-container {
+    margin-top: 0.75rem;
+    position: relative;
+    display: inline-block;
+    width: fit-content;
+  }
+
+  // Logo preview image
+  &__logo-preview {
+    max-width: 200px;
+    max-height: 200px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    display: block;
+  }
+
+  // Logo remove button (X button)
+  &__logo-remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #ef4444;
+    color: white;
+    border: 2px solid white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 0;
+    line-height: 1;
+    z-index: 10;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background-color: #dc2626;
+      transform: scale(1.1);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
 }
 
 // Responsive

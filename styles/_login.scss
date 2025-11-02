@@ -44,6 +44,11 @@
     width: 100%;
     max-width: 450px;
     z-index: 1;
+
+    // Slightly wider for onboarding page with more fields
+    .onboarding-page & {
+        max-width: 550px;
+    }
 }
 
 .login-card {
@@ -125,6 +130,17 @@
     &::placeholder {
         color: var(--gray-medium);
     }
+
+}
+
+// Select styling
+select.form-input {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 3rem;
 }
 
 .login-button {
@@ -134,6 +150,35 @@
     padding: 1rem 2rem;
     min-height: 3.5rem;
     white-space: nowrap;
+}
+
+// Onboarding specific styles
+.onboarding-step {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.onboarding-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    align-items: center;
+
+    .btn {
+        flex: 1;
+        min-width: 120px;
+    }
 }
 
 // Responsive

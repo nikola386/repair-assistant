@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ticketStorage } from '@/lib/ticketStorage'
+import { userStorage } from '@/lib/userStorage'
 import { UpdateTicketInput, TicketStatus, TicketPriority } from '@/types/ticket'
 import { withAuth } from '@/lib/auth.middleware'
 import { logger, generateRequestId } from '@/lib/logger'
@@ -17,9 +18,19 @@ export async function GET(
   }
   const session = authResult.session
 
+  // Get user's storeId
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    logger.error('User or store not found', { userId: session.user.id }, requestId)
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
   try {
-    logger.info('Fetching ticket by ID', { ticketId: params.id, userId: session.user.id }, requestId)
-    const ticket = await ticketStorage.getById(params.id)
+    logger.info('Fetching ticket by ID', { ticketId: params.id, userId: session.user.id, storeId: user.storeId }, requestId)
+    const ticket = await ticketStorage.getById(params.id, user.storeId)
     
     if (!ticket) {
       logger.warn('Ticket not found', { ticketId: params.id }, requestId)
@@ -56,8 +67,18 @@ export async function PATCH(
   }
   const session = authResult.session
 
+  // Get user's storeId
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    logger.error('User or store not found', { userId: session.user.id }, requestId)
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
   try {
-    logger.info('Updating ticket', { ticketId: params.id, userId: session.user.id }, requestId)
+    logger.info('Updating ticket', { ticketId: params.id, userId: session.user.id, storeId: user.storeId }, requestId)
     const body = await request.json()
     const {
       customerName,
@@ -104,10 +125,10 @@ export async function PATCH(
       ...(notes !== undefined && { notes }),
     }
 
-    const ticket = await ticketStorage.update(params.id, updateInput)
+    const ticket = await ticketStorage.update(params.id, updateInput, user.storeId)
     
     if (!ticket) {
-      logger.warn('Ticket not found for update', { ticketId: params.id }, requestId)
+      logger.warn('Ticket not found for update', { ticketId: params.id, storeId: user.storeId }, requestId)
       return NextResponse.json(
         { error: 'Ticket not found' },
         { status: 404 }
@@ -144,9 +165,19 @@ export async function DELETE(
   }
   const session = authResult.session
 
+  // Get user's storeId
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    logger.error('User or store not found', { userId: session.user.id }, requestId)
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
   try {
-    logger.info('Deleting ticket', { ticketId: params.id, userId: session.user.id }, requestId)
-    const deleted = await ticketStorage.delete(params.id)
+    logger.info('Deleting ticket', { ticketId: params.id, userId: session.user.id, storeId: user.storeId }, requestId)
+    const deleted = await ticketStorage.delete(params.id, user.storeId)
     
     if (!deleted) {
       logger.warn('Ticket not found for deletion', { ticketId: params.id }, requestId)
