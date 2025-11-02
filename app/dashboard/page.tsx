@@ -1,4 +1,4 @@
-npx prisma migrate'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import Navigation from '@/components/layout/Navigation'
