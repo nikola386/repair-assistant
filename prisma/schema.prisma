@@ -72,6 +72,7 @@ model Settings {
   storeId        String   @unique @map("store_id")
   primaryColor   String   @default("#FFD700") @map("primary_color")
   secondaryColor String   @default("#000000") @map("secondary_color")
+  language       String?  @default("en") @map("language")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

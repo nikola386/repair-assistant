@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { Language, getAllLanguages } from '@/lib/languages'
 import Spinner from '@/components/ui/Spinner'
 import Steps from '@/components/ui/Steps'
 import LogoUpload from '@/components/ui/LogoUpload'
@@ -26,7 +27,7 @@ const CURRENCIES = [
 ]
 
 export default function OnboardingPage() {
-  const { t } = useLanguage()
+  const { t, setLanguage } = useLanguage()
   const router = useRouter()
   const { data: session, status } = useSession()
 
@@ -49,6 +50,7 @@ export default function OnboardingPage() {
   const [logoPreview, setLogoPreview] = useState<string>('')
   const [primaryColor, setPrimaryColor] = useState('#FFD700')
   const [secondaryColor, setSecondaryColor] = useState('#000000')
+  const [language, setLanguage] = useState<Language>('en')
 
   // Country dropdown state
   const [countries, setCountries] = useState<Country[]>([])
@@ -109,6 +111,7 @@ export default function OnboardingPage() {
               if (data.settings) {
                 setPrimaryColor(data.settings.primaryColor || '#FFD700')
                 setSecondaryColor(data.settings.secondaryColor || '#000000')
+                setLanguage((data.settings.language as Language) || 'en')
               }
             }
             setFetching(false)
@@ -215,6 +218,7 @@ export default function OnboardingPage() {
       if (logo) formData.append('logo', logo)
       formData.append('primaryColor', primaryColor)
       formData.append('secondaryColor', secondaryColor)
+      formData.append('language', language)
 
       const response = await fetch('/api/onboarding', {
         method: 'POST',
@@ -229,6 +233,11 @@ export default function OnboardingPage() {
         showAlert.error(errorMsg)
         setLoading(false)
         return
+      }
+
+      // Update language context if language was set
+      if (data.settings?.language) {
+        setLanguage(data.settings.language as Language)
       }
 
       // Redirect to dashboard
@@ -596,6 +605,25 @@ export default function OnboardingPage() {
                       style={{ flex: 1 }}
                     />
                   </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="language" className="form-label">
+                    {t.onboarding?.language || t.settings?.language || 'Language'}
+                  </label>
+                  <select
+                    id="language"
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value as Language)}
+                    className="form-input"
+                    disabled={loading}
+                  >
+                    {getAllLanguages().map((lang) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.nativeName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             )}

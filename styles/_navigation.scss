@@ -60,36 +60,6 @@
     gap: 1.5rem;
 }
 
-.language-switcher {
-    display: flex;
-    gap: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    padding: 2px;
-}
-
-.lang-btn {
-    padding: 0.4rem 0.8rem;
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.3s;
-    font-family: inherit;
-
-    &:hover {
-        color: var(--white);
-    }
-
-    &.active {
-        background: var(--primary-yellow);
-        color: var(--black);
-    }
-}
-
 .nav-menu {
     display: flex;
     list-style: none;

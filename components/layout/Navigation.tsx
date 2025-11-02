@@ -8,7 +8,7 @@ import { useSession } from 'next-auth/react'
 import ProfileDropdown from '../ui/ProfileDropdown'
 
 export default function Navigation() {
-  const { t, language, setLanguage } = useLanguage()
+  const { t } = useLanguage()
   const [navMenuActive, setNavMenuActive] = useState(false)
   const [navbarBg, setNavbarBg] = useState('rgba(30, 30, 30, 0.98)')
   const pathname = usePathname()
@@ -153,20 +153,6 @@ export default function Navigation() {
               </Link>
             </>
           )}
-          <div className="language-switcher">
-            <button
-              className={`lang-btn ${language === 'en' ? 'active' : ''}`}
-              onClick={() => setLanguage('en')}
-            >
-              EN
-            </button>
-            <button
-              className={`lang-btn ${language === 'bg' ? 'active' : ''}`}
-              onClick={() => setLanguage('bg')}
-            >
-              BG
-            </button>
-          </div>
           <div 
             className={`hamburger ${navMenuActive ? 'active' : ''}`}
             onClick={() => setNavMenuActive(!navMenuActive)}

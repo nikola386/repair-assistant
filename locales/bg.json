@@ -367,9 +367,13 @@
     "appearanceDescription": "Персонализирайте основните и вторичните цветове на вашето приложение.",
     "primaryColor": "Основен цвят",
     "secondaryColor": "Вторичен цвят",
+    "language": "Език",
+    "languageDescription": "Изберете предпочитания език",
     "resetColors": "Възстанови по подразбиране",
     "colorsUpdateSuccess": "Цветовете са актуализирани успешно",
     "colorsUpdateError": "Неуспешна актуализация на цветовете",
+    "appearanceUpdateSuccess": "Външният вид е актуализиран успешно",
+    "appearanceUpdateError": "Неуспешна актуализация на външния вид",
     "invalidColorFormat": "Невалиден формат на цвят. Моля, използвайте hex формат (напр., #FFD700)"
   },
   "onboarding": {
@@ -408,6 +412,7 @@
     "vatNumberNonEU": "ДДС номерата са задължителни само за ЕС държави",
     "invalidVatNumber": "Невалиден ДДС номер",
     "logo": "Лого",
+    "language": "Език",
     "primaryColor": "Основен Цвят",
     "secondaryColor": "Вторичен Цвят",
     "next": "Напред",

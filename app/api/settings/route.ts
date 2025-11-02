@@ -4,6 +4,7 @@ import { userStorage } from '@/lib/userStorage'
 import { withAuth } from '@/lib/auth.middleware'
 import { db } from '@/lib/db'
 import { put, del } from '@vercel/blob'
+import { isValidLanguage, SUPPORTED_LANGUAGES } from '@/lib/languages'
 
 export async function GET(request: NextRequest) {
   const authResult = await withAuth(request, { action: 'settings access' })
@@ -99,6 +100,7 @@ export async function PATCH(request: NextRequest) {
       // Settings fields
       const primaryColor = formData.get('primaryColor') as string | null
       const secondaryColor = formData.get('secondaryColor') as string | null
+      const language = formData.get('language') as string | null
 
       // Get existing store
       const existingStore = await db.store.findUnique({
@@ -204,8 +206,10 @@ export async function PATCH(request: NextRequest) {
         })
       }
 
-      // Update settings colors if provided
-      if (primaryColor || secondaryColor) {
+      // Update settings if provided
+      const updateSettings: { primaryColor?: string; secondaryColor?: string; language?: string } = {}
+      
+      if (primaryColor || secondaryColor || language) {
         const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
         
         if (primaryColor && !colorRegex.test(primaryColor)) {
@@ -222,11 +226,18 @@ export async function PATCH(request: NextRequest) {
           )
         }
 
-        await settingsStorage.updateColors(
-          storeId,
-          primaryColor || undefined,
-          secondaryColor || undefined
-        )
+        if (language && !isValidLanguage(language)) {
+          return NextResponse.json(
+            { error: `Invalid language. Must be one of: ${SUPPORTED_LANGUAGES.join(', ')}` },
+            { status: 400 }
+          )
+        }
+
+        if (primaryColor) updateSettings.primaryColor = primaryColor
+        if (secondaryColor) updateSettings.secondaryColor = secondaryColor
+        if (language) updateSettings.language = language
+
+        await settingsStorage.createOrUpdate(storeId, updateSettings)
       }
 
       const updatedSettings = await settingsStorage.findByStoreId(storeId)
@@ -237,9 +248,9 @@ export async function PATCH(request: NextRequest) {
       )
     }
     
-    // Handle JSON (colors only for backward compatibility)
+    // Handle JSON (colors and language for backward compatibility)
     const body = await request.json()
-    const { primaryColor, secondaryColor } = body
+    const { primaryColor, secondaryColor, language } = body
 
     // Validate color format (hex color)
     const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
@@ -258,10 +269,21 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    const updatedSettings = await settingsStorage.updateColors(
+    if (language && !isValidLanguage(language)) {
+      return NextResponse.json(
+        { error: `Invalid language. Must be one of: ${SUPPORTED_LANGUAGES.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
+    const updateSettings: { primaryColor?: string; secondaryColor?: string; language?: string } = {}
+    if (primaryColor) updateSettings.primaryColor = primaryColor
+    if (secondaryColor) updateSettings.secondaryColor = secondaryColor
+    if (language) updateSettings.language = language
+
+    const updatedSettings = await settingsStorage.createOrUpdate(
       storeId,
-      primaryColor,
-      secondaryColor
+      updateSettings
     )
 
     const store = await db.store.findUnique({

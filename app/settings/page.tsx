@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { Language, getAllLanguages } from '@/lib/languages'
 import LogoUpload from '@/components/ui/LogoUpload'
 import { showAlert } from '@/lib/alerts'
 
@@ -30,7 +31,7 @@ const CURRENCIES = [
 type Tab = 'profile' | 'password' | 'store' | 'appearance'
 
 export default function SettingsPage() {
-  const { t } = useLanguage()
+  const { t, setLanguage } = useLanguage()
   const { data: session, update: updateSession } = useSession()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('profile')
@@ -55,6 +56,7 @@ export default function SettingsPage() {
   const [appearanceFormData, setAppearanceFormData] = useState({
     primaryColor: '#FFD700',
     secondaryColor: '#000000',
+    language: 'en' as Language,
   })
 
   const [storeFormData, setStoreFormData] = useState({
@@ -123,6 +125,7 @@ export default function SettingsPage() {
           setAppearanceFormData({
             primaryColor: data.settings.primaryColor || '#FFD700',
             secondaryColor: data.settings.secondaryColor || '#000000',
+            language: (data.settings.language as Language) || 'en',
           })
           // Apply colors immediately
           applyColors(data.settings.primaryColor || '#FFD700', data.settings.secondaryColor || '#000000')
@@ -366,6 +369,7 @@ export default function SettingsPage() {
         const formData = new FormData()
         formData.append('primaryColor', appearanceFormData.primaryColor)
         formData.append('secondaryColor', appearanceFormData.secondaryColor)
+        formData.append('language', appearanceFormData.language)
         if (logo) {
           formData.append('logo', logo)
         }
@@ -386,6 +390,10 @@ export default function SettingsPage() {
           showAlert.success(successMsg)
           // Apply colors immediately
           applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
+          // Update language context if language changed
+          if (data.settings?.language) {
+            setLanguage(data.settings.language as Language)
+          }
           // Update logo preview if logo was uploaded
           if (data.store?.logo) {
             setLogoPreview(data.store.logo)
@@ -402,7 +410,7 @@ export default function SettingsPage() {
           showAlert.error(errorMsg)
         }
       } else {
-        // No logo changes, just update colors with JSON
+        // No logo changes, just update colors and language with JSON
         const response = await fetch('/api/settings', {
           method: 'PATCH',
           headers: {
@@ -414,11 +422,15 @@ export default function SettingsPage() {
         const data = await response.json()
 
         if (response.ok) {
-          const successMsg = t.settings?.colorsUpdateSuccess || 'Colors updated successfully'
+          const successMsg = t.settings?.appearanceUpdateSuccess || 'Appearance updated successfully'
           setSuccess(successMsg)
           showAlert.success(successMsg)
           // Apply colors immediately
           applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
+          // Update language context if language changed
+          if (data.settings?.language) {
+            setLanguage(data.settings.language as Language)
+          }
         } else {
           const errorMsg = data.error || t.settings?.colorsUpdateError || 'Failed to update colors'
           setError(errorMsg)
@@ -438,6 +450,7 @@ export default function SettingsPage() {
     setAppearanceFormData({
       primaryColor: '#FFD700',
       secondaryColor: '#000000',
+      language: 'en',
     })
   }
 
@@ -1099,6 +1112,30 @@ export default function SettingsPage() {
                               className="settings-page__input settings-page__color-text-input"
                             />
                           </div>
+                        </div>
+
+                        <div className="settings-page__field">
+                          <label htmlFor="language" className="settings-page__label">
+                            {t.settings?.language || 'Language'}
+                          </label>
+                          <select
+                            id="language"
+                            value={appearanceFormData.language}
+                            onChange={(e) => {
+                              setAppearanceFormData({
+                                ...appearanceFormData,
+                                language: e.target.value as Language,
+                              })
+                            }}
+                            className="settings-page__input"
+                            disabled={settingsLoading}
+                          >
+                            {getAllLanguages().map((lang) => (
+                              <option key={lang.code} value={lang.code}>
+                                {lang.nativeName}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         <div className="settings-page__field">

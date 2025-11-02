@@ -8,6 +8,7 @@ export type { Settings }
 export interface UpdateSettingsInput {
   primaryColor?: string
   secondaryColor?: string
+  language?: string
 }
 
 export class SettingsStorage {
@@ -25,11 +26,13 @@ export class SettingsStorage {
       update: {
         primaryColor: data.primaryColor ?? undefined,
         secondaryColor: data.secondaryColor ?? undefined,
+        language: data.language ?? undefined,
       },
       create: {
         storeId,
         primaryColor: data.primaryColor ?? '#FFD700',
         secondaryColor: data.secondaryColor ?? '#000000',
+        language: data.language ?? 'en',
       },
     })
   }
@@ -46,6 +49,10 @@ export class SettingsStorage {
     }
 
     return this.createOrUpdate(storeId, updateData)
+  }
+
+  async updateLanguage(storeId: string, language: string): Promise<Settings> {
+    return this.createOrUpdate(storeId, { language })
   }
 }
 

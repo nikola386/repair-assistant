@@ -3,6 +3,7 @@ import { withAuth } from '@/lib/auth.middleware'
 import { userStorage } from '@/lib/userStorage'
 import { db } from '@/lib/db'
 import { put, del } from '@vercel/blob'
+import { isValidLanguage, SUPPORTED_LANGUAGES } from '@/lib/languages'
 
 export async function POST(request: NextRequest) {
   const authResult = await withAuth(request, { action: 'onboarding setup' })
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
     const logoFile = formData.get('logo') as File | null
     const primaryColor = formData.get('primaryColor') as string | null
     const secondaryColor = formData.get('secondaryColor') as string | null
+    const language = formData.get('language') as string | null
 
     // Validate required fields
     if (!storeName || storeName.trim().length === 0) {
@@ -46,6 +48,14 @@ export async function POST(request: NextRequest) {
     if (secondaryColor && !colorRegex.test(secondaryColor)) {
       return NextResponse.json(
         { error: 'Invalid secondary color format' },
+        { status: 400 }
+      )
+    }
+    
+    // Validate language if provided
+    if (language && !isValidLanguage(language)) {
+      return NextResponse.json(
+        { error: `Invalid language. Must be one of: ${SUPPORTED_LANGUAGES.join(', ')}` },
         { status: 400 }
       )
     }
@@ -140,17 +150,19 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Update or create settings with colors
-    await db.settings.upsert({
+    // Update or create settings with colors and language
+    const updatedSettings = await db.settings.upsert({
       where: { storeId },
       create: {
         storeId,
         primaryColor: primaryColor?.trim() || '#FFD700',
         secondaryColor: secondaryColor?.trim() || '#000000',
+        language: language?.trim() || 'en',
       },
       update: {
         primaryColor: primaryColor?.trim() || '#FFD700',
         secondaryColor: secondaryColor?.trim() || '#000000',
+        language: language?.trim() || 'en',
       },
     })
 
@@ -158,6 +170,7 @@ export async function POST(request: NextRequest) {
       { 
         message: 'Onboarding completed successfully',
         store: updatedStore,
+        settings: updatedSettings,
       },
       { status: 200 }
     )

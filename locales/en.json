@@ -367,9 +367,13 @@
     "appearanceDescription": "Customize the primary and secondary colors of your application.",
     "primaryColor": "Primary Color",
     "secondaryColor": "Secondary Color",
+    "language": "Language",
+    "languageDescription": "Select your preferred language",
     "resetColors": "Reset to Default",
     "colorsUpdateSuccess": "Colors updated successfully",
     "colorsUpdateError": "Failed to update colors",
+    "appearanceUpdateSuccess": "Appearance updated successfully",
+    "appearanceUpdateError": "Failed to update appearance",
     "invalidColorFormat": "Invalid color format. Please use hex format (e.g., #FFD700)"
   },
   "onboarding": {
@@ -408,6 +412,7 @@
     "vatNumberNonEU": "VAT numbers are only required for EU countries",
     "invalidVatNumber": "Invalid VAT number",
     "logo": "Logo",
+    "language": "Language",
     "primaryColor": "Primary Color",
     "secondaryColor": "Secondary Color",
     "next": "Next",
