@@ -24,7 +24,6 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false)
-  const [isDownloadingServiceReport, setIsDownloadingServiceReport] = useState(false)
   const [uploadingImages, setUploadingImages] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<File[]>([]) // Files selected before upload
@@ -446,108 +445,65 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
     }
   }
 
-  const handleDownloadServiceReport = async () => {
-    setIsDownloadingServiceReport(true)
-    try {
-      const response = await fetch(`/api/tickets/${ticket.id}/service-report`)
-      if (!response.ok) {
-        throw new Error('Failed to generate service report')
-      }
-
-      // Create blob from response
-      const blob = await response.blob()
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `service-report-${ticket.ticketNumber}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      
-      // Cleanup
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      
-      showAlert.success('Service report downloaded successfully')
-    } catch (error) {
-      console.error('Error downloading service report:', error)
-      showAlert.error('Failed to download service report')
-    } finally {
-      setIsDownloadingServiceReport(false)
-    }
-  }
 
   return (
     <div className="ticket-detail">
       <div className="ticket-detail__header">
-        <div>
-          <h1 className="ticket-detail__title">{currentTicket.ticketNumber}</h1>
-          <div className="ticket-detail__meta">
-            <span className={`ticket-status ticket-status--${currentTicket.status}`}>
-              {t.tickets.status[currentTicket.status]}
-            </span>
-            <span className={`ticket-priority ticket-priority--${currentTicket.priority}`}>
-              {t.tickets.priority[currentTicket.priority]}
-            </span>
+        <button
+          className="ticket-detail__back"
+          onClick={() => router.push('/tickets')}
+        >
+          ← {t.tickets.backToList || 'Back to List'}
+        </button>
+        <div className="ticket-detail__header-content">
+          <div>
+            <h1 className="ticket-detail__title">{currentTicket.ticketNumber}</h1>
+            <div className="ticket-detail__meta">
+              <span className={`ticket-status ticket-status--${currentTicket.status}`}>
+                {t.tickets.status[currentTicket.status]}
+              </span>
+              <span className={`ticket-priority ticket-priority--${currentTicket.priority}`}>
+                {t.tickets.priority[currentTicket.priority]}
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="ticket-detail__actions">
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => router.push('/tickets')}
-          >
-            {t.tickets.backToList || 'Back to List'}
-          </button>
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={handleDownloadInvoice}
-            disabled={isDownloadingInvoice}
-          >
-            {isDownloadingInvoice ? (
-              <>
-                <Spinner size="small" />
-                <span>Generating...</span>
-              </>
-            ) : (
-              'Download Invoice'
-            )}
-          </button>
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={handleDownloadServiceReport}
-            disabled={isDownloadingServiceReport}
-          >
-            {isDownloadingServiceReport ? (
-              <>
-                <Spinner size="small" />
-                <span>Generating...</span>
-              </>
-            ) : (
-              'Download Service Report'
-            )}
-          </button>
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={() => setIsEditing(!isEditing)}
-            disabled={isUpdating}
-          >
-            {isEditing ? 'Cancel Edit' : 'Edit Ticket'}
-          </button>
-          <button
-            className="btn btn-danger btn-sm"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
-            {isDeleting ? (
-              <>
-                <Spinner size="small" />
-                <span>Deleting...</span>
-              </>
-            ) : (
-              t.tickets.delete || 'Delete'
-            )}
-          </button>
+          <div className="ticket-detail__actions">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={handleDownloadInvoice}
+              disabled={isDownloadingInvoice}
+            >
+              {isDownloadingInvoice ? (
+                <>
+                  <Spinner size="small" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                'Download Invoice'
+              )}
+            </button>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => setIsEditing(!isEditing)}
+              disabled={isUpdating}
+            >
+              {isEditing ? 'Cancel Edit' : 'Edit Ticket'}
+            </button>
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Spinner size="small" />
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                t.tickets.delete || 'Delete'
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
