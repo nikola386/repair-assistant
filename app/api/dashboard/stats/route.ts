@@ -16,6 +16,18 @@ interface DashboardStats {
   averageRepairTime: number
   completionRate: number
   chartData: ChartDataPoint[]
+  overdueTickets: number
+  highPriorityTickets: number
+  averageRevenuePerTicket: number
+  revenueGrowth: number | null // Percentage change from previous period
+  lowStockItems: number
+  statusDistribution: StatusDistributionItem[]
+}
+
+interface StatusDistributionItem {
+  status: string
+  count: number
+  percentage: number
 }
 
 interface ChartDataPoint {
@@ -184,9 +196,9 @@ export async function GET(request: NextRequest) {
   const session = authResult.session
 
   // Get user's storeId
-  const user = await userStorage.findById(session.user.id)
-  if (!user || !user.storeId) {
-    logger.error('User or store not found', { userId: session.user.id }, requestId)
+  const storeId = await userStorage.getStoreId(session.user.id)
+  if (!storeId) {
+    logger.error('User store not found', { userId: session.user.id }, requestId)
     return NextResponse.json(
       { error: 'User store not found' },
       { status: 404 }
@@ -218,11 +230,11 @@ export async function GET(request: NextRequest) {
 
     const startDate = getDateRange(days)
 
-    logger.info('Fetching dashboard stats', { userId: session.user.id, storeId: user.storeId, period, days }, requestId)
+    logger.info('Fetching dashboard stats', { userId: session.user.id, storeId, period, days }, requestId)
 
     // Build where clause for date filtering and store filtering
     const dateFilter = {
-      storeId: user.storeId, // Filter by store
+      storeId: storeId, // Filter by store
       createdAt: {
         gte: startDate,
       },
@@ -234,9 +246,11 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         status: true,
+        priority: true,
         actualCost: true,
         estimatedCost: true,
         actualCompletionDate: true,
+        estimatedCompletionDate: true,
         createdAt: true,
       },
     })
@@ -247,18 +261,13 @@ export async function GET(request: NextRequest) {
 
     // Get expenses only for completed tickets in the date range, with creation date and inventory item info
     const expenses = completedTicketIds.length > 0 
-      ? await db.expense.findMany({
+      ? await (db as any).expense.findMany({
           where: {
             ticketId: {
               in: completedTicketIds,
             },
           },
-          select: {
-            quantity: true,
-            price: true,
-            createdAt: true,
-            ticketId: true,
-            inventoryItemId: true,
+          include: {
             inventoryItem: {
               select: {
                 costPrice: true,
@@ -286,8 +295,9 @@ export async function GET(request: NextRequest) {
     for (const expense of expenses) {
       // Use costPrice from inventory item if available, otherwise use expense price
       let costPerUnit = expense.price.toNumber()
-      if (expense.inventoryItemId && expense.inventoryItem?.costPrice) {
-        costPerUnit = expense.inventoryItem.costPrice.toNumber()
+      const expenseWithInventory = expense as typeof expense & { inventoryItemId?: string | null; inventoryItem?: { costPrice: Decimal | null } | null }
+      if (expenseWithInventory.inventoryItemId && expenseWithInventory.inventoryItem?.costPrice) {
+        costPerUnit = expenseWithInventory.inventoryItem.costPrice.toNumber()
       }
       
       const amount = expense.quantity.toNumber() * costPerUnit
@@ -319,6 +329,116 @@ export async function GET(request: NextRequest) {
     // Calculate Completion Rate (percentage of completed tickets)
     const completionRate = totalRepairs > 0 ? (completedTickets.length / totalRepairs) * 100 : 0
 
+    // Calculate Overdue Tickets (tickets past estimated completion date that aren't completed)
+    // Check all active tickets, not just those in the date range
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const allActiveTickets = await db.repairTicket.findMany({
+      where: {
+        storeId: storeId as any, // Type assertion for Prisma client
+        status: {
+          notIn: ['completed', 'cancelled'],
+        },
+      },
+      select: {
+        status: true,
+        estimatedCompletionDate: true,
+      },
+    })
+    
+    const overdueTickets = allActiveTickets.filter((t) => {
+      if (!t.estimatedCompletionDate) return false
+      const estimatedDate = new Date(t.estimatedCompletionDate)
+      estimatedDate.setHours(0, 0, 0, 0)
+      return estimatedDate < today
+    }).length
+
+    // Calculate High Priority Tickets (high or urgent priority)
+    const highPriorityTickets = tickets.filter((t: typeof tickets[0]) => {
+      return t.priority === 'high' || t.priority === 'urgent'
+    }).length
+
+    // Calculate Average Revenue per Ticket
+    const averageRevenuePerTicket = completedTickets.length > 0 
+      ? Math.round((income / completedTickets.length) * 100) / 100 
+      : 0
+
+    // Calculate Period-over-Period Growth
+    // Get previous period data for comparison
+    const previousPeriodStartDate = getDateRange(days * 2) // Start of previous period
+    const previousPeriodEndDate = getDateRange(days) // End of previous period (same as current start)
+    
+    const previousPeriodTickets = await db.repairTicket.findMany({
+      where: {
+        storeId: storeId as any, // Type assertion for Prisma client
+        createdAt: {
+          gte: previousPeriodStartDate,
+          lt: startDate,
+        },
+        status: 'completed',
+      },
+      select: {
+        actualCost: true,
+        estimatedCost: true,
+      },
+    })
+
+    let previousPeriodIncome = 0
+    for (const ticket of previousPeriodTickets) {
+      const cost = ticket.actualCost ? ticket.actualCost.toNumber() : (ticket.estimatedCost ? ticket.estimatedCost.toNumber() : 0)
+      previousPeriodIncome += cost
+    }
+    previousPeriodIncome = Math.round(previousPeriodIncome * 100) / 100
+
+    // Calculate revenue growth percentage
+    let revenueGrowth: number | null = null
+    if (previousPeriodIncome > 0 && income > 0) {
+      revenueGrowth = Math.round(((income - previousPeriodIncome) / previousPeriodIncome) * 100 * 100) / 100
+    } else if (previousPeriodIncome === 0 && income > 0) {
+      revenueGrowth = 100 // 100% growth if previous was 0
+    } else if (previousPeriodIncome > 0 && income === 0) {
+      revenueGrowth = -100 // -100% if current is 0
+    }
+
+    // Calculate Low Stock Items
+    const inventoryItems = await (db as any).inventoryItem.findMany({
+      where: {
+        storeId: storeId
+      },
+      select: {
+        currentQuantity: true,
+        minQuantity: true,
+      },
+    })
+
+    const lowStockItems = inventoryItems.filter((item: { currentQuantity: Decimal; minQuantity: Decimal }) => {
+      return item.currentQuantity.toNumber() <= item.minQuantity.toNumber()
+    }).length
+
+    // Calculate Status Distribution
+    const statusCounts = new Map<string, number>()
+    const statusOrder = ['pending', 'in_progress', 'waiting_parts', 'completed', 'cancelled']
+    
+    // Initialize all statuses with 0
+    statusOrder.forEach(status => statusCounts.set(status, 0))
+    
+    // Count tickets by status
+    tickets.forEach(ticket => {
+      const currentCount = statusCounts.get(ticket.status) || 0
+      statusCounts.set(ticket.status, currentCount + 1)
+    })
+    
+    // Create distribution array with percentages
+    const statusDistribution: StatusDistributionItem[] = statusOrder.map(status => {
+      const count = statusCounts.get(status) || 0
+      const percentage = totalRepairs > 0 ? Math.round((count / totalRepairs) * 100 * 100) / 100 : 0
+      return {
+        status,
+        count,
+        percentage,
+      }
+    })
+
     // Generate chart data (time-series)
     const chartData = generateChartData(days, completedTickets, expenses)
 
@@ -333,6 +453,12 @@ export async function GET(request: NextRequest) {
       averageRepairTime: Math.round((averageRepairTime || 0) * 10) / 10, // Round to 1 decimal place
       completionRate: Math.round((completionRate || 0) * 100) / 100,
       chartData,
+      overdueTickets: overdueTickets || 0,
+      highPriorityTickets: highPriorityTickets || 0,
+      averageRevenuePerTicket: averageRevenuePerTicket || 0,
+      revenueGrowth: revenueGrowth,
+      lowStockItems: lowStockItems || 0,
+      statusDistribution: statusDistribution || [],
     }
 
     const duration = Date.now() - startTime
@@ -354,6 +480,12 @@ export async function GET(request: NextRequest) {
       averageRepairTime: 0,
       completionRate: 0,
       chartData: [],
+      overdueTickets: 0,
+      highPriorityTickets: 0,
+      averageRevenuePerTicket: 0,
+      revenueGrowth: null,
+      lowStockItems: 0,
+      statusDistribution: [],
     }
     return NextResponse.json(defaultStats, { status: 200 })
   }

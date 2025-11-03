@@ -368,6 +368,12 @@
       "grossProfitPercentage": "Брутна Печалба %",
       "averageRepairTime": "Средно Време за Ремонт",
       "completionRate": "Процент успешни",
+      "overdueTickets": "Просрочени Билети",
+      "highPriorityTickets": "Билети с Висок Приоритет",
+      "averageRevenuePerTicket": "Средни Приходи на Билет",
+      "revenueGrowth": "Ръст на Приходите",
+      "lowStockItems": "Ниски наличности",
+      "statusDistribution": "Разпределение по Статус",
       "days": "дни",
       "day": "ден",
       "hours": "часа"

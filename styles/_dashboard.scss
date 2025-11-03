@@ -273,6 +273,60 @@
       background: rgba(16, 185, 129, 0.1);
     }
   }
+
+  &--overdue {
+    border-left: 4px solid #ef4444;
+
+    .stat-card__icon {
+      background: rgba(239, 68, 68, 0.1);
+    }
+  }
+
+  &--high-priority {
+    border-left: 4px solid #f97316;
+
+    .stat-card__icon {
+      background: rgba(249, 115, 22, 0.1);
+    }
+  }
+
+  &--avg-revenue {
+    border-left: 4px solid #10b981;
+
+    .stat-card__icon {
+      background: rgba(16, 185, 129, 0.1);
+    }
+  }
+
+  &--revenue-growth {
+    border-left: 4px solid #3b82f6;
+
+    .stat-card__icon {
+      background: rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  &--low-stock {
+    border-left: 4px solid #f59e0b;
+
+    .stat-card__icon {
+      background: rgba(245, 158, 11, 0.1);
+    }
+  }
+
+  &--status-distribution {
+    border-left: 4px solid #8b5cf6;
+
+    .stat-card__icon {
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .stat-card__legend {
+      padding-top: 12px;
+      border-top: 1px solid var(--border-gray);
+      font-size: 0.75rem;
+    }
+  }
 }
 
 .dashboard-charts {

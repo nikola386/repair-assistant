@@ -384,6 +384,12 @@
       "grossProfitPercentage": "Gross Profit %",
       "averageRepairTime": "Average Repair Time",
       "completionRate": "Completion Rate",
+      "overdueTickets": "Overdue Tickets",
+      "highPriorityTickets": "High Priority Tickets",
+      "averageRevenuePerTicket": "Avg Revenue per Ticket",
+      "revenueGrowth": "Revenue Growth",
+      "lowStockItems": "Low Stock Items",
+      "statusDistribution": "Status Distribution",
       "days": "days",
       "day": "day",
       "hours": "hours"

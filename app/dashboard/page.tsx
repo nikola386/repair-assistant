@@ -14,6 +14,9 @@ import {
   Legend,
   Brush,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts'
 import {
   HiCog,
@@ -23,6 +26,11 @@ import {
   HiTrendingDown,
   HiChartBar,
   HiSearch,
+  HiExclamation,
+  HiFire,
+  HiArrowUp,
+  HiArrowDown,
+  HiCube,
 } from 'react-icons/hi'
 import { FaWrench, FaStopwatch, FaDollarSign } from 'react-icons/fa'
 
@@ -32,6 +40,12 @@ interface ChartDataPoint {
   expenses: number
   profit: number
   profitPercentage: number
+}
+
+interface StatusDistributionItem {
+  status: string
+  count: number
+  percentage: number
 }
 
 interface DashboardStats {
@@ -45,6 +59,13 @@ interface DashboardStats {
   averageRepairTime: number
   completionRate: number
   chartData: ChartDataPoint[]
+  // New high-priority stats
+  overdueTickets: number
+  highPriorityTickets: number
+  averageRevenuePerTicket: number
+  revenueGrowth: number | null
+  lowStockItems: number
+  statusDistribution: StatusDistributionItem[]
 }
 
 type Period = '7d' | '30d' | '180d' | '360d'
@@ -63,6 +84,12 @@ export default function DashboardPage() {
     averageRepairTime: 0,
     completionRate: 0,
     chartData: [],
+    overdueTickets: 0,
+    highPriorityTickets: 0,
+    averageRevenuePerTicket: 0,
+    revenueGrowth: null,
+    lowStockItems: 0,
+    statusDistribution: [],
   })
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState<Period>('30d')
@@ -89,6 +116,12 @@ export default function DashboardPage() {
           averageRepairTime: 0,
           completionRate: 0,
           chartData: [],
+          overdueTickets: 0,
+          highPriorityTickets: 0,
+          averageRevenuePerTicket: 0,
+          revenueGrowth: null,
+          lowStockItems: 0,
+          statusDistribution: [],
         })
         return
       }
@@ -105,6 +138,12 @@ export default function DashboardPage() {
         averageRepairTime: data.averageRepairTime ?? 0,
         completionRate: data.completionRate ?? 0,
         chartData: data.chartData ?? [],
+        overdueTickets: data.overdueTickets ?? 0,
+        highPriorityTickets: data.highPriorityTickets ?? 0,
+        averageRevenuePerTicket: data.averageRevenuePerTicket ?? 0,
+        revenueGrowth: data.revenueGrowth ?? null,
+        lowStockItems: data.lowStockItems ?? 0,
+        statusDistribution: data.statusDistribution ?? [],
       })
     } catch (err) {
       // On error, set default zero values instead of showing error
@@ -119,6 +158,12 @@ export default function DashboardPage() {
         averageRepairTime: 0,
         completionRate: 0,
         chartData: [],
+        overdueTickets: 0,
+        highPriorityTickets: 0,
+        averageRevenuePerTicket: 0,
+        revenueGrowth: null,
+        lowStockItems: 0,
+        statusDistribution: [],
       })
       console.error('Error fetching dashboard stats:', err)
     } finally {
@@ -205,6 +250,44 @@ export default function DashboardPage() {
       default:
         return '#000000'
     }
+  }
+
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'pending':
+        return '#FFF3CD'
+      case 'in_progress':
+        return '#D1ECF1'
+      case 'waiting_parts':
+        return '#F8D7DA'
+      case 'completed':
+        return '#D4EDDA'
+      case 'cancelled':
+        return '#E2E3E5'
+      default:
+        return '#E2E3E5'
+    }
+  }
+
+  const getStatusBorderColor = (status: string): string => {
+    switch (status) {
+      case 'pending':
+        return '#FFC107' // Amber
+      case 'in_progress':
+        return '#2196F3' // Blue
+      case 'waiting_parts':
+        return '#FF5722' // Deep Orange
+      case 'completed':
+        return '#4CAF50' // Green
+      case 'cancelled':
+        return '#9E9E9E' // Grey
+      default:
+        return '#9E9E9E'
+    }
+  }
+
+  const getStatusLabel = (status: string): string => {
+    return t.common?.status?.[status as keyof typeof t.common.status] || status
   }
 
   const renderFullChart = () => {
@@ -376,6 +459,87 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
+                <div className="stat-card stat-card--overdue">
+                  <div className="stat-card__icon">
+                    <HiExclamation />
+                  </div>
+                  <div className="stat-card__content">
+                    <h3 className="stat-card__label">
+                      {t.dashboard?.stats?.overdueTickets || 'Overdue Tickets'}
+                    </h3>
+                    <p className="stat-card__value">{stats.overdueTickets}</p>
+                  </div>
+                </div>
+
+                <div className="stat-card stat-card--high-priority">
+                  <div className="stat-card__icon">
+                    <HiFire />
+                  </div>
+                  <div className="stat-card__content">
+                    <h3 className="stat-card__label">
+                      {t.dashboard?.stats?.highPriorityTickets || 'High Priority Tickets'}
+                    </h3>
+                    <p className="stat-card__value">{stats.highPriorityTickets}</p>
+                  </div>
+                </div>
+
+                <div className="stat-card stat-card--avg-revenue">
+                  <div className="stat-card__icon">
+                    <FaDollarSign />
+                  </div>
+                  <div className="stat-card__content">
+                    <h3 className="stat-card__label">
+                      {t.dashboard?.stats?.averageRevenuePerTicket || 'Avg Revenue per Ticket'}
+                    </h3>
+                    <p className="stat-card__value">{formatCurrency(stats.averageRevenuePerTicket)}</p>
+                  </div>
+                </div>
+
+                <div className="stat-card stat-card--revenue-growth">
+                  <div className="stat-card__icon">
+                    {stats.revenueGrowth !== null && stats.revenueGrowth >= 0 ? (
+                      <HiArrowUp />
+                    ) : stats.revenueGrowth !== null ? (
+                      <HiArrowDown />
+                    ) : (
+                      <HiTrendingUp />
+                    )}
+                  </div>
+                  <div className="stat-card__content">
+                    <h3 className="stat-card__label">
+                      {t.dashboard?.stats?.revenueGrowth || 'Revenue Growth'}
+                    </h3>
+                    <p className="stat-card__value">
+                      {stats.revenueGrowth !== null ? formatPercentage(stats.revenueGrowth) : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="stat-card stat-card--low-stock">
+                  <div className="stat-card__icon">
+                    <HiCube />
+                  </div>
+                  <div className="stat-card__content">
+                    <h3 className="stat-card__label">
+                      {t.dashboard?.stats?.lowStockItems || 'Low Stock Items'}
+                    </h3>
+                    <p className="stat-card__value">{stats.lowStockItems}</p>
+                  </div>
+                </div>
+
+                {/* Expenses Stat Card */}
+                <div className="stat-card stat-card--expenses">
+                  <div className="stat-card__icon">
+                    <HiTrendingDown />
+                  </div>
+                  <div className="stat-card__content">
+                    <h3 className="stat-card__label">
+                      {t.dashboard?.stats?.expenses || 'Expenses'}
+                    </h3>
+                    <p className="stat-card__value">{formatCurrency(stats.expenses)}</p>
+                  </div>
+                </div>
+
               </div>
 
               {/* Chart cards in 3-column grid */}
@@ -438,63 +602,81 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="stat-card stat-card--expenses stat-card--with-chart">
-                  <div className="stat-card__header">
-                    <div className="stat-card__icon">
-                      <HiTrendingDown />
+                {/* Status Distribution Pie Chart */}
+                {stats.statusDistribution && stats.statusDistribution.length > 0 && (
+                  <div className="stat-card stat-card--status-distribution stat-card--with-chart">
+                    <div className="stat-card__header">
+                      <div className="stat-card__icon">
+                        <HiChartBar />
+                      </div>
+                      <div className="stat-card__content">
+                        <h3 className="stat-card__label">
+                          {t.dashboard?.stats?.statusDistribution || 'Status Distribution'}
+                        </h3>
+                      </div>
                     </div>
-                    <div className="stat-card__content">
-                      <h3 className="stat-card__label">
-                        {t.dashboard?.stats?.expenses || 'Expenses'}
-                      </h3>
-                      <p className="stat-card__value">{formatCurrency(stats.expenses)}</p>
-                    </div>
-                    {stats.chartData && stats.chartData.length > 0 && (
-                      <button
-                        className="stat-card__zoom-btn"
-                        onClick={() => setOpenChart('expenses')}
-                        aria-label="Zoom chart"
-                        title="View full chart"
-                      >
-                        <HiSearch />
-                      </button>
-                    )}
-                  </div>
-                  {stats.chartData && stats.chartData.length > 0 && (
                     <div className="stat-card__chart">
                       <ResponsiveContainer width="100%" height={120}>
-                        <LineChart data={stats.chartData} margin={{ top: 5, right: 5, left: 25, bottom: 5 }}>
-                          <YAxis
-                            width={40}
-                            tick={{ fontSize: 10 }}
-                            tickFormatter={(value) => {
-                              if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`
-                              return `$${value}`
+                        <PieChart>
+                          <Pie
+                            data={stats.statusDistribution as any}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={(props: any) => {
+                              const percentage = props.payload?.percentage || 0
+                              return percentage > 5 ? `${percentage}%` : ''
                             }}
-                          />
+                            outerRadius={50}
+                            fill="#8884d8"
+                            dataKey="count"
+                          >
+                            {stats.statusDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={getStatusBorderColor(entry.status)} />
+                            ))}
+                          </Pie>
                           <Tooltip
                             contentStyle={{
                               backgroundColor: 'var(--white)',
-                              border: '1px solid var(--border-gray)',
+                              border: '2px solid var(--border-gray)',
                               borderRadius: '8px',
-                              padding: '8px',
-                              fontSize: '12px',
+                              padding: '12px',
+                              fontSize: '14px',
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                             }}
-                            formatter={(value: number) => formatCurrency(value)}
+                            formatter={(value: number, name: string, props: any) => [
+                              `${value} (${props.payload.percentage}%)`,
+                              getStatusLabel(props.payload.status),
+                            ]}
                           />
-                          <Line
-                            type="monotone"
-                            dataKey="expenses"
-                            stroke="#F44336"
-                            strokeWidth={2}
-                            dot={false}
-                            activeDot={{ r: 4 }}
-                          />
-                        </LineChart>
+                        </PieChart>
                       </ResponsiveContainer>
                     </div>
-                  )}
-                </div>
+                    <div className="stat-card__legend" style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '0.75rem' }}>
+                      {stats.statusDistribution.map((item) => (
+                        <div
+                          key={item.status}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '12px',
+                              height: '12px',
+                              backgroundColor: getStatusBorderColor(item.status),
+                              borderRadius: '3px',
+                            }}
+                          />
+                          <span style={{ fontWeight: 600 }}>{getStatusLabel(item.status)}:</span>
+                          <span>{item.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="stat-card stat-card--profit stat-card--with-chart">
                   <div className="stat-card__header">

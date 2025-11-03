@@ -384,6 +384,12 @@
       "grossProfitPercentage": "Bruttogewinn %",
       "averageRepairTime": "Durchschnittliche Reparaturzeit",
       "completionRate": "Abschlussrate",
+      "overdueTickets": "Überfällige Tickets",
+      "highPriorityTickets": "Tickets mit hoher Priorität",
+      "averageRevenuePerTicket": "Durchschnittlicher Umsatz pro Ticket",
+      "revenueGrowth": "Umsatzwachstum",
+      "lowStockItems": "Niedrige Lagerbestände",
+      "statusDistribution": "Statusverteilung",
       "days": "Tage",
       "day": "Tag",
       "hours": "Stunden"
