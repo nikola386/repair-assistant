@@ -284,9 +284,14 @@
       "downloadSuccess": "Отчетът за склад е изтеглен успешно",
       "downloadError": "Грешка при генериране на отчет за склад"
     },
+    "comingSoon": {
+      "title": "Очаквайте скоро",
+      "description": "Още видове отчети ще бъдат достъпни скоро",
+      "message": "Очаквайте още възможности за отчети!"
+    },
     "dateRange": {
       "selectDateRange": "Избери Период",
-      "selectDateRangeForTurnover": "Избери Период (за анализ на оборот)",
+      "selectDateRangeForTurnover": "Избери Период",
       "quickSelect": "Бърз Избор:",
       "last7Days": "Последни 7 Дни",
       "last30Days": "Последни 30 Дни",
@@ -321,7 +326,7 @@
       "grossProfit": "Брутна Печалба",
       "profitMargin": "Марж на Печалба",
       "avgRepairTime": "Средно Време за Ремонт",
-      "completionRate": "Процент на Завършване",
+      "completionRate": "Процент успешни",
       "performanceByDeviceType": "Производителност по Тип Устройство",
       "topCustomers": "Топ Клиенти",
       "totalSpent": "Общо Похарчено",
@@ -360,7 +365,12 @@
       "income": "Приходи",
       "expenses": "Разходи",
       "grossProfit": "Брутна Печалба",
-      "grossProfitPercentage": "Брутна Печалба %"
+      "grossProfitPercentage": "Брутна Печалба %",
+      "averageRepairTime": "Средно Време за Ремонт",
+      "completionRate": "Процент успешни",
+      "days": "дни",
+      "day": "ден",
+      "hours": "часа"
     }
   },
   "settings": {

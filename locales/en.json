@@ -262,9 +262,14 @@
       "downloadSuccess": "Inventory report downloaded successfully",
       "downloadError": "Failed to generate inventory report"
     },
+    "comingSoon": {
+      "title": "Coming Soon",
+      "description": "More report types will be available soon",
+      "message": "Stay tuned for more reporting features!"
+    },
     "dateRange": {
       "selectDateRange": "Select Date Range",
-      "selectDateRangeForTurnover": "Select Date Range (for turnover analysis)",
+      "selectDateRangeForTurnover": "Select Date Range",
       "quickSelect": "Quick Select:",
       "last7Days": "Last 7 Days",
       "last30Days": "Last 30 Days",
@@ -376,7 +381,12 @@
       "income": "Income",
       "expenses": "Expenses",
       "grossProfit": "Gross Profit",
-      "grossProfitPercentage": "Gross Profit %"
+      "grossProfitPercentage": "Gross Profit %",
+      "averageRepairTime": "Average Repair Time",
+      "completionRate": "Completion Rate",
+      "days": "days",
+      "day": "day",
+      "hours": "hours"
     }
   },
   "settings": {

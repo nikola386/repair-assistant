@@ -262,9 +262,14 @@
       "downloadSuccess": "Inventarbericht erfolgreich heruntergeladen",
       "downloadError": "Fehler beim Generieren des Inventarberichts"
     },
+    "comingSoon": {
+      "title": "Bald verfügbar",
+      "description": "Weitere Berichtstypen werden bald verfügbar sein",
+      "message": "Bleiben Sie dran für weitere Berichtsfunktionen!"
+    },
     "dateRange": {
       "selectDateRange": "Datumsbereich auswählen",
-      "selectDateRangeForTurnover": "Datumsbereich auswählen (für Umsatzanalyse)",
+      "selectDateRangeForTurnover": "Datumsbereich auswählen",
       "quickSelect": "Schnellauswahl:",
       "last7Days": "Letzte 7 Tage",
       "last30Days": "Letzte 30 Tage",
@@ -376,7 +381,12 @@
       "income": "Einnahmen",
       "expenses": "Ausgaben",
       "grossProfit": "Bruttogewinn",
-      "grossProfitPercentage": "Bruttogewinn %"
+      "grossProfitPercentage": "Bruttogewinn %",
+      "averageRepairTime": "Durchschnittliche Reparaturzeit",
+      "completionRate": "Abschlussrate",
+      "days": "Tage",
+      "day": "Tag",
+      "hours": "Stunden"
     }
   },
   "settings": {

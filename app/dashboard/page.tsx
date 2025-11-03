@@ -140,10 +140,10 @@ export default function DashboardPage() {
   }
 
   const formatDays = (days: number): string => {
-    if (days === 0) return '0 days'
-    if (days < 1) return `${Math.round(days * 24)} hours`
-    if (days === 1) return '1 day'
-    return `${days.toFixed(1)} days`
+    if (days === 0) return `0 ${t.dashboard?.stats?.days || 'days'}`
+    if (days < 1) return `${Math.round(days * 24)} ${t.dashboard?.stats?.hours || 'hours'}`
+    if (days === 1) return `1 ${t.dashboard?.stats?.day || 'day'}`
+    return `${days.toFixed(1)} ${t.dashboard?.stats?.days || 'days'}`
   }
 
   const getPeriodLabel = (p: Period): string => {
@@ -346,7 +346,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
-                      {'Average Repair Time'}
+                      {t.dashboard?.stats?.averageRepairTime || 'Average Repair Time'}
                     </h3>
                     <p className="stat-card__value">{formatDays(stats.averageRepairTime)}</p>
                   </div>
@@ -358,7 +358,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
-                      {'Completion Rate'}
+                      {t.dashboard?.stats?.completionRate || 'Completion Rate'}
                     </h3>
                     <p className="stat-card__value">{formatPercentage(stats.completionRate)}</p>
                   </div>
@@ -376,6 +376,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
+              </div>
+
+              {/* Chart cards in 3-column grid */}
+              <div className="dashboard-charts-grid">
                 <div className="stat-card stat-card--income stat-card--with-chart">
                   <div className="stat-card__header">
                     <div className="stat-card__icon">

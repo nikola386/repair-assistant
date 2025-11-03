@@ -7,7 +7,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import Spinner from '@/components/ui/Spinner'
 import { showAlert } from '@/lib/alerts'
-import { HiDocumentReport, HiCalendar } from 'react-icons/hi'
+import { HiDocumentReport, HiCalendar, HiClock } from 'react-icons/hi'
 
 export default function ReportsPage() {
   const { t } = useLanguage()
@@ -125,9 +125,6 @@ export default function ReportsPage() {
         <div className="container">
           <div className="reports-page__header">
             <h1>{t.reports?.title || 'Reports'}</h1>
-            <p className="reports-page__subtitle">
-              {t.reports?.subtitle || 'Generate printable PDF reports for your repair business'}
-            </p>
           </div>
           
           <div className="reports-page__content">
@@ -294,6 +291,27 @@ export default function ReportsPage() {
                     </>
                   )}
                 </button>
+              </div>
+            </div>
+
+            {/* Coming Soon Section */}
+            <div className="report-card report-card--coming-soon">
+              <div className="report-card__header">
+                <HiClock className="report-card__icon" />
+                <div>
+                  <h2 className="report-card__title">{t.reports.comingSoon.title}</h2>
+                  <p className="report-card__description">
+                    {t.reports.comingSoon.description}
+                  </p>
+                </div>
+              </div>
+
+              <div className="report-card__body">
+                <div className="report-card__section">
+                  <p className="report-card__info">
+                    {t.reports.comingSoon.message}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
