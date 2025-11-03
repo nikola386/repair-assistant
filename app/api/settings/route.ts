@@ -15,6 +15,7 @@ import {
 } from '@/lib/fileValidation'
 import {
   generateUniqueFileName,
+  compressAndConvertToJpg,
 } from '@/lib/fileUtils'
 import { validateHexColor } from '@/lib/colorValidation'
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from '@/lib/constants'
@@ -183,10 +184,13 @@ export async function PATCH(request: NextRequest) {
           }
         }
 
-        // Generate unique filename using secure random
+        // Compress and convert image to JPG
+        const processedFile = await compressAndConvertToJpg(logoFile)
+
+        // Generate unique filename using secure random (use processed file name for correct extension)
         let fileName: string
         try {
-          fileName = generateUniqueFileName('stores', storeId, logoFile.name, ALLOWED_IMAGE_EXTENSIONS)
+          fileName = generateUniqueFileName('stores', storeId, processedFile.name, ALLOWED_IMAGE_EXTENSIONS, storeId)
         } catch (error) {
           return NextResponse.json(
             { error: error instanceof Error ? error.message : 'Invalid file extension' },
@@ -195,9 +199,9 @@ export async function PATCH(request: NextRequest) {
         }
 
         // Upload file to Vercel Blob
-        const blob = await put(fileName, logoFile, {
+        const blob = await put(fileName, processedFile, {
           access: 'public',
-          contentType: logoFile.type,
+          contentType: processedFile.type,
         })
 
         logoUrl = blob.url

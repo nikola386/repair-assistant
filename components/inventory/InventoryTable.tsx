@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { InventoryItem } from '../../types/inventory'
 import { showAlert } from '../../lib/alerts'
 import InventoryForm from './InventoryForm'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface InventoryTableProps {
   items: InventoryItem[]
@@ -22,6 +23,7 @@ export default function InventoryTable({
   editable = true,
   isLoading = false,
 }: InventoryTableProps) {
+  const { t } = useLanguage()
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
   const [adjustingId, setAdjustingId] = useState<string | null>(null)
   const [adjustQuantity, setAdjustQuantity] = useState('')
@@ -48,21 +50,21 @@ export default function InventoryTable({
         const result = await response.json()
         onItemUpdate(result.item)
         setEditingItem(null)
-        showAlert.success('Inventory item updated successfully')
+        showAlert.success(t.inventory.table.updateSuccess)
       } else {
         const error = await response.json()
-        showAlert.error(error.error || 'Failed to update item')
+        showAlert.error(error.error || t.inventory.table.updateError)
       }
     } catch (error) {
       console.error('Error updating item:', error)
-      showAlert.error('Failed to update item')
+      showAlert.error(t.inventory.table.updateError)
     }
   }
 
   const handleDelete = async (itemId: string) => {
     if (!onItemDelete) return
 
-    if (!confirm('Are you sure you want to delete this inventory item?')) {
+    if (!confirm(t.common.messages.confirmDelete)) {
       return
     }
 
@@ -73,13 +75,13 @@ export default function InventoryTable({
 
       if (response.ok) {
         onItemDelete(itemId)
-        showAlert.success('Inventory item deleted successfully')
+        showAlert.success(t.inventory.table.deleteSuccess)
       } else {
-        showAlert.error('Failed to delete item')
+        showAlert.error(t.inventory.table.deleteError)
       }
     } catch (error) {
       console.error('Error deleting item:', error)
-      showAlert.error('Failed to delete item')
+      showAlert.error(t.inventory.table.deleteError)
     }
   }
 
@@ -88,7 +90,7 @@ export default function InventoryTable({
 
     const quantityChange = parseFloat(adjustQuantity)
     if (isNaN(quantityChange) || quantityChange === 0) {
-      showAlert.error('Please enter a valid non-zero quantity change')
+      showAlert.error(t.inventory.table.quantityChangeError)
       return
     }
 
@@ -104,14 +106,14 @@ export default function InventoryTable({
         onQuantityAdjust(itemId, quantityChange)
         setAdjustingId(null)
         setAdjustQuantity('')
-        showAlert.success(data.message || 'Quantity adjusted successfully')
+        showAlert.success(data.message || t.inventory.table.adjustSuccess)
       } else {
         const error = await response.json()
-        showAlert.error(error.error || 'Failed to adjust quantity')
+        showAlert.error(error.error || t.inventory.table.adjustError)
       }
     } catch (error) {
       console.error('Error adjusting quantity:', error)
-      showAlert.error('Failed to adjust quantity')
+      showAlert.error(t.inventory.table.adjustError)
     }
   }
 
@@ -204,7 +206,7 @@ export default function InventoryTable({
   }
 
   if (items.length === 0) {
-    return <p className="inventory-table__empty">No inventory items found</p>
+    return <p className="inventory-table__empty">{t.inventory.table.noItems}</p>
   }
 
   return (
@@ -213,15 +215,15 @@ export default function InventoryTable({
         <table className="inventory-table__table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>SKU</th>
-              <th>Category</th>
-              <th>Location</th>
-              <th>Quantity</th>
-              <th>Min Quantity</th>
-              <th>Unit Price</th>
-              <th>Status</th>
-              {editable && <th>Actions</th>}
+              <th>{t.common.fields.name}</th>
+              <th>{t.common.fields.sku}</th>
+              <th>{t.common.fields.category}</th>
+              <th>{t.common.fields.location}</th>
+              <th>{t.common.fields.quantity}</th>
+              <th>{t.inventory.minQuantity}</th>
+              <th>{t.inventory.unitPrice}</th>
+              <th>{t.common.fields.status}</th>
+              {editable && <th>{t.common.labels.actions}</th>}
             </tr>
           </thead>
           <tbody>
@@ -241,9 +243,9 @@ export default function InventoryTable({
                 <td>{item.unitPrice !== undefined ? `$${item.unitPrice.toFixed(2)}` : '-'}</td>
                 <td>
                   {isLowStock(item) ? (
-                    <span className="inventory-table__status--low">Low Stock</span>
+                    <span className="inventory-table__status--low">{t.inventory.lowStock}</span>
                   ) : (
-                    <span className="inventory-table__status--ok">OK</span>
+                    <span className="inventory-table__status--ok">{t.inventory.ok}</span>
                   )}
                 </td>
                 {editable && (
@@ -298,7 +300,7 @@ export default function InventoryTable({
                             className="inventory-table__menu-item"
                             onClick={() => handleMenuAction('edit', item)}
                           >
-                            Edit
+                            {t.common.actions.edit}
                           </button>
                           <button
                             type="button"
@@ -306,14 +308,14 @@ export default function InventoryTable({
                             onClick={() => handleMenuAction('adjust', item)}
                             disabled={adjustingId !== null && adjustingId !== item.id}
                           >
-                            Adjust
+                            {t.inventory.adjust}
                           </button>
                           <button
                             type="button"
                             className="inventory-table__menu-item inventory-table__menu-item--danger"
                             onClick={() => handleMenuAction('delete', item)}
                           >
-                            Delete
+                            {t.common.actions.delete}
                           </button>
                         </div>
                       )}
@@ -322,7 +324,7 @@ export default function InventoryTable({
                       <div className="inventory-table__adjust-form">
                         <input
                           type="number"
-                          placeholder="Quantity change"
+                          placeholder={t.inventory.table.quantityChangePlaceholder}
                           value={adjustQuantity}
                           onChange={(e) => setAdjustQuantity(e.target.value)}
                           className="inventory-table__adjust-input"
@@ -334,7 +336,7 @@ export default function InventoryTable({
                             onClick={() => handleQuantityAdjust(item.id)}
                             disabled={isLoading}
                           >
-                            Apply
+                            {t.common.actions.apply}
                           </button>
                           <button
                             type="button"
@@ -342,7 +344,7 @@ export default function InventoryTable({
                             onClick={cancelAdjust}
                             disabled={isLoading}
                           >
-                            Cancel
+                            {t.common.actions.cancel}
                           </button>
                         </div>
                       </div>
@@ -360,7 +362,7 @@ export default function InventoryTable({
         <div className="inventory-modal" onClick={cancelEdit}>
           <div className="inventory-modal__content" onClick={(e) => e.stopPropagation()}>
             <div className="inventory-modal__header">
-              <h2 className="inventory-modal__title">Edit Inventory Item</h2>
+              <h2 className="inventory-modal__title">{t.inventory.table.editItem}</h2>
               <button
                 className="inventory-modal__close"
                 onClick={cancelEdit}

@@ -1,7 +1,9 @@
 import React from 'react'
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import { RepairTicket } from '@/types/ticket'
 import { PDF_FONT_FAMILY } from '@/lib/pdfFonts'
+import { PdfTranslations } from '@/lib/pdfTranslations'
+import { Language } from '@/lib/languages'
 
 // Define styles for the PDF
 const styles = StyleSheet.create({
@@ -35,6 +37,14 @@ const styles = StyleSheet.create({
   companyInfo: {
     width: '45%',
   },
+  logoContainer: {
+    marginBottom: 10,
+  },
+  logo: {
+    maxWidth: 120,
+    maxHeight: 60,
+    objectFit: 'contain',
+  },
   companyName: {
     fontSize: 14,
     fontWeight: 'bold',
@@ -47,6 +57,14 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 20,
+  },
+  sectionRow: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    justifyContent: 'space-between',
+  },
+  sectionColumn: {
+    width: '48%',
   },
   sectionTitle: {
     fontSize: 12,
@@ -157,13 +175,6 @@ const styles = StyleSheet.create({
     marginBottom: 3,
     lineHeight: 1.4,
   },
-  statusBadge: {
-    display: 'inline',
-    padding: '2 6',
-    borderRadius: 3,
-    fontSize: 8,
-    fontWeight: 'bold',
-  },
 })
 
 interface InvoicePDFProps {
@@ -181,14 +192,18 @@ interface InvoicePDFProps {
     website?: string | null
     vatNumber?: string | null
     currency?: string | null
+    logo?: string | null
   }
+  translations: PdfTranslations
+  language: Language
 }
 
-const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store }) => {
+const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store, translations, language }) => {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A'
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
+    const locale = language === 'bg' ? 'bg-BG' : language === 'de' ? 'de-DE' : 'en-US'
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -198,7 +213,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store }) => {
   const formatCurrency = (amount?: number) => {
     if (amount === undefined || amount === null) return 'N/A'
     const currency = store.currency || 'USD'
-    return new Intl.NumberFormat('en-US', {
+    const locale = language === 'bg' ? 'bg-BG' : language === 'de' ? 'de-DE' : 'en-US'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
@@ -208,21 +224,21 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store }) => {
 
   const formatStatus = (status: string) => {
     const statusMap: Record<string, string> = {
-      pending: 'Pending',
-      in_progress: 'In Progress',
-      waiting_parts: 'Waiting for Parts',
-      completed: 'Completed',
-      cancelled: 'Cancelled',
+      pending: translations.pending,
+      in_progress: translations.inProgress,
+      waiting_parts: translations.waitingParts,
+      completed: translations.completed,
+      cancelled: translations.cancelled,
     }
     return statusMap[status] || status
   }
 
   const formatPriority = (priority: string) => {
     const priorityMap: Record<string, string> = {
-      low: 'Low',
-      medium: 'Medium',
-      high: 'High',
-      urgent: 'Urgent',
+      low: translations.low,
+      medium: translations.medium,
+      high: translations.high,
+      urgent: translations.urgent,
     }
     return priorityMap[priority] || priority
   }
@@ -254,67 +270,75 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store }) => {
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View style={styles.companyInfo}>
-              <Text style={styles.companyName}>{store.name || 'Repair Shop'}</Text>
+              {store.logo && (
+                <View style={styles.logoContainer}>
+                  <Image src={store.logo} style={styles.logo} />
+                </View>
+              )}
+              <Text style={styles.companyName}>{store.name || translations.repairShop}</Text>
               {companyAddress && <Text style={styles.infoText}>{companyAddress}</Text>}
-              {store.phone && <Text style={styles.infoText}>Phone: {store.phone}</Text>}
-              {store.email && <Text style={styles.infoText}>Email: {store.email}</Text>}
-              {store.website && <Text style={styles.infoText}>Website: {store.website}</Text>}
-              {store.vatNumber && <Text style={styles.infoText}>VAT: {store.vatNumber}</Text>}
+              {store.phone && <Text style={styles.infoText}>{translations.phone}: {store.phone}</Text>}
+              {store.email && <Text style={styles.infoText}>{translations.email}: {store.email}</Text>}
+              {store.website && <Text style={styles.infoText}>{translations.website}: {store.website}</Text>}
+              {store.vatNumber && <Text style={styles.infoText}>{translations.vat}: {store.vatNumber}</Text>}
             </View>
             <View style={styles.companyInfo}>
-              <Text style={styles.title}>REPAIR INVOICE</Text>
-              <Text style={styles.subtitle}>Ticket #: {ticket.ticketNumber}</Text>
-              <Text style={styles.subtitle}>Date: {formatDate(ticket.createdAt)}</Text>
-              <Text style={styles.subtitle}>Status: {formatStatus(ticket.status)}</Text>
+              <Text style={styles.title}>{translations.repairInvoice}</Text>
+              <Text style={styles.subtitle}>{translations.ticketNumber}: {ticket.ticketNumber}</Text>
+              <Text style={styles.subtitle}>{translations.date}: {formatDate(ticket.createdAt)}</Text>
+              <Text style={styles.subtitle}>{translations.status}: {formatStatus(ticket.status)}</Text>
             </View>
           </View>
         </View>
 
-        {/* Customer Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Customer Information</Text>
-          <View style={styles.grid}>
-            <Text style={styles.gridLabel}>Name:</Text>
-            <Text style={styles.gridValue}>{ticket.customerName}</Text>
+        {/* Customer Information and Device Information */}
+        <View style={styles.sectionRow}>
+          {/* Customer Information */}
+          <View style={styles.sectionColumn}>
+            <Text style={styles.sectionTitle}>{translations.customerInformation}</Text>
+            <View style={styles.grid}>
+              <Text style={styles.gridLabel}>{translations.name}:</Text>
+              <Text style={styles.gridValue}>{ticket.customerName}</Text>
+            </View>
+            <View style={styles.grid}>
+              <Text style={styles.gridLabel}>{translations.email}:</Text>
+              <Text style={styles.gridValue}>{ticket.customerEmail}</Text>
+            </View>
+            <View style={styles.grid}>
+              <Text style={styles.gridLabel}>{translations.phone}:</Text>
+              <Text style={styles.gridValue}>{ticket.customerPhone}</Text>
+            </View>
           </View>
-          <View style={styles.grid}>
-            <Text style={styles.gridLabel}>Email:</Text>
-            <Text style={styles.gridValue}>{ticket.customerEmail}</Text>
-          </View>
-          <View style={styles.grid}>
-            <Text style={styles.gridLabel}>Phone:</Text>
-            <Text style={styles.gridValue}>{ticket.customerPhone}</Text>
-          </View>
-        </View>
 
-        {/* Device Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Device Information</Text>
-          <View style={styles.grid}>
-            <Text style={styles.gridLabel}>Device Type:</Text>
-            <Text style={styles.gridValue}>{ticket.deviceType}</Text>
-          </View>
-          {ticket.deviceBrand && (
+          {/* Device Information */}
+          <View style={styles.sectionColumn}>
+            <Text style={styles.sectionTitle}>{translations.deviceInformation}</Text>
             <View style={styles.grid}>
-              <Text style={styles.gridLabel}>Brand:</Text>
-              <Text style={styles.gridValue}>{ticket.deviceBrand}</Text>
+              <Text style={styles.gridLabel}>{translations.deviceType}:</Text>
+              <Text style={styles.gridValue}>{ticket.deviceType}</Text>
             </View>
-          )}
-          {ticket.deviceModel && (
+            {ticket.deviceBrand && (
+              <View style={styles.grid}>
+                <Text style={styles.gridLabel}>{translations.brand}:</Text>
+                <Text style={styles.gridValue}>{ticket.deviceBrand}</Text>
+              </View>
+            )}
+            {ticket.deviceModel && (
+              <View style={styles.grid}>
+                <Text style={styles.gridLabel}>{translations.model}:</Text>
+                <Text style={styles.gridValue}>{ticket.deviceModel}</Text>
+              </View>
+            )}
             <View style={styles.grid}>
-              <Text style={styles.gridLabel}>Model:</Text>
-              <Text style={styles.gridValue}>{ticket.deviceModel}</Text>
+              <Text style={styles.gridLabel}>{translations.priority}:</Text>
+              <Text style={styles.gridValue}>{formatPriority(ticket.priority)}</Text>
             </View>
-          )}
-          <View style={styles.grid}>
-            <Text style={styles.gridLabel}>Priority:</Text>
-            <Text style={styles.gridValue}>{formatPriority(ticket.priority)}</Text>
           </View>
         </View>
 
         {/* Issue Description */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Issue Description</Text>
+          <Text style={styles.sectionTitle}>{translations.issueDescription}</Text>
           <View style={styles.descriptionBox}>
             <Text style={styles.descriptionText}>{ticket.issueDescription}</Text>
           </View>
@@ -323,13 +347,13 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store }) => {
         {/* Expenses/Parts */}
         {ticket.expenses && ticket.expenses.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Parts & Components</Text>
+            <Text style={styles.sectionTitle}>{translations.partsComponents}</Text>
             <View style={styles.expensesTable}>
               <View style={styles.tableHeader}>
-                <Text style={styles.tableCellName}>Part/Component</Text>
-                <Text style={styles.tableCellQuantity}>Qty</Text>
-                <Text style={styles.tableCellPrice}>Unit Price</Text>
-                <Text style={styles.tableCellTotal}>Total</Text>
+                <Text style={styles.tableCellName}>{translations.partComponent}</Text>
+                <Text style={styles.tableCellQuantity}>{translations.quantity}</Text>
+                <Text style={styles.tableCellPrice}>{translations.unitPrice}</Text>
+                <Text style={styles.tableCellTotal}>{translations.total}</Text>
               </View>
               {ticket.expenses.map((expense) => {
                 const lineTotal = expense.quantity * expense.price
@@ -348,28 +372,28 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store }) => {
 
         {/* Cost Summary */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cost Summary</Text>
+          <Text style={styles.sectionTitle}>{translations.costSummary}</Text>
           <View style={styles.totalsSection}>
             {ticket.expenses && ticket.expenses.length > 0 && (
               <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Parts Total:</Text>
+                <Text style={styles.totalLabel}>{translations.partsTotal}:</Text>
                 <Text style={styles.totalValue}>{formatCurrency(expensesTotal)}</Text>
               </View>
             )}
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>
-                {ticket.actualCost ? 'Total Cost:' : 'Estimated Cost:'}
+                {ticket.actualCost ? `${translations.totalCost}:` : `${translations.estimatedCost}:`}
               </Text>
               <Text style={styles.totalValue}>{formatCurrency(totalCost)}</Text>
             </View>
             {ticket.estimatedCost && ticket.actualCost && (
               <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Original Estimate:</Text>
+                <Text style={styles.totalLabel}>{translations.originalEstimate}:</Text>
                 <Text style={styles.totalValue}>{formatCurrency(ticket.estimatedCost)}</Text>
               </View>
             )}
             <View style={[styles.totalRow, styles.grandTotal]}>
-              <Text style={styles.totalLabel}>Amount Due:</Text>
+              <Text style={styles.totalLabel}>{translations.amountDue}:</Text>
               <Text style={styles.totalValue}>{formatCurrency(totalCost)}</Text>
             </View>
           </View>
@@ -377,20 +401,20 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store }) => {
 
         {/* Dates */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Important Dates</Text>
+          <Text style={styles.sectionTitle}>{translations.importantDates}</Text>
           <View style={styles.grid}>
-            <Text style={styles.gridLabel}>Date Received:</Text>
+            <Text style={styles.gridLabel}>{translations.dateReceived}:</Text>
             <Text style={styles.gridValue}>{formatDate(ticket.createdAt)}</Text>
           </View>
           {ticket.estimatedCompletionDate && (
             <View style={styles.grid}>
-              <Text style={styles.gridLabel}>Estimated Completion:</Text>
+              <Text style={styles.gridLabel}>{translations.estimatedCompletion}:</Text>
               <Text style={styles.gridValue}>{formatDate(ticket.estimatedCompletionDate)}</Text>
             </View>
           )}
           {ticket.actualCompletionDate && (
             <View style={styles.grid}>
-              <Text style={styles.gridLabel}>Completed On:</Text>
+              <Text style={styles.gridLabel}>{translations.completedOn}:</Text>
               <Text style={styles.gridValue}>{formatDate(ticket.actualCompletionDate)}</Text>
             </View>
           )}
@@ -399,7 +423,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store }) => {
         {/* Notes */}
         {ticket.notes && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Notes</Text>
+            <Text style={styles.sectionTitle}>{translations.notes}</Text>
             <View style={styles.descriptionBox}>
               <Text style={styles.descriptionText}>{ticket.notes}</Text>
             </View>
@@ -408,24 +432,21 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerTitle}>Terms & Conditions</Text>
+          <Text style={styles.footerTitle}>{translations.termsConditions}</Text>
           <Text style={styles.footerText}>
-            • All repairs are guaranteed for 90 days from completion date, unless otherwise specified.
+            {translations.terms1}
           </Text>
           <Text style={styles.footerText}>
-            • Parts replaced during repair become property of the repair shop.
+            {translations.terms2}
           </Text>
           <Text style={styles.footerText}>
-            • Payment is due upon completion of repair. Unpaid items may be subject to storage fees.
+            {translations.terms3}
           </Text>
           <Text style={styles.footerText}>
-            • Customer acknowledges receipt of device in the condition described above.
-          </Text>
-          <Text style={styles.footerText}>
-            • This invoice is valid for 30 days from date of issue.
+            {translations.terms4}
           </Text>
           <Text style={[styles.footerText, { marginTop: 10 }]}>
-            Thank you for your business!
+            {translations.thankYou}
           </Text>
         </View>
       </Page>

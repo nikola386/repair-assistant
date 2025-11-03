@@ -1,256 +1,16 @@
 {
-  "nav": {
-    "home": "Home",
-    "quickContact": "Quick Contact",
-    "contact": "Contact",
-    "dashboard": "Dashboard",
-    "tickets": "Tickets",
-    "clients": "Clients",
-    "inventory": "Inventory",
-    "reports": "Reports",
-    "settings": "Settings"
-  },
-  "auth": {
-    "login": "Login",
-    "logout": "Logout",
-    "loginTitle": "Login",
-    "register": "Sign Up",
-    "registerTitle": "Create Account",
-    "registering": "Creating account...",
-    "registrationError": "Registration failed",
-    "name": "Name",
-    "namePlaceholder": "Enter your name",
-    "confirmPassword": "Confirm Password",
-    "passwordMismatch": "Passwords do not match",
-    "passwordTooShort": "Password must be at least 6 characters long",
-    "alreadyHaveAccount": "Already have an account?",
-    "email": "Email",
-    "password": "Password",
-    "loggingIn": "Logging in...",
-    "loginError": "Invalid email or password",
-    "loading": "Loading..."
-  },
-  "hero": {
-    "title": "Expert Electronics Repair",
-    "subtitle": "Fast, reliable, and affordable repair services for all your electronic devices"
-  },
-  "quickServices": {
-    "hardware": {
-      "title": "Hardware Repair",
-      "description": "Everything for computer components, maintenance, repair and replacement."
+  "common": {
+    "actions": {
+      "create": "Create",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "next": "Next",
+      "previous": "Previous",
+      "apply": "Apply",
+      "update": "Update"
     },
-    "software": {
-      "title": "Software Services",
-      "description": "Virus removal, data recovery, maintenance and software optimization."
-    }
-  },
-  "welcome": {
-    "title": "Welcome to Repair Assistant",
-    "text": "We offer accessible and reliable computer maintenance services, specializing in operating system reinstallation, data recovery, and hardware repairs. Our goal is to provide fast and effective solutions for all your technological needs, focusing on quality and customer satisfaction. With us, you can count on professionalism and attention to detail that will restore and improve your equipment's performance."
-  },
-  "deviceTypes": {
-    "desktop": {
-      "title": "Desktop Computers",
-      "description": "Quality software and hardware services for your desktop computer."
-    },
-    "laptop": {
-      "title": "Laptops",
-      "description": "Fast software and hardware services for your laptop."
-    },
-    "dataRecovery": {
-      "title": "Data Recovery",
-      "description": "Recovery of accidentally deleted or lost files due to incidents."
-    }
-  },
-  "whyChooseUs": {
-    "title": "Why Choose Us?",
-    "fastService": {
-      "title": "Fast Service",
-      "description": "We'll fix issues in the shortest possible time."
-    },
-    "affordablePrices": {
-      "title": "Affordable Prices",
-      "description": "Our service prices are the most affordable on the market."
-    },
-    "qualifiedStaff": {
-      "title": "Qualified Staff",
-      "description": "With over 15 years of experience handling all types of IT service challenges."
-    }
-  },
-  "contact": {
-    "form": {
-      "title": "Message",
-      "name": "Your Name",
-      "email": "Your Email",
-      "subject": "Subject",
-      "message": "Your Message",
-      "send": "Send Message",
-      "sending": "Sending...",
-      "success": "Thank you for your message! We will get back to you soon.",
-      "error": "There was an error sending your message. Please try again.",
-      "required": "Please fill in all required fields."
-    },
-    "info": {
-      "title": "Contact Us",
-      "office": {
-        "title": "Office",
-        "address": "123 Repair Street\nTech City, TC 12345"
-      },
-      "phone": {
-        "title": "Phone",
-        "number": "+1 (555) 123-4567"
-      },
-      "email": {
-        "title": "Email",
-        "address": "info@repairpro.com"
-      },
-      "hours": {
-        "title": "Hours",
-        "schedule": "Mon-Fri: 9:00 AM - 6:00 PM\nSat-Sun: CLOSED"
-      }
-    }
-  },
-  "footer": {
-    "description": "We offer fast and affordable services for operating system reinstallation, data recovery, and hardware repairs. We care for your technological needs with professionalism and attention to detail.",
-    "contact": "Contact",
-    "copyright": "© 2024 Repair Assistant. All rights reserved.",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfUse": "Terms of Use",
-    "cookiePolicy": "Cookie Policy"
-  },
-  "cookies": {
-    "message": "We use cookies to enhance your experience on this website. By continuing to use the site, you agree to our use of cookies.",
-    "accept": "Accept",
-    "decline": "Decline"
-  },
-  "pages": {
-    "privacyPolicy": {
-      "title": "Privacy Policy",
-      "lastUpdated": "Last Updated",
-      "sections": {
-        "introduction": {
-          "title": "Introduction",
-          "content": "Repair Assistant is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website."
-        },
-        "dataCollection": {
-          "title": "What Information We Collect",
-          "content": "We may collect the following information: name, email address, phone number, and other information you provide to us through the contact form or communication with us."
-        },
-        "dataUsage": {
-          "title": "How We Use Information",
-          "content": "We use the collected information to: process requests and inquiries, communicate with you about our services, improve our website and services."
-        },
-        "dataProtection": {
-          "title": "Data Protection",
-          "content": "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction."
-        },
-        "dataSharing": {
-          "title": "Data Sharing",
-          "content": "We do not sell your personal information to third parties. We may share information only if required by law or with your consent."
-        },
-        "contact": {
-          "title": "Contact",
-          "content": "If you have questions regarding this Privacy Policy, please contact us."
-        }
-      }
-    },
-    "termsOfUse": {
-      "title": "Terms of Use",
-      "lastUpdated": "Last Updated",
-      "sections": {
-        "introduction": {
-          "title": "Introduction",
-          "content": "Welcome to Repair Assistant's website. By using our website, you agree to comply with the following terms of use."
-        },
-        "acceptance": {
-          "title": "Acceptance of Terms",
-          "content": "By accessing and using this website, you accept and agree to be bound by these terms of use and all applicable laws and regulations."
-        },
-        "services": {
-          "title": "Services",
-          "content": "We offer electronics repair services. Prices, specifications, and service conditions may change without prior notice."
-        },
-        "userResponsibilities": {
-          "title": "User Responsibilities",
-          "content": "You are responsible for the accuracy of information you provide to us. You must not use our website for illegal or unauthorized purposes."
-        },
-        "intellectualProperty": {
-          "title": "Intellectual Property",
-          "content": "All materials on this website, including text, graphics, logos, and images, are the property of Repair Assistant and are protected by copyright laws."
-        },
-        "limitation": {
-          "title": "Limitation of Liability",
-          "content": "Repair Assistant is not liable for any direct, indirect, incidental, or consequential damages arising from the use of our website."
-        }
-      }
-    },
-    "cookiePolicy": {
-      "title": "Cookie Policy",
-      "lastUpdated": "Last Updated",
-      "sections": {
-        "introduction": {
-          "title": "Introduction",
-          "content": "This website uses cookies to enhance your experience. This policy explains what cookies are, how we use them, and how you can control their use."
-        },
-        "whatAreCookies": {
-          "title": "What Are Cookies",
-          "content": "Cookies are small text files that are stored on your device when you visit a website. They allow the website to remember your actions and preferences for a certain period of time."
-        },
-        "howWeUseCookies": {
-          "title": "How We Use Cookies",
-          "content": "We use cookies to: remember your language preferences, analyze website usage, improve website functionality and performance."
-        },
-        "cookieTypes": {
-          "title": "Types of Cookies",
-          "content": "We primarily use functional cookies that are necessary for the basic functioning of the website, including remembering your language preferences."
-        },
-        "managingCookies": {
-          "title": "Managing Cookies",
-          "content": "You can control and manage cookies through your browser settings. Please note that disabling cookies may affect website functionality."
-        },
-        "contact": {
-          "title": "Contact",
-          "content": "If you have questions regarding the use of cookies on our website, please contact us."
-        }
-      }
-    }
-  },
-  "tickets": {
-    "title": "Repair Tickets",
-    "createNew": "Create New Ticket",
-    "backToList": "Back to List",
-    "delete": "Delete",
-    "confirmDelete": "Are you sure you want to delete this ticket?",
-    "deleteError": "Error deleting ticket",
-    "updateError": "Error updating ticket",
-    "noTicketsFound": "No tickets found",
-    "searchPlaceholder": "Search tickets...",
-    "filterByStatus": "Filter by Status",
-    "filterByPriority": "Filter by Priority",
-    "allStatuses": "All Statuses",
-    "allPriorities": "All Priorities",
-    "showingResults": "Showing {count} of {total} tickets",
-    "showing": "Showing",
-    "to": "to",
-    "of": "of",
-    "previous": "Previous",
-    "next": "Next",
-    "noTickets": "No tickets found",
-    "customerInfo": "Customer Information",
-    "deviceInfo": "Device Information",
-    "issueDescription": "Issue Description",
-    "financialInfo": "Financial Information",
-    "dates": "Dates",
-    "updateStatus": "Update Status",
-    "createdAt": "Created",
-    "updatedAt": "Updated",
-    "estimatedCompletionDate": "Estimated Completion Date",
-    "actualCompletionDate": "Actual Completion Date",
-    "estimatedCost": "Estimated Cost",
-    "actualCost": "Actual Cost",
-    "qrCode": "Ticket QR Code",
-    "qrCodeDescription": "Scan this QR code to view ticket details",
-    "printQr": "Print QR Code",
     "status": {
       "pending": "Pending",
       "in_progress": "In Progress",
@@ -264,6 +24,93 @@
       "high": "High",
       "urgent": "Urgent"
     },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "status": "Status",
+      "priority": "Priority",
+      "quantity": "Quantity",
+      "price": "Price",
+      "total": "Total",
+      "category": "Category",
+      "location": "Location",
+      "sku": "SKU"
+    },
+    "messages": {
+      "loading": "Loading...",
+      "saving": "Saving...",
+      "deleting": "Deleting...",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "searching": "Searching...",
+      "required": "Please fill in all required fields",
+      "invalidEmail": "Please enter a valid email address",
+      "invalidNumbers": "Quantity and price must be valid positive numbers",
+      "selectBothDates": "Please select both start and end dates",
+      "startBeforeEnd": "Start date must be before end date",
+      "confirmDelete": "Are you sure you want to delete this item?",
+      "noItemsFound": "No items found"
+    },
+    "labels": {
+      "actions": "Actions"
+    },
+    "info": {
+      "customerInformation": "Customer Information",
+      "deviceInformation": "Device Information",
+      "financialInformation": "Financial Information",
+      "importantDates": "Important Dates"
+    },
+    "dates": {
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "selectStartDate": "Select start date",
+      "selectEndDate": "Select end date",
+      "selectDate": "Select a date"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "tickets": "Tickets",
+    "clients": "Clients",
+    "inventory": "Inventory",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Sign Up",
+    "loading": "Loading..."
+  },
+  "cookies": {
+    "message": "We use cookies to enhance your experience on this website. By continuing to use the site, you agree to our use of cookies.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "tickets": {
+    "title": "Repair Tickets",
+    "createNew": "Create New Ticket",
+    "backToList": "Back to List",
+    "deleteError": "Error deleting ticket",
+    "updateError": "Error updating ticket",
+    "noTicketsFound": "No tickets found",
+    "searchPlaceholder": "Search tickets...",
+    "filterByStatus": "Filter by Status",
+    "filterByPriority": "Filter by Priority",
+    "allStatuses": "All Statuses",
+    "allPriorities": "All Priorities",
+    "showingResults": "Showing {count} of {total} tickets",
+    "updateStatus": "Update Status",
+    "estimatedCompletionDate": "Estimated Completion Date",
+    "actualCompletionDate": "Actual Completion Date",
+    "estimatedCost": "Estimated Cost",
+    "actualCost": "Actual Cost",
+    "printQr": "Print QR Code",
     "form": {
       "title": "Create Repair Ticket",
       "customerName": "Customer Name",
@@ -274,182 +121,118 @@
       "deviceBrand": "Device Brand",
       "deviceModel": "Device Model",
       "issueDescription": "Issue Description",
-      "priority": "Priority",
       "estimatedCost": "Estimated Cost ($)",
       "estimatedCompletionDate": "Estimated Completion Date",
       "notes": "Internal Notes",
       "submit": "Create Ticket",
-      "submitting": "Creating...",
       "cancel": "Cancel",
       "required": "Please fill in all required fields",
-      "error": "Error creating ticket"
+      "error": "Error creating ticket",
+      "searchCustomersPlaceholder": "Start typing to search customers...",
+      "selectDate": "Select a date",
+      "uploadFiles": "Upload Files",
+      "clickToUpload": "Click to upload",
+      "orDragAndDrop": "or drag and drop",
+      "fileTypesHint": "PNG, JPG, GIF, PDF up to 2MB",
+      "uploadingImages": "Uploading images...",
+      "filesWillUploadAfter": "{count} file(s) will be uploaded after ticket creation",
+      "successfullyUploaded": "Successfully uploaded {count} file(s)"
+    },
+    "detail": {
+      "loadingTicket": "Loading ticket...",
+      "ticketNotFound": "Ticket not found",
+      "confirmDeleteImage": "Are you sure you want to delete this image?",
+      "deleteImageError": "Failed to delete image",
+      "downloadInvoice": "Download Invoice",
+      "files": "Files",
+      "noFilesUploaded": "No files uploaded yet",
+      "clickToSelectImages": "Click to select images",
+      "addExpense": "+ Add Expense"
+    },
+    "expenses": {
+      "title": "Expenses",
+      "deleteError": "Failed to delete expense",
+      "updateError": "Failed to update expense",
+      "addError": "Failed to add expense",
+      "noExpenses": "No expenses added yet",
+      "totalExpenses": "Total Expenses",
+      "expenseName": "Expense name",
+      "searchInventoryPlaceholder": "Search inventory items (optional)..."
+    },
+    "list": {
+      "loadingTickets": "Loading tickets..."
     }
-  },
-  "profile": {
-    "menu": "Profile menu",
-    "myProfile": "My Profile",
-    "changePassword": "Change Password",
-    "title": "My Profile",
-    "name": "Name",
-    "uploadImage": "Upload Image",
-    "uploading": "Uploading...",
-    "deleteImage": "Delete Image",
-    "deleteImageConfirm": "Are you sure you want to delete your profile image?",
-    "save": "Save Changes",
-    "saving": "Saving...",
-    "backToProfile": "Back to Profile",
-    "currentPassword": "Current Password",
-    "newPassword": "New Password",
-    "confirmPassword": "Confirm New Password",
-    "passwordMismatch": "New passwords do not match",
-    "passwordTooShort": "Password must be at least 6 characters long",
-    "fetchError": "Failed to load profile",
-    "updateSuccess": "Profile updated successfully",
-    "updateError": "Failed to update profile",
-    "passwordChangeSuccess": "Password changed successfully",
-    "passwordChangeError": "Failed to change password",
-    "changing": "Changing Password...",
-    "imageUploadSuccess": "Profile image uploaded successfully",
-    "imageUploadError": "Failed to upload image",
-    "imageDeleteSuccess": "Profile image deleted successfully",
-    "imageDeleteError": "Failed to delete image",
-    "country": "Country",
-    "countryPlaceholder": "Search country...",
-    "vatNumber": "VAT Number",
-    "vatNumberPlaceholder": "Enter VAT number",
-    "vatRequired": "VAT number is required for the selected country"
-  },
-  "clients": {
-    "title": "Clients",
-    "description": "Client management coming soon...",
-    "searchPlaceholder": "Search clients...",
-    "noClientsFound": "No clients found",
-    "name": "Name",
-    "email": "Email",
-    "phone": "Phone",
-    "tickets": "Tickets",
-    "totalTickets": "Total Tickets",
-    "repairs": "Repairs",
-    "noRepairs": "No repairs found for this client"
   },
   "inventory": {
-    "title": "Inventory",
-    "addItem": "Add Item",
-    "searchPlaceholder": "Search items...",
-    "lowStockOnly": "Low Stock Only",
-    "noItems": "No inventory items found",
-    "name": "Name",
-    "sku": "SKU",
-    "category": "Category",
-    "location": "Location",
-    "quantity": "Quantity",
     "minQuantity": "Min Quantity",
     "unitPrice": "Unit Price",
-    "costPrice": "Cost Price",
-    "status": "Status",
     "lowStock": "Low Stock",
     "ok": "OK",
-    "actions": "Actions",
-    "edit": "Edit",
-    "adjust": "Adjust",
-    "delete": "Delete",
-    "createItem": "Create Item",
-    "creating": "Creating...",
-    "updateItem": "Update Item",
-    "updating": "Updating...",
-    "deleteConfirm": "Are you sure you want to delete this inventory item?",
-    "quantityAdjust": "Quantity Adjustment",
-    "quantityChange": "Quantity Change"
-  },
-  "reports": {
-    "title": "Reports",
-    "description": "Reports coming soon..."
-  },
-  "dashboard": {
-    "title": "Dashboard",
-    "selectPeriod": "Select Period",
-    "retry": "Retry",
-    "periods": {
-      "last7Days": "Last 7 Days",
-      "last30Days": "Last 30 Days",
-      "last180Days": "Last 180 Days",
-      "last360Days": "Last 360 Days"
+    "form": {
+      "basicInformation": "Basic Information",
+      "organization": "Organization",
+      "quantities": "Quantities",
+      "pricing": "Pricing",
+      "nameRequired": "Name is required",
+      "quantityNonNegative": "Current quantity must be non-negative",
+      "minQuantityNonNegative": "Min quantity must be non-negative",
+      "unitPriceNonNegative": "Unit price must be non-negative",
+      "costPriceNonNegative": "Cost price must be non-negative",
+      "createError": "Failed to create inventory item",
+      "updateError": "Failed to update inventory item",
+      "currentQuantity": "Current Quantity",
+      "minimumQuantity": "Minimum Quantity (Low Stock Threshold)",
+      "minimumQuantityHint": "Item will be marked as low stock when quantity falls at or below this value",
+      "unitPriceLabel": "Unit Price (Selling Price)",
+      "costPriceLabel": "Cost Price (Purchase Price)",
+      "optional": "Optional",
+      "optionalDescription": "Optional description",
+      "categoryPlaceholder": "e.g., Screens, Batteries, Cables",
+      "locationPlaceholder": "e.g., Shelf A-1, Warehouse 2"
     },
-    "stats": {
-      "totalRepairs": "Total Repairs",
-      "inProgress": "In Progress",
-      "waiting": "Waiting",
-      "income": "Income",
-      "expenses": "Expenses",
-      "grossProfit": "Gross Profit",
-      "grossProfitPercentage": "Gross Profit %"
+    "table": {
+      "noItems": "No inventory items found",
+      "editItem": "Edit Inventory Item",
+      "quantityChangePlaceholder": "Quantity change",
+      "updateSuccess": "Inventory item updated successfully",
+      "updateError": "Failed to update item",
+      "deleteSuccess": "Inventory item deleted successfully",
+      "deleteError": "Failed to delete item",
+      "quantityChangeError": "Please enter a valid non-zero quantity change",
+      "adjustSuccess": "Quantity adjusted successfully",
+      "adjustError": "Failed to adjust quantity"
+    },
+    "page": {
+      "allCategories": "All Categories",
+      "allLocations": "All Locations",
+      "createSuccess": "Inventory item created successfully",
+      "createError": "Failed to create item",
+      "fetchError": "Failed to fetch inventory items"
     }
   },
-  "settings": {
-    "title": "Settings",
-    "description": "Settings coming soon...",
-    "profile": "Profile",
-    "profileDescription": "Update your account information and profile picture.",
-    "changePassword": "Change Password",
-    "security": "Security",
-    "passwordDescription": "Update your password to keep your account secure.",
-    "appearance": "Appearance",
-    "appearanceDescription": "Customize the primary and secondary colors of your application.",
-    "primaryColor": "Primary Color",
-    "secondaryColor": "Secondary Color",
-    "language": "Language",
-    "languageDescription": "Select your preferred language",
-    "resetColors": "Reset to Default",
-    "colorsUpdateSuccess": "Colors updated successfully",
-    "colorsUpdateError": "Failed to update colors",
-    "appearanceUpdateSuccess": "Appearance updated successfully",
-    "appearanceUpdateError": "Failed to update appearance",
-    "invalidColorFormat": "Invalid color format. Please use hex format (e.g., #FFD700)"
-  },
-  "onboarding": {
-    "title": "Welcome! Let's Set Up Your Store",
-    "description": "Configure your store information to get started.",
-    "step1Title": "Basic Information",
-    "step1Description": "Store name and address",
-    "step2Title": "Store Details",
-    "step2Description": "Contact and business info",
-    "step3Title": "Appearance",
-    "step3Description": "Logo and colors",
-    "storeName": "Store Name",
-    "storeNamePlaceholder": "Enter your store name",
-    "step1StoreNameRequired": "Store name is required",
-    "street": "Street Address",
-    "streetPlaceholder": "Street address",
-    "city": "City",
-    "cityPlaceholder": "City",
-    "state": "State/Province",
-    "statePlaceholder": "State/Province",
-    "postalCode": "Postal Code",
-    "postalCodePlaceholder": "Postal Code",
-    "country": "Country",
-    "countryPlaceholder": "Country (e.g., US, BG, DE)",
-    "address": "Store Address",
-    "addressPlaceholder": "Enter your store address",
-    "website": "Website",
-    "websitePlaceholder": "https://example.com",
-    "phone": "Phone",
-    "phonePlaceholder": "Enter phone number",
-    "currency": "Currency",
-    "vatNumber": "VAT Number",
-    "vatNumberPlaceholder": "VAT Number (optional)",
-    "vatNumberPlaceholderNonEU": "VAT Number (only for EU countries)",
-    "vatNumberPlaceholderCountry": "Enter country in step 1 first",
-    "vatNumberNonEU": "VAT numbers are only required for EU countries",
-    "invalidVatNumber": "Invalid VAT number",
-    "logo": "Logo",
-    "language": "Language",
-    "primaryColor": "Primary Color",
-    "secondaryColor": "Secondary Color",
-    "next": "Next",
-    "back": "Back",
-    "complete": "Complete Setup",
-    "completing": "Completing setup...",
-    "error": "Failed to complete onboarding"
+  "reports": {
+    "businessReport": {
+      "title": "Monthly/Period Business Report",
+      "description": "Comprehensive business performance report with statistics, revenue breakdown, and customer analytics",
+      "generateButton": "Generate Business Report",
+      "downloadSuccess": "Business report downloaded successfully",
+      "downloadError": "Failed to generate business report"
+    },
+    "inventoryReport": {
+      "title": "Inventory Report",
+      "description": "View inventory value, turnover metrics, low stock items, and category breakdown",
+      "generateButton": "Generate Inventory Report",
+      "downloadSuccess": "Inventory report downloaded successfully",
+      "downloadError": "Failed to generate inventory report"
+    },
+    "dateRange": {
+      "selectDateRange": "Select Date Range",
+      "selectDateRangeForTurnover": "Select Date Range (for turnover analysis)",
+      "quickSelect": "Quick Select:",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "last90Days": "Last 90 Days",
+      "lastYear": "Last Year"
+    }
   }
 }
-

@@ -9,6 +9,9 @@ import React from 'react'
 import { renderToBuffer } from '@react-pdf/renderer'
 import InventoryReportPDF from '@/components/reports/InventoryReportPDF'
 import { ensurePdfFontsRegistered } from '@/lib/pdfFonts'
+import { settingsStorage } from '@/lib/settingsStorage'
+import { getPdfTranslations } from '@/lib/pdfTranslations'
+import { isValidLanguage } from '@/lib/languages'
 
 // Mark route as dynamic
 export const dynamic = 'force-dynamic'
@@ -49,6 +52,7 @@ export async function GET(request: NextRequest) {
         website: true,
         vatNumber: true,
         currency: true,
+        logo: true,
       },
     })
 
@@ -270,12 +274,17 @@ export async function GET(request: NextRequest) {
       })),
     }
 
+    // Get language from settings
+    const settings = await settingsStorage.findByStoreId(storeId)
+    const language = (settings?.language && isValidLanguage(settings.language)) ? settings.language : 'en'
+    const translations = getPdfTranslations(language)
+
     // Ensure fonts are registered before rendering
     await ensurePdfFontsRegistered()
 
     // Render PDF
     const pdfBuffer = await renderToBuffer(
-      React.createElement(InventoryReportPDF, { store, reportData }) as React.ReactElement
+      React.createElement(InventoryReportPDF, { store, reportData, translations, language }) as React.ReactElement
     )
 
     // Convert Buffer to Uint8Array for NextResponse

@@ -13,6 +13,7 @@ import {
 import {
   generateUniqueFileName,
   ALLOWED_FILE_EXTENSIONS,
+  compressAndConvertToJpg,
 } from '@/lib/fileUtils'
 
 export async function POST(request: NextRequest) {
@@ -77,10 +78,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate unique filename using secure random
+    // Compress and convert image to JPG if it's an image (skip PDFs)
+    const processedFile = await compressAndConvertToJpg(file)
+
+    // Generate unique filename using secure random (use processed file name for correct extension)
     let fileName: string
     try {
-      fileName = generateUniqueFileName('tickets', ticketId, file.name, ALLOWED_FILE_EXTENSIONS)
+      fileName = generateUniqueFileName('tickets', ticketId, processedFile.name, ALLOWED_FILE_EXTENSIONS, storeId)
     } catch (error) {
       return NextResponse.json(
         { error: error instanceof Error ? error.message : 'Invalid file extension' },
@@ -89,18 +93,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload file to Vercel Blob
-    const blob = await put(fileName, file, {
+    const blob = await put(fileName, processedFile, {
       access: 'public',
-      contentType: file.type,
+      contentType: processedFile.type,
     })
 
     // Save image record to database (store the blob URL)
+    // Use original filename for user reference, but store processed file info
     const image = await ticketStorage.createImage(
       ticketId,
-      file.name,
+      file.name, // Keep original filename for user reference
       blob.url,
-      file.size,
-      file.type
+      processedFile.size,
+      processedFile.type
     )
 
     return NextResponse.json(

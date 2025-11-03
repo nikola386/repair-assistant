@@ -6,6 +6,7 @@ import TicketDetail from '@/components/tickets/TicketDetail'
 import Navigation from '@/components/layout/Navigation'
 import Spinner from '@/components/ui/Spinner'
 import { RepairTicket } from '@/types/ticket'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface PageProps {
   params: {
@@ -14,6 +15,7 @@ interface PageProps {
 }
 
 export default function TicketDetailPage({ params }: PageProps) {
+  const { t } = useLanguage()
   const router = useRouter()
   const [ticket, setTicket] = useState<RepairTicket | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -50,7 +52,7 @@ export default function TicketDetailPage({ params }: PageProps) {
         <div className="container">
           <div className="spinner-container spinner-container--inline">
             <Spinner size="large" />
-            <p>Loading ticket...</p>
+            <p>{t.tickets.detail.loadingTicket}</p>
           </div>
         </div>
       </>
@@ -62,7 +64,7 @@ export default function TicketDetailPage({ params }: PageProps) {
       <>
         <Navigation />
         <div className="container">
-          <div style={{ padding: '2rem', textAlign: 'center' }}>Ticket not found</div>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>{t.tickets.detail.ticketNotFound}</div>
         </div>
       </>
     )

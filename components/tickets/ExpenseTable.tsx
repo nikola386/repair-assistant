@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Expense } from '../../types/ticket'
 import { InventoryItem } from '../../types/inventory'
 import { showAlert } from '../../lib/alerts'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface ExpenseTableProps {
   ticketId: string
@@ -16,6 +17,7 @@ interface ExpenseTableProps {
 }
 
 export default function ExpenseTable({ ticketId, initialExpenses = [], onExpensesChange, editable = true, showHeader = true, triggerAdd = false, onAddTriggered }: ExpenseTableProps) {
+  const { t } = useLanguage()
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses)
   const [isAdding, setIsAdding] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -161,7 +163,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
 
   const handleAddExpense = async () => {
     if (!newExpense.name || !newExpense.quantity || !newExpense.price) {
-      showAlert.error('Please fill in all fields')
+      showAlert.error(t.common.messages.required)
       return
     }
 
@@ -169,7 +171,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
     const price = parseFloat(newExpense.price)
 
     if (isNaN(quantity) || quantity < 0 || isNaN(price) || price < 0) {
-      showAlert.error('Quantity and price must be valid positive numbers')
+      showAlert.error(t.common.messages.invalidNumbers)
       return
     }
 
@@ -177,7 +179,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
     if (newExpense.inventoryItemId) {
       const selectedItem = inventoryItems.find(item => item.id === newExpense.inventoryItemId)
       if (selectedItem && selectedItem.currentQuantity < quantity) {
-        showAlert.error(`Insufficient inventory. Available: ${selectedItem.currentQuantity}, Required: ${quantity}`)
+        showAlert.error(t.tickets.expenses.insufficientInventory.replace('{available}', selectedItem.currentQuantity.toString()).replace('{required}', quantity.toString()))
         return
       }
     }
@@ -210,11 +212,11 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
         setIsAdding(false)
       } else {
         const error = await response.json()
-        showAlert.error(error.error || 'Failed to add expense')
+        showAlert.error(error.error || t.tickets.expenses.addError)
       }
     } catch (error) {
       console.error('Error adding expense:', error)
-      showAlert.error('Failed to add expense')
+      showAlert.error(t.tickets.expenses.addError)
     } finally {
       setIsLoading(false)
     }
@@ -231,7 +233,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
 
   const handleUpdateExpense = async (expenseId: string) => {
     if (!editingExpense.name || !editingExpense.quantity || !editingExpense.price) {
-      showAlert.error('Please fill in all fields')
+      showAlert.error(t.common.messages.required)
       return
     }
 
@@ -239,7 +241,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
     const price = parseFloat(editingExpense.price)
 
     if (isNaN(quantity) || quantity < 0 || isNaN(price) || price < 0) {
-      showAlert.error('Quantity and price must be valid positive numbers')
+      showAlert.error(t.common.messages.invalidNumbers)
       return
     }
 
@@ -261,18 +263,18 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
         setEditingExpense({ name: '', quantity: '', price: '' })
       } else {
         const error = await response.json()
-        showAlert.error(error.error || 'Failed to update expense')
+        showAlert.error(error.error || t.tickets.expenses.updateError)
       }
     } catch (error) {
       console.error('Error updating expense:', error)
-      showAlert.error('Failed to update expense')
+      showAlert.error(t.tickets.expenses.updateError)
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleDeleteExpense = async (expenseId: string) => {
-    if (!confirm('Are you sure you want to delete this expense?')) {
+    if (!confirm(t.common.messages.confirmDelete)) {
       return
     }
 
@@ -285,11 +287,11 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
       if (response.ok) {
         await fetchExpenses()
       } else {
-        showAlert.error('Failed to delete expense')
+        showAlert.error(t.tickets.expenses.deleteError)
       }
     } catch (error) {
       console.error('Error deleting expense:', error)
-      showAlert.error('Failed to delete expense')
+      showAlert.error(t.tickets.expenses.deleteError)
     } finally {
       setIsLoading(false)
     }
@@ -316,7 +318,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
     <div className="expense-table">
       {showHeader && (
         <div className="expense-table__header">
-          <h3>Expenses</h3>
+          <h3>{t.tickets.expenses.title}</h3>
           {editable && (
             <button
               type="button"
@@ -324,7 +326,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
               onClick={() => setIsAdding(true)}
               disabled={isAdding || isLoading}
             >
-              Add Expense
+              {t.tickets.expenses.addExpense}
             </button>
           )}
         </div>
@@ -337,7 +339,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
               <input
                 ref={inventorySearchRef}
                 type="text"
-                placeholder="Search inventory items (optional)..."
+                placeholder={t.tickets.expenses.searchInventoryPlaceholder}
                 value={inventorySearchQuery}
                 onChange={(e) => setInventorySearchQuery(e.target.value)}
                 onFocus={() => {
@@ -410,21 +412,21 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                   color: '#666',
                   zIndex: 1000,
                 }}>
-                  No items found
+                      {t.common.messages.noItemsFound}
                 </div>
               )}
             </div>
             <div className="expense-table__form-row">
               <input
                 type="text"
-                placeholder="Expense name"
+                placeholder={t.tickets.expenses.expenseName}
                 value={newExpense.name}
                 onChange={(e) => setNewExpense({ ...newExpense, name: e.target.value })}
                 className="expense-table__input"
               />
               <input
                 type="number"
-                placeholder="Quantity"
+                placeholder={t.common.fields.quantity}
                 min="0"
                 step="1"
                 value={newExpense.quantity}
@@ -433,7 +435,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
               />
               <input
                 type="number"
-                placeholder="Price"
+                placeholder={t.common.fields.price}
                 min="0"
                 step="0.01"
                 value={newExpense.price}
@@ -447,7 +449,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                   onClick={handleAddExpense}
                   disabled={isLoading || isLoadingInventory}
                 >
-                  Save
+                  {t.common.actions.save}
                 </button>
                 <button
                   type="button"
@@ -455,7 +457,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                   onClick={cancelAdd}
                   disabled={isLoading}
                 >
-                  Cancel
+                  {t.common.actions.cancel}
                 </button>
               </div>
             </div>
@@ -463,16 +465,16 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
         )}
 
         {expenses.length === 0 && !isAdding ? (
-          <p className="expense-table__empty">No expenses added yet</p>
+          <p className="expense-table__empty">{t.tickets.expenses.noExpenses}</p>
         ) : (
             <table className="expense-table__table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Total</th>
-                  {editable && <th>Actions</th>}
+                  <th>{t.common.fields.name}</th>
+                  <th>{t.common.fields.quantity}</th>
+                  <th>{t.common.fields.price}</th>
+                  <th>{t.common.fields.total}</th>
+                  {editable && <th>{t.common.labels.actions}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -517,7 +519,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                               onClick={() => handleUpdateExpense(expense.id)}
                               disabled={isLoading}
                             >
-                              Save
+                              {t.common.actions.save}
                             </button>
                             <button
                               type="button"
@@ -525,7 +527,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                               onClick={cancelEdit}
                               disabled={isLoading}
                             >
-                              Cancel
+                              {t.common.actions.cancel}
                             </button>
                           </div>
                         </td>
@@ -542,18 +544,18 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                               <button
                                 type="button"
                                 className="btn btn-secondary btn-xs"
-                                onClick={() => handleEditExpense(expense)}
-                                disabled={isLoading || editingId !== null}
-                              >
-                                Edit
-                              </button>
+                              onClick={() => handleEditExpense(expense)}
+                              disabled={isLoading || editingId !== null}
+                            >
+                              {t.common.actions.edit}
+                            </button>
                               <button
                                 type="button"
                                 className="btn btn-danger btn-xs"
                                 onClick={() => handleDeleteExpense(expense.id)}
                                 disabled={isLoading || editingId !== null}
                               >
-                                Delete
+                                {t.common.actions.delete}
                               </button>
                             </div>
                           </td>
@@ -565,7 +567,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                 {expenses.length > 0 && (
                   <tr className="expense-table__table__total-row">
                     <td colSpan={editable ? 4 : 3} className="expense-table__table__total-label">
-                      <strong>Total Expenses</strong>
+                      <strong>{t.tickets.expenses.totalExpenses}</strong>
                     </td>
                     <td className="expense-table__table__total-amount">
                       <strong>${totalExpenses.toFixed(2)}</strong>

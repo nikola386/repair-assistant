@@ -138,7 +138,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
     
     if (!formData.customerName || !formData.customerEmail || !formData.customerPhone || 
         !formData.deviceType || !formData.issueDescription) {
-      showAlert.error(t.tickets.form.required)
+      showAlert.error(t.common.messages.required)
       return
     }
 
@@ -325,12 +325,12 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
                 setShowCustomerDropdown(true)
               }
             }}
-            placeholder="Start typing to search customers..."
+            placeholder={t.tickets.form.searchCustomersPlaceholder}
             required
           />
           {isSearchingCustomers && (
             <div style={{ position: 'absolute', right: '10px', top: '42px', fontSize: '12px', color: '#666' }}>
-              Searching...
+              {t.common.messages.searching}
             </div>
           )}
         </div>
@@ -348,7 +348,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
                 setShowCustomerDropdown(true)
               }
             }}
-            placeholder="Start typing to search customers..."
+            placeholder={t.tickets.form.searchCustomersPlaceholder}
             required
           />
           {showCustomerDropdown && customerSearchResults.length > 0 && (
@@ -410,17 +410,17 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
           />
         </div>
         <div className="form-group">
-          <label htmlFor="priority">{t.tickets.form.priority}</label>
+          <label htmlFor="priority">{t.common.fields.priority}</label>
           <select
             id="priority"
             name="priority"
             value={formData.priority}
             onChange={handleInputChange}
           >
-            <option value="low">{t.tickets.priority.low}</option>
-            <option value="medium">{t.tickets.priority.medium}</option>
-            <option value="high">{t.tickets.priority.high}</option>
-            <option value="urgent">{t.tickets.priority.urgent}</option>
+            <option value="low">{t.common.priority.low}</option>
+            <option value="medium">{t.common.priority.medium}</option>
+            <option value="high">{t.common.priority.high}</option>
+            <option value="urgent">{t.common.priority.urgent}</option>
           </select>
         </div>
       </div>
@@ -487,7 +487,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
             }))
           }}
           dateFormat="yyyy-MM-dd"
-          placeholderText="Select a date"
+          placeholderText={t.common.dates.selectDate}
           className="date-picker-input"
           wrapperClassName="date-picker-wrapper"
         />
@@ -517,7 +517,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
       </div>
 
       <div className="form-group">
-        <label>Upload Files</label>
+        <label>{t.tickets.form.uploadFiles}</label>
         <div
           className={`image-upload-area ${isDragging ? 'drag-over' : ''} ${uploadingImages ? 'uploading' : ''} ${isSubmitting ? 'disabled' : ''}`}
           onDragOver={handleDragOver}
@@ -543,11 +543,11 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
             </svg>
             <span className="upload-text">
               {uploadingImages ? (
-                <>Uploading images...</>
+                <>{t.tickets.form.uploadingImages}</>
               ) : (
                 <>
-                  <strong>Click to upload</strong> or drag and drop
-                  <span className="upload-hint">PNG, JPG, GIF, PDF up to 2MB</span>
+                  <strong>{t.tickets.form.clickToUpload}</strong> {t.tickets.form.orDragAndDrop}
+                  <span className="upload-hint">{t.tickets.form.fileTypesHint}</span>
                 </>
               )}
             </span>
@@ -601,7 +601,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
                   ))}
                 </div>
                 <p className="image-preview-note">
-                  {pendingFiles.length} file(s) will be uploaded after ticket creation
+                  {t.tickets.form.filesWillUploadAfter.replace('{count}', pendingFiles.length.toString())}
                 </p>
               </>
             )}
@@ -610,7 +610,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                <span>Successfully uploaded {uploadedImages.length} file(s)</span>
+                <span>{t.tickets.form.successfullyUploaded.replace('{count}', uploadedImages.length.toString())}</span>
               </div>
             )}
           </div>
@@ -630,11 +630,11 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
       <div className="form-actions">
         {onCancel && (
           <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>
-            {t.tickets.form.cancel}
+            {t.common.actions.cancel}
           </button>
         )}
         <button type="submit" className="btn btn-primary btn-sm" disabled={isSubmitting}>
-          {isSubmitting ? t.tickets.form.submitting : t.tickets.form.submit}
+          {isSubmitting ? t.common.messages.creating : t.common.actions.create}
         </button>
       </div>
     </form>

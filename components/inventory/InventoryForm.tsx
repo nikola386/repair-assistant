@@ -3,6 +3,7 @@
 import { useState, FormEvent, useEffect } from 'react'
 import { CreateInventoryItemInput, UpdateInventoryItemInput } from '../../types/inventory'
 import { showAlert } from '../../lib/alerts'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface InventoryFormProps {
   onSubmit: (data: CreateInventoryItemInput | UpdateInventoryItemInput) => Promise<void>
@@ -12,6 +13,7 @@ interface InventoryFormProps {
 }
 
 export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit = false }: InventoryFormProps) {
+  const { t } = useLanguage()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<CreateInventoryItemInput>({
     name: initialData?.name || '',
@@ -46,27 +48,27 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
     e.preventDefault()
 
     if (!formData.name || !formData.name.trim()) {
-      showAlert.error('Name is required')
+      showAlert.error(t.inventory.form.nameRequired)
       return
     }
 
     if (formData.currentQuantity !== undefined && formData.currentQuantity < 0) {
-      showAlert.error('Current quantity must be non-negative')
+      showAlert.error(t.inventory.form.quantityNonNegative)
       return
     }
 
     if (formData.minQuantity !== undefined && formData.minQuantity < 0) {
-      showAlert.error('Min quantity must be non-negative')
+      showAlert.error(t.inventory.form.minQuantityNonNegative)
       return
     }
 
     if (formData.unitPrice !== undefined && formData.unitPrice < 0) {
-      showAlert.error('Unit price must be non-negative')
+      showAlert.error(t.inventory.form.unitPriceNonNegative)
       return
     }
 
     if (formData.costPrice !== undefined && formData.costPrice < 0) {
-      showAlert.error('Cost price must be non-negative')
+      showAlert.error(t.inventory.form.costPriceNonNegative)
       return
     }
 
@@ -89,7 +91,7 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
       }
     } catch (error) {
       console.error('Error submitting inventory form:', error)
-      showAlert.error(isEdit ? 'Failed to update inventory item' : 'Failed to create inventory item')
+      showAlert.error(isEdit ? t.inventory.form.updateError : t.inventory.form.createError)
     } finally {
       setIsSubmitting(false)
     }
@@ -98,11 +100,11 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
   return (
     <form onSubmit={handleSubmit} className="inventory-form">
       <div className="inventory-form__section">
-        <h3>Basic Information</h3>
+        <h3>{t.inventory.form.basicInformation}</h3>
         
         <div className="inventory-form__field">
           <label htmlFor="name" className="inventory-form__label">
-            Name <span className="required">*</span>
+            {t.common.fields.name} <span className="required">*</span>
           </label>
           <input
             type="text"
@@ -116,7 +118,7 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
 
         <div className="inventory-form__field">
           <label htmlFor="sku" className="inventory-form__label">
-            SKU
+            {t.common.fields.sku}
           </label>
           <input
             type="text"
@@ -124,13 +126,13 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
             value={formData.sku}
             onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
             className="inventory-form__input"
-            placeholder="Optional"
+            placeholder={t.inventory.form.optional}
           />
         </div>
 
         <div className="inventory-form__field">
           <label htmlFor="description" className="inventory-form__label">
-            Description
+            {t.inventory.form.description}
           </label>
           <textarea
             id="description"
@@ -138,17 +140,17 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className="inventory-form__textarea"
             rows={3}
-            placeholder="Optional description"
+            placeholder={t.inventory.form.optionalDescription}
           />
         </div>
       </div>
 
       <div className="inventory-form__section">
-        <h3>Organization</h3>
+        <h3>{t.inventory.form.organization}</h3>
         
         <div className="inventory-form__field">
           <label htmlFor="category" className="inventory-form__label">
-            Category
+            {t.common.fields.category}
           </label>
           <input
             type="text"
@@ -156,13 +158,13 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             className="inventory-form__input"
-            placeholder="e.g., Screens, Batteries, Cables"
+            placeholder={t.inventory.form.categoryPlaceholder}
           />
         </div>
 
         <div className="inventory-form__field">
           <label htmlFor="location" className="inventory-form__label">
-            Location
+            {t.common.fields.location}
           </label>
           <input
             type="text"
@@ -170,17 +172,17 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
             value={formData.location}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             className="inventory-form__input"
-            placeholder="e.g., Shelf A-1, Warehouse 2"
+            placeholder={t.inventory.form.locationPlaceholder}
           />
         </div>
       </div>
 
       <div className="inventory-form__section">
-        <h3>Quantities</h3>
+        <h3>{t.inventory.form.quantities}</h3>
         
         <div className="inventory-form__field">
           <label htmlFor="currentQuantity" className="inventory-form__label">
-            Current Quantity
+            {t.inventory.form.currentQuantity}
           </label>
           <input
             type="number"
@@ -197,7 +199,7 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
 
         <div className="inventory-form__field">
           <label htmlFor="minQuantity" className="inventory-form__label">
-            Minimum Quantity (Low Stock Threshold)
+            {t.inventory.form.minimumQuantity}
           </label>
           <input
             type="number"
@@ -211,17 +213,17 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
             className="inventory-form__input"
           />
           <small className="inventory-form__hint">
-            Item will be marked as low stock when quantity falls at or below this value
+            {t.inventory.form.minimumQuantityHint}
           </small>
         </div>
       </div>
 
       <div className="inventory-form__section">
-        <h3>Pricing</h3>
+        <h3>{t.inventory.form.pricing}</h3>
         
         <div className="inventory-form__field">
           <label htmlFor="unitPrice" className="inventory-form__label">
-            Unit Price (Selling Price)
+            {t.inventory.form.unitPriceLabel}
           </label>
           <input
             type="number"
@@ -236,13 +238,13 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
               })
             }
             className="inventory-form__input"
-            placeholder="Optional"
+            placeholder={t.inventory.form.optional}
           />
         </div>
 
         <div className="inventory-form__field">
           <label htmlFor="costPrice" className="inventory-form__label">
-            Cost Price (Purchase Price)
+            {t.inventory.form.costPriceLabel}
           </label>
           <input
             type="number"
@@ -257,7 +259,7 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
               })
             }
             className="inventory-form__input"
-            placeholder="Optional"
+            placeholder={t.inventory.form.optional}
           />
         </div>
       </div>
@@ -268,7 +270,7 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
           className="btn btn-primary btn-sm"
           disabled={isSubmitting}
         >
-          {isSubmitting ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update Item' : 'Create Item')}
+          {isSubmitting ? (isEdit ? t.common.messages.updating : t.common.messages.creating) : (isEdit ? t.common.actions.update : t.common.actions.create)}
         </button>
         {onCancel && (
           <button
@@ -277,7 +279,7 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
             onClick={onCancel}
             disabled={isSubmitting}
           >
-            Cancel
+            {t.common.actions.cancel}
           </button>
         )}
       </div>

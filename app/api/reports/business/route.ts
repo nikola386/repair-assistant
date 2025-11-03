@@ -7,6 +7,9 @@ import { renderToBuffer } from '@react-pdf/renderer'
 import BusinessReportPDF from '@/components/reports/BusinessReportPDF'
 import { Prisma } from '@prisma/client'
 import { ensurePdfFontsRegistered } from '@/lib/pdfFonts'
+import { settingsStorage } from '@/lib/settingsStorage'
+import { getPdfTranslations } from '@/lib/pdfTranslations'
+import { isValidLanguage } from '@/lib/languages'
 
 // Mark route as dynamic
 export const dynamic = 'force-dynamic'
@@ -66,6 +69,7 @@ export async function GET(request: NextRequest) {
         website: true,
         vatNumber: true,
         currency: true,
+        logo: true,
       },
     })
 
@@ -237,12 +241,17 @@ export async function GET(request: NextRequest) {
       topCustomers,
     }
 
+    // Get language from settings
+    const settings = await settingsStorage.findByStoreId(storeId)
+    const language = (settings?.language && isValidLanguage(settings.language)) ? settings.language : 'en'
+    const translations = getPdfTranslations(language)
+
     // Ensure fonts are registered before rendering
     await ensurePdfFontsRegistered()
 
     // Render PDF
     const pdfBuffer = await renderToBuffer(
-      React.createElement(BusinessReportPDF, { store, reportData }) as React.ReactElement
+      React.createElement(BusinessReportPDF, { store, reportData, translations, language }) as React.ReactElement
     )
 
     // Convert Buffer to Uint8Array for NextResponse

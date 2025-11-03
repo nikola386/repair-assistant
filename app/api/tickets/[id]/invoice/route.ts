@@ -7,6 +7,9 @@ import React from 'react'
 import { renderToBuffer } from '@react-pdf/renderer'
 import InvoicePDF from '@/components/reports/InvoicePDF'
 import { ensurePdfFontsRegistered } from '@/lib/pdfFonts'
+import { settingsStorage } from '@/lib/settingsStorage'
+import { getPdfTranslations } from '@/lib/pdfTranslations'
+import { isValidLanguage } from '@/lib/languages'
 
 // Mark route as dynamic
 export const dynamic = 'force-dynamic'
@@ -56,6 +59,7 @@ export async function GET(
         website: true,
         vatNumber: true,
         currency: true,
+        logo: true,
       },
     })
 
@@ -71,12 +75,17 @@ export async function GET(
       ticket.expenses = await ticketStorage.getExpensesByTicketId(ticket.id)
     }
 
+    // Get language from settings
+    const settings = await settingsStorage.findByStoreId(user.storeId)
+    const language = (settings?.language && isValidLanguage(settings.language)) ? settings.language : 'en'
+    const translations = getPdfTranslations(language)
+
     // Ensure fonts are registered before rendering
     await ensurePdfFontsRegistered()
 
     // Render PDF
     const pdfBuffer = await renderToBuffer(
-      React.createElement(InvoicePDF, { ticket, store })
+      React.createElement(InvoicePDF, { ticket, store, translations, language })
     )
 
     // Return PDF as response

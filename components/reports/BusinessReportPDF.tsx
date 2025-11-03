@@ -1,6 +1,8 @@
 import React from 'react'
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import { PDF_FONT_FAMILY } from '@/lib/pdfFonts'
+import { PdfTranslations } from '@/lib/pdfTranslations'
+import { Language } from '@/lib/languages'
 
 const styles = StyleSheet.create({
   page: {
@@ -30,6 +32,15 @@ const styles = StyleSheet.create({
   companyInfo: {
     marginTop: 10,
     textAlign: 'center',
+  },
+  logoContainer: {
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  logo: {
+    maxWidth: 120,
+    maxHeight: 60,
+    objectFit: 'contain',
   },
   companyName: {
     fontSize: 12,
@@ -198,14 +209,18 @@ interface BusinessReportPDFProps {
     website?: string | null
     vatNumber?: string | null
     currency?: string | null
+    logo?: string | null
   }
   reportData: BusinessReportData
+  translations: PdfTranslations
+  language: Language
 }
 
-const BusinessReportPDF: React.FC<BusinessReportPDFProps> = ({ store, reportData }) => {
+const BusinessReportPDF: React.FC<BusinessReportPDFProps> = ({ store, reportData, translations, language }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
+    const locale = language === 'bg' ? 'bg-BG' : language === 'de' ? 'de-DE' : 'en-US'
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -214,7 +229,8 @@ const BusinessReportPDF: React.FC<BusinessReportPDFProps> = ({ store, reportData
 
   const formatCurrency = (amount: number) => {
     const currency = store.currency || 'USD'
-    return new Intl.NumberFormat('en-US', {
+    const locale = language === 'bg' ? 'bg-BG' : language === 'de' ? 'de-DE' : 'en-US'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
@@ -227,10 +243,10 @@ const BusinessReportPDF: React.FC<BusinessReportPDFProps> = ({ store, reportData
   }
 
   const formatDays = (days: number) => {
-    if (days === 0) return '0 days'
-    if (days < 1) return `${Math.round(days * 24)} hours`
-    if (days === 1) return '1 day'
-    return `${days.toFixed(1)} days`
+    if (days === 0) return `0 ${translations.days}`
+    if (days < 1) return `${Math.round(days * 24)} ${translations.hours}`
+    if (days === 1) return `1 ${translations.day}`
+    return `${days.toFixed(1)} ${translations.days}`
   }
 
   // Build company address
@@ -248,61 +264,65 @@ const BusinessReportPDF: React.FC<BusinessReportPDFProps> = ({ store, reportData
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>BUSINESS REPORT</Text>
-          <Text style={styles.subtitle}>{reportData.period.label}</Text>
+          <Text style={styles.title}>{translations.businessReport}</Text>
           <Text style={styles.subtitle}>
             {formatDate(reportData.period.startDate)} - {formatDate(reportData.period.endDate)}
           </Text>
           <View style={styles.companyInfo}>
-            <Text style={styles.companyName}>{store.name || 'Repair Shop'}</Text>
+            {store.logo && (
+              <View style={styles.logoContainer}>
+                <Image src={store.logo} style={styles.logo} />
+              </View>
+            )}
+            <Text style={styles.companyName}>{store.name || translations.repairShop}</Text>
             {companyAddress && <Text style={styles.infoText}>{companyAddress}</Text>}
-            {store.phone && <Text style={styles.infoText}>Phone: {store.phone}</Text>}
-            {store.email && <Text style={styles.infoText}>Email: {store.email}</Text>}
+            {store.phone && <Text style={styles.infoText}>{translations.phone}: {store.phone}</Text>}
+            {store.email && <Text style={styles.infoText}>{translations.email}: {store.email}</Text>}
           </View>
         </View>
 
         {/* Summary Statistics */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Summary Statistics</Text>
+          <Text style={styles.sectionTitle}>{translations.summaryStatistics}</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Total Repairs</Text>
+              <Text style={styles.statLabel}>{translations.totalRepairs}</Text>
               <Text style={styles.statValue}>{reportData.summary.totalRepairs}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Completed Repairs</Text>
+              <Text style={styles.statLabel}>{translations.completedRepairs}</Text>
               <Text style={styles.statValue}>{reportData.summary.completedRepairs}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>In Progress</Text>
+              <Text style={styles.statLabel}>{translations.inProgress}</Text>
               <Text style={styles.statValue}>{reportData.summary.inProgressRepairs}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Waiting</Text>
+              <Text style={styles.statLabel}>{translations.waiting}</Text>
               <Text style={styles.statValue}>{reportData.summary.waitingRepairs}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Total Revenue</Text>
+              <Text style={styles.statLabel}>{translations.totalRevenue}</Text>
               <Text style={styles.statValue}>{formatCurrency(reportData.summary.income)}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Total Expenses</Text>
+              <Text style={styles.statLabel}>{translations.totalExpenses}</Text>
               <Text style={styles.statValue}>{formatCurrency(reportData.summary.expenses)}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Gross Profit</Text>
+              <Text style={styles.statLabel}>{translations.grossProfit}</Text>
               <Text style={styles.statValue}>{formatCurrency(reportData.summary.grossProfit)}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Profit Margin</Text>
+              <Text style={styles.statLabel}>{translations.profitMargin}</Text>
               <Text style={styles.statValue}>{formatPercentage(reportData.summary.grossProfitPercentage)}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Avg. Repair Time</Text>
+              <Text style={styles.statLabel}>{translations.avgRepairTime}</Text>
               <Text style={styles.statValue}>{formatDays(reportData.summary.averageRepairTime)}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Completion Rate</Text>
+              <Text style={styles.statLabel}>{translations.completionRate}</Text>
               <Text style={styles.statValue}>{formatPercentage(reportData.summary.completionRate)}</Text>
             </View>
           </View>
@@ -311,13 +331,13 @@ const BusinessReportPDF: React.FC<BusinessReportPDFProps> = ({ store, reportData
         {/* Performance by Device Type */}
         {reportData.byDeviceType && reportData.byDeviceType.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Performance by Device Type</Text>
+            <Text style={styles.sectionTitle}>{translations.performanceByDeviceType}</Text>
             <View style={styles.table}>
               <View style={styles.tableHeader}>
-                <Text style={[styles.tableCell, styles.colDeviceType]}>Device Type</Text>
-                <Text style={[styles.tableCell, styles.colCount, styles.tableCellNumber]}>Count</Text>
-                <Text style={[styles.tableCell, styles.colRevenue, styles.tableCellNumber]}>Revenue</Text>
-                <Text style={[styles.tableCell, styles.colExpenses, styles.tableCellNumber]}>Expenses</Text>
+                <Text style={[styles.tableCell, styles.colDeviceType]}>{translations.deviceType}</Text>
+                <Text style={[styles.tableCell, styles.colCount, styles.tableCellNumber]}>{translations.count}</Text>
+                <Text style={[styles.tableCell, styles.colRevenue, styles.tableCellNumber]}>{translations.revenue}</Text>
+                <Text style={[styles.tableCell, styles.colExpenses, styles.tableCellNumber]}>{translations.expenses}</Text>
               </View>
               {reportData.byDeviceType.map((item, index) => (
                 <View key={index} style={styles.tableRow}>
@@ -332,7 +352,7 @@ const BusinessReportPDF: React.FC<BusinessReportPDFProps> = ({ store, reportData
                 </View>
               ))}
               <View style={styles.totalsRow}>
-                <Text style={styles.totalsLabel}>TOTAL</Text>
+                <Text style={styles.totalsLabel}>{translations.total}</Text>
                 <Text style={styles.totalsValue}>
                   {reportData.byDeviceType.reduce((sum, item) => sum + item.count, 0)} |{' '}
                   {formatCurrency(
@@ -348,12 +368,12 @@ const BusinessReportPDF: React.FC<BusinessReportPDFProps> = ({ store, reportData
         {/* Top Customers */}
         {reportData.topCustomers && reportData.topCustomers.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Top Customers</Text>
+            <Text style={styles.sectionTitle}>{translations.topCustomers}</Text>
             <View style={styles.table}>
               <View style={styles.tableHeader}>
-                <Text style={[styles.tableCell, { width: '50%' }]}>Customer</Text>
-                <Text style={[styles.tableCell, { width: '25%' }, styles.tableCellNumber]}>Tickets</Text>
-                <Text style={[styles.tableCell, { width: '25%' }, styles.tableCellNumber]}>Total Spent</Text>
+                <Text style={[styles.tableCell, { width: '50%' }]}>{translations.customer}</Text>
+                <Text style={[styles.tableCell, { width: '25%' }, styles.tableCellNumber]}>{translations.tickets}</Text>
+                <Text style={[styles.tableCell, { width: '25%' }, styles.tableCellNumber]}>{translations.totalSpent}</Text>
               </View>
               {reportData.topCustomers.map((customer, index) => (
                 <View key={index} style={styles.tableRow}>
@@ -376,7 +396,7 @@ const BusinessReportPDF: React.FC<BusinessReportPDFProps> = ({ store, reportData
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text>Generated on {new Date().toLocaleDateString('en-US', {
+          <Text>{translations.generatedOn} {new Date().toLocaleDateString(language === 'bg' ? 'bg-BG' : language === 'de' ? 'de-DE' : 'en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

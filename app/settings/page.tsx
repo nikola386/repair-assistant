@@ -527,7 +527,7 @@ export default function SettingsPage() {
         <main className="settings-page">
           <div className="settings-page__container">
             <div className="settings-page__loading">
-              <p>{t.auth.loading}</p>
+              <p>{t.common.messages.loading}</p>
             </div>
           </div>
         </main>
@@ -671,7 +671,7 @@ export default function SettingsPage() {
 
                         <div className="settings-page__field">
                           <label htmlFor="email" className="settings-page__label">
-                            {t.auth.email}
+                            {t.common.fields.email}
                           </label>
                           <input
                             id="email"

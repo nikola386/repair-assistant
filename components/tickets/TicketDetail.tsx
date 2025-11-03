@@ -143,14 +143,14 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
     // Validate required fields
     if (!editFormData.customerName || !editFormData.customerEmail || !editFormData.customerPhone || 
         !editFormData.deviceType || !editFormData.issueDescription) {
-      showAlert.error('Please fill in all required fields (Customer Name, Email, Phone, Device Type, and Issue Description)')
+      showAlert.error(t.common.messages.required)
       return
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(editFormData.customerEmail || '')) {
-      showAlert.error('Please enter a valid email address')
+      showAlert.error(t.common.messages.invalidEmail)
       return
     }
 
@@ -259,7 +259,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   }
 
   const handleDeleteImage = async (imageId: string) => {
-    if (!confirm('Are you sure you want to delete this image?')) return
+    if (!confirm(t.tickets.detail.confirmDeleteImage)) return
 
     try {
       const response = await fetch(`/api/tickets/images?imageId=${imageId}`, {
@@ -279,12 +279,12 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
       }
     } catch (error) {
       console.error('Error deleting image:', error)
-      showAlert.error('Failed to delete image')
+      showAlert.error(t.tickets.detail.deleteImageError)
     }
   }
 
   const handleDelete = async () => {
-    if (!confirm(t.tickets.confirmDelete)) {
+    if (!confirm(t.common.messages.confirmDelete)) {
       return
     }
 
@@ -460,10 +460,10 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
             <h1 className="ticket-detail__title">{currentTicket.ticketNumber}</h1>
             <div className="ticket-detail__meta">
               <span className={`ticket-status ticket-status--${currentTicket.status}`}>
-                {t.tickets.status[currentTicket.status]}
+                {t.common.status[currentTicket.status as keyof typeof t.common.status]}
               </span>
               <span className={`ticket-priority ticket-priority--${currentTicket.priority}`}>
-                {t.tickets.priority[currentTicket.priority]}
+                {t.common.priority[currentTicket.priority as keyof typeof t.common.priority]}
               </span>
             </div>
           </div>
@@ -476,10 +476,10 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
               {isDownloadingInvoice ? (
                 <>
                   <Spinner size="small" />
-                  <span>Generating...</span>
+                  <span>{t.tickets.detail.generatingInvoice}</span>
                 </>
               ) : (
-                'Download Invoice'
+                t.tickets.detail.downloadInvoice
               )}
             </button>
             <button
@@ -487,7 +487,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
               onClick={() => setIsEditing(!isEditing)}
               disabled={isUpdating}
             >
-              {isEditing ? 'Cancel Edit' : 'Edit Ticket'}
+              {isEditing ? t.common.actions.cancel : t.common.actions.edit}
             </button>
             <button
               className="btn btn-danger btn-sm"
@@ -497,10 +497,10 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
               {isDeleting ? (
                 <>
                   <Spinner size="small" />
-                  <span>Deleting...</span>
+                  <span>{t.common.messages.deleting}</span>
                 </>
               ) : (
-                t.tickets.delete || 'Delete'
+                t.common.actions.delete
               )}
             </button>
           </div>
@@ -524,14 +524,14 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 className="btn btn-secondary btn-sm ticket-detail__qr-print"
                 onClick={handlePrintQR}
               >
-                {(t.tickets as any).printQr || 'Print QR Code'}
+                {t.tickets.printQr || 'Print QR Code'}
               </button>
             </div>
           </div>
         )}
 
         <div className="ticket-detail__section">
-          <h2>{t.tickets.customerInfo || 'Customer Information'}</h2>
+          <h2>{t.common.info.customerInformation}</h2>
           <div className="ticket-detail__info-grid">
             <div>
               <label>{t.tickets.form.customerName || 'Customer Name'}</label>
@@ -579,7 +579,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
         </div>
 
         <div className="ticket-detail__section">
-          <h2>{t.tickets.deviceInfo || 'Device Information'}</h2>
+          <h2>{t.common.info.deviceInformation}</h2>
           <div className="ticket-detail__info-grid">
             <div>
               <label>{t.tickets.form.deviceType || 'Device Type'}</label>
@@ -655,7 +655,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
 
         {/* Files Section */}
         <div className="ticket-detail__section">
-          <h2>Files</h2>
+          <h2>{t.tickets.detail.files}</h2>
           <div className="ticket-detail__images">
             {currentTicket.images && currentTicket.images.length > 0 ? (
               <div className="ticket-detail__image-gallery">
@@ -700,7 +700,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 ))}
               </div>
             ) : (
-              <p className="ticket-detail__no-images">No files uploaded yet</p>
+              <p className="ticket-detail__no-images">{t.tickets.detail.noFilesUploaded}</p>
             )}
             <div
               className={`image-upload-area ${isDragging ? 'drag-over' : ''} ${uploadingImages ? 'uploading' : ''}`}
@@ -726,11 +726,11 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 </svg>
                 <span className="upload-text">
                   {uploadingImages ? (
-                    <>Uploading images...</>
+                    <>{t.tickets.form.uploadingImages}</>
                   ) : (
                     <>
-                      <strong>Click to select images</strong> or drag and drop
-                      <span className="upload-hint">PNG, JPG, GIF, PDF up to 2MB</span>
+                      <strong>{t.tickets.detail.clickToSelectImages}</strong> {t.tickets.form.orDragAndDrop}
+                      <span className="upload-hint">{t.tickets.form.fileTypesHint}</span>
                     </>
                   )}
                 </span>
@@ -784,7 +784,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 </div>
                 {uploadingImages && (
                   <p className="image-preview-note">
-                    Uploading {pendingFiles.length} file(s)...
+                    {t.tickets.detail.uploadingFiles.replace('{count}', pendingFiles.length.toString())}
                   </p>
                 )}
               </div>
@@ -793,7 +793,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
         </div>
 
         <div className="ticket-detail__section">
-          <h2>{t.tickets.financialInfo || 'Financial Information'}</h2>
+          <h2>{t.common.info.financialInformation}</h2>
           <div className="ticket-detail__info-grid">
             <div>
               <label>{t.tickets.estimatedCost || 'Estimated Cost'}</label>
@@ -836,13 +836,13 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
 
         <div className="ticket-detail__section">
           <div className="ticket-detail__section-header">
-            <h2>Expenses</h2>
+            <h2>{t.tickets.detail.expenses}</h2>
             <button
               type="button"
               className="btn btn-primary btn-sm"
               onClick={() => setTriggerAddExpense(true)}
             >
-              + Add Expense
+              {t.tickets.detail.addExpense}
             </button>
           </div>
           <ExpenseTable
@@ -862,14 +862,14 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
         </div>
 
         <div className="ticket-detail__section">
-          <h2>{t.tickets.dates}</h2>
+          <h2>{t.common.info.importantDates}</h2>
           <div className="ticket-detail__info-grid">
             <div>
-              <label>{t.tickets.createdAt}</label>
+              <label>{t.common.dates.createdAt}</label>
               <p>{formatDateTime(currentTicket.createdAt)}</p>
             </div>
             <div>
-              <label>{t.tickets.updatedAt}</label>
+              <label>{t.common.dates.updatedAt}</label>
               <p>{formatDateTime(currentTicket.updatedAt)}</p>
             </div>
             <div>
@@ -884,7 +884,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                     })
                   }}
                   dateFormat="yyyy-MM-dd"
-                  placeholderText="Select a date"
+                  placeholderText={t.common.dates.selectDate}
                   className="date-picker-input"
                   wrapperClassName="date-picker-wrapper"
                 />
@@ -904,7 +904,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                     })
                   }}
                   dateFormat="yyyy-MM-dd"
-                  placeholderText="Select a date"
+                  placeholderText={t.common.dates.selectDate}
                   className="date-picker-input"
                   wrapperClassName="date-picker-wrapper"
                 />
@@ -928,10 +928,10 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 {isUpdating && currentTicket.status !== status ? (
                   <>
                     <Spinner size="small" />
-                    <span>{t.tickets.status?.[status] || status}</span>
+                    <span>{t.common.status[status as keyof typeof t.common.status] || status}</span>
                   </>
                 ) : (
-                  t.tickets.status?.[status] || status
+                  t.common.status[status as keyof typeof t.common.status] || status
                 )}
               </button>
             ))}
@@ -951,10 +951,10 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 })}
                 className="ticket-detail__edit-select"
               >
-                <option value="low">{t.tickets.priority?.low || 'Low'}</option>
-                <option value="medium">{t.tickets.priority?.medium || 'Medium'}</option>
-                <option value="high">{t.tickets.priority?.high || 'High'}</option>
-                <option value="urgent">{t.tickets.priority?.urgent || 'Urgent'}</option>
+                <option value="low">{t.common.priority.low}</option>
+                <option value="medium">{t.common.priority.medium}</option>
+                <option value="high">{t.common.priority.high}</option>
+                <option value="urgent">{t.common.priority.urgent}</option>
               </select>
             </div>
             <div className="ticket-detail__edit-actions">
@@ -966,10 +966,10 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 {isUpdating ? (
                   <>
                     <Spinner size="small" />
-                    <span>Saving...</span>
+                    <span>{t.common.messages.saving}</span>
                   </>
                 ) : (
-                  'Save Changes'
+                  t.common.actions.save
                 )}
               </button>
               <button
@@ -994,7 +994,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 }}
                 disabled={isUpdating}
               >
-                Cancel
+                {t.common.actions.cancel}
               </button>
             </div>
           </div>

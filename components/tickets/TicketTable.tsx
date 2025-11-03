@@ -95,7 +95,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
       },
       {
         accessorKey: 'createdAt',
-        header: t.tickets.createdAt || 'Date',
+        header: t.common.dates.date,
         enableSorting: true,
         sortingFn: 'datetime',
         cell: (info) => {
@@ -133,7 +133,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
         return (
           <Link href={`/tickets/${ticket.id}`} className="ticket-table__link">
             <span className={getStatusClass(status)}>
-              {t.tickets.status[status as keyof typeof t.tickets.status] || status}
+              {t.common.status[status as keyof typeof t.common.status] || status}
             </span>
           </Link>
         )
@@ -149,7 +149,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
         return (
           <Link href={`/tickets/${ticket.id}`} className="ticket-table__link">
             <span className={getPriorityClass(priority)}>
-              {t.tickets.priority[priority as keyof typeof t.tickets.priority] || priority}
+              {t.common.priority[priority as keyof typeof t.common.priority] || priority}
             </span>
           </Link>
         )

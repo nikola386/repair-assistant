@@ -29,7 +29,7 @@ export default function TicketCard({ ticket, viewMode = 'grid' }: TicketCardProp
       <div className="ticket-card__header">
         <div className="ticket-card__number">{ticket.ticketNumber}</div>
         <span className={getStatusClass(ticket.status)}>
-          {t.tickets.status[ticket.status]}
+          {t.common.status[ticket.status as keyof typeof t.common.status]}
         </span>
       </div>
       <div className="ticket-card__body">
@@ -44,7 +44,7 @@ export default function TicketCard({ ticket, viewMode = 'grid' }: TicketCardProp
       <div className="ticket-card__footer">
         <div className="ticket-card__meta">
           <span className="ticket-card__date">
-            {t.tickets.createdAt}: {formatDate(ticket.createdAt)}
+            {t.common.dates.createdAt}: {formatDate(ticket.createdAt)}
           </span>
           {ticket.estimatedCost && (
             <span className="ticket-card__cost">
@@ -53,7 +53,7 @@ export default function TicketCard({ ticket, viewMode = 'grid' }: TicketCardProp
           )}
         </div>
         <span className={getPriorityClass(ticket.priority)}>
-          {t.tickets.priority[ticket.priority]}
+          {t.common.priority[ticket.priority as keyof typeof t.common.priority]}
         </span>
       </div>
     </Link>

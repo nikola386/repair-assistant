@@ -12,6 +12,7 @@ import {
 } from '@/lib/fileValidation'
 import {
   generateUniqueFileName,
+  compressAndConvertToJpg,
 } from '@/lib/fileUtils'
 
 export async function POST(request: NextRequest) {
@@ -66,6 +67,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Get user's storeId for organizing files
+    const storeId = await userStorage.getStoreId(session.user.id)
+    if (!storeId) {
+      return NextResponse.json(
+        { error: 'User store not found' },
+        { status: 404 }
+      )
+    }
+
     // Delete old profile image from Vercel Blob if exists
     if (user.profileImage) {
       try {
@@ -79,10 +89,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate unique filename using secure random
+    // Compress and convert image to JPG
+    const processedFile = await compressAndConvertToJpg(file)
+
+    // Generate unique filename using secure random (use processed file name for correct extension)
     let fileName: string
     try {
-      fileName = generateUniqueFileName('profiles', session.user.id, file.name, ALLOWED_IMAGE_EXTENSIONS)
+      fileName = generateUniqueFileName('profiles', session.user.id, processedFile.name, ALLOWED_IMAGE_EXTENSIONS, storeId)
     } catch (error) {
       return NextResponse.json(
         { error: error instanceof Error ? error.message : 'Invalid file extension' },
@@ -91,9 +104,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload file to Vercel Blob
-    const blob = await put(fileName, file, {
+    const blob = await put(fileName, processedFile, {
       access: 'public',
-      contentType: file.type,
+      contentType: processedFile.type,
     })
 
     // Update user profile image (store the blob URL)

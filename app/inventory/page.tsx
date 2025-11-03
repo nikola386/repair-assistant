@@ -54,11 +54,11 @@ export default function InventoryPage() {
           totalPages: data.totalPages,
         })
       } else {
-        throw new Error('Failed to fetch inventory items')
+        throw new Error(t.inventory.page.fetchError)
       }
     } catch (error) {
       console.error('Error fetching inventory:', error)
-      setError(error instanceof Error ? error.message : 'Failed to fetch inventory items')
+      setError(error instanceof Error ? error.message : t.inventory.page.fetchError)
     } finally {
       setIsLoading(false)
     }
@@ -104,14 +104,14 @@ export default function InventoryPage() {
       })
 
       if (response.ok) {
-        showAlert.success('Inventory item created successfully')
+        showAlert.success(t.inventory.page.createSuccess)
         setShowForm(false)
         await fetchItems()
         await fetchFilters()
       } else {
         const error = await response.json()
-        showAlert.error(error.error || 'Failed to create item')
-        throw new Error(error.error || 'Failed to create item')
+        showAlert.error(error.error || t.inventory.page.createError)
+        throw new Error(error.error || t.inventory.page.createError)
       }
     } catch (error) {
       console.error('Error creating item:', error)
@@ -156,7 +156,7 @@ export default function InventoryPage() {
               className="btn btn-primary btn-sm"
               onClick={() => setShowForm(!showForm)}
             >
-              {showForm ? 'Cancel' : t.inventory?.addItem || 'Add Item'}
+              {showForm ? t.inventory.page.cancel : t.inventory?.addItem || 'Add Item'}
             </button>
           </div>
 
@@ -204,7 +204,7 @@ export default function InventoryPage() {
                 }}
                 className="inventory-page__filter"
               >
-                <option value="">All Categories</option>
+                <option value="">{t.inventory.page.allCategories}</option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -220,7 +220,7 @@ export default function InventoryPage() {
                 }}
                 className="inventory-page__filter"
               >
-                <option value="">All Locations</option>
+                <option value="">{t.inventory.page.allLocations}</option>
                 {locations.map((loc) => (
                   <option key={loc} value={loc}>
                     {loc}
@@ -273,10 +273,10 @@ export default function InventoryPage() {
                       onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
                       disabled={pagination.page === 1}
                     >
-                      Previous
+                      {t.common.actions.previous}
                     </button>
                     <span>
-                      Page {pagination.page} of {pagination.totalPages} ({pagination.total} items)
+                      {t.inventory.page.pageInfo.replace('{page}', pagination.page.toString()).replace('{totalPages}', pagination.totalPages.toString()).replace('{total}', pagination.total.toString())}
                     </span>
                     <button
                       type="button"
@@ -284,7 +284,7 @@ export default function InventoryPage() {
                       onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                       disabled={pagination.page >= pagination.totalPages}
                     >
-                      Next
+                      {t.common.actions.next}
                     </button>
                   </div>
                 )}

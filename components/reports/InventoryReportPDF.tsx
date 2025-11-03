@@ -1,6 +1,8 @@
 import React from 'react'
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import { PDF_FONT_FAMILY } from '@/lib/pdfFonts'
+import { PdfTranslations } from '@/lib/pdfTranslations'
+import { Language } from '@/lib/languages'
 
 const styles = StyleSheet.create({
   page: {
@@ -30,6 +32,15 @@ const styles = StyleSheet.create({
   companyInfo: {
     marginTop: 10,
     textAlign: 'center',
+  },
+  logoContainer: {
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  logo: {
+    maxWidth: 120,
+    maxHeight: 60,
+    objectFit: 'contain',
   },
   companyName: {
     fontSize: 12,
@@ -222,14 +233,18 @@ interface InventoryReportPDFProps {
     website?: string | null
     vatNumber?: string | null
     currency?: string | null
+    logo?: string | null
   }
   reportData: InventoryReportData
+  translations: PdfTranslations
+  language: Language
 }
 
-const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportData }) => {
+const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportData, translations, language }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
+    const locale = language === 'bg' ? 'bg-BG' : language === 'de' ? 'de-DE' : 'en-US'
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -238,7 +253,8 @@ const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportDa
 
   const formatCurrency = (amount: number) => {
     const currency = store.currency || 'USD'
-    return new Intl.NumberFormat('en-US', {
+    const locale = language === 'bg' ? 'bg-BG' : language === 'de' ? 'de-DE' : 'en-US'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
@@ -261,63 +277,67 @@ const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportDa
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>INVENTORY REPORT</Text>
+          <Text style={styles.title}>{translations.inventoryReport}</Text>
           {reportData.period && (
             <>
-              <Text style={styles.subtitle}>{reportData.period.label}</Text>
               <Text style={styles.subtitle}>
                 {formatDate(reportData.period.startDate)} - {formatDate(reportData.period.endDate)}
               </Text>
             </>
           )}
           <View style={styles.companyInfo}>
-            <Text style={styles.companyName}>{store.name || 'Repair Shop'}</Text>
+            {store.logo && (
+              <View style={styles.logoContainer}>
+                <Image src={store.logo} style={styles.logo} />
+              </View>
+            )}
+            <Text style={styles.companyName}>{store.name || translations.repairShop}</Text>
             {companyAddress && <Text style={styles.infoText}>{companyAddress}</Text>}
-            {store.phone && <Text style={styles.infoText}>Phone: {store.phone}</Text>}
-            {store.email && <Text style={styles.infoText}>Email: {store.email}</Text>}
+            {store.phone && <Text style={styles.infoText}>{translations.phone}: {store.phone}</Text>}
+            {store.email && <Text style={styles.infoText}>{translations.email}: {store.email}</Text>}
           </View>
         </View>
 
         {/* Summary Statistics */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Summary Statistics</Text>
+          <Text style={styles.sectionTitle}>{translations.summaryStatistics}</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Total Items</Text>
+              <Text style={styles.statLabel}>{translations.totalItems}</Text>
               <Text style={styles.statValue}>{reportData.summary.totalItems}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Total Inventory Value</Text>
+              <Text style={styles.statLabel}>{translations.totalInventoryValue}</Text>
               <Text style={styles.statValue}>{formatCurrency(reportData.summary.totalInventoryValue)}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Inventory Value (Cost)</Text>
+              <Text style={styles.statLabel}>{translations.inventoryValueCost}</Text>
               <Text style={styles.statValue}>{formatCurrency(reportData.summary.totalInventoryValueByCost)}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Inventory Value (Price)</Text>
+              <Text style={styles.statLabel}>{translations.inventoryValuePrice}</Text>
               <Text style={styles.statValue}>{formatCurrency(reportData.summary.totalInventoryValueByPrice)}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Low Stock Items</Text>
+              <Text style={styles.statLabel}>{translations.lowStockItems}</Text>
               <Text style={styles.statValue}>{reportData.summary.lowStockItemsCount}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Zero Stock Items</Text>
+              <Text style={styles.statLabel}>{translations.zeroStockItems}</Text>
               <Text style={styles.statValue}>{reportData.summary.zeroStockItemsCount}</Text>
             </View>
             {reportData.summary.turnoverCount > 0 && (
               <>
                 <View style={styles.statBox}>
-                  <Text style={styles.statLabel}>Total Turnover Quantity</Text>
+                  <Text style={styles.statLabel}>{translations.totalTurnoverQuantity}</Text>
                   <Text style={styles.statValue}>{reportData.summary.totalTurnoverQuantity.toFixed(2)}</Text>
                 </View>
                 <View style={styles.statBox}>
-                  <Text style={styles.statLabel}>Total Turnover Value</Text>
+                  <Text style={styles.statLabel}>{translations.totalTurnoverValue}</Text>
                   <Text style={styles.statValue}>{formatCurrency(reportData.summary.totalTurnoverValue)}</Text>
                 </View>
                 <View style={styles.statBox}>
-                  <Text style={styles.statLabel}>Turnover Transactions</Text>
+                  <Text style={styles.statLabel}>{translations.turnoverTransactions}</Text>
                   <Text style={styles.statValue}>{reportData.summary.turnoverCount}</Text>
                 </View>
               </>
@@ -328,13 +348,13 @@ const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportDa
         {/* Category Breakdown */}
         {reportData.categoryBreakdown && reportData.categoryBreakdown.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Category Breakdown</Text>
+            <Text style={styles.sectionTitle}>{translations.categoryBreakdown}</Text>
             <View style={styles.table}>
               <View style={styles.tableHeader}>
-                <Text style={[styles.tableCell, styles.colCategory]}>Category</Text>
-                <Text style={[styles.tableCell, styles.colQuantity, styles.tableCellNumber]}>Items</Text>
-                <Text style={[styles.tableCell, styles.colQuantity, styles.tableCellNumber]}>Total Qty</Text>
-                <Text style={[styles.tableCell, styles.colValue, styles.tableCellNumber]}>Total Value</Text>
+                <Text style={[styles.tableCell, styles.colCategory]}>{translations.category}</Text>
+                <Text style={[styles.tableCell, styles.colQuantity, styles.tableCellNumber]}>{translations.items}</Text>
+                <Text style={[styles.tableCell, styles.colQuantity, styles.tableCellNumber]}>{translations.totalQty}</Text>
+                <Text style={[styles.tableCell, styles.colValue, styles.tableCellNumber]}>{translations.totalValue}</Text>
               </View>
               {reportData.categoryBreakdown.map((category, index) => (
                 <View key={index} style={styles.tableRow}>
@@ -347,7 +367,7 @@ const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportDa
                 </View>
               ))}
               <View style={styles.totalsRow}>
-                <Text style={styles.totalsLabel}>TOTAL</Text>
+                <Text style={styles.totalsLabel}>{translations.total}</Text>
                 <Text style={styles.totalsValue}>
                   {reportData.categoryBreakdown.reduce((sum, c) => sum + c.count, 0)} |{' '}
                   {reportData.categoryBreakdown.reduce((sum, c) => sum + c.totalQuantity, 0).toFixed(2)} |{' '}
@@ -363,13 +383,13 @@ const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportDa
         {/* Top Moving Items */}
         {reportData.topMovingItems && reportData.topMovingItems.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Top Moving Items</Text>
+            <Text style={styles.sectionTitle}>{translations.topMovingItems}</Text>
             <View style={styles.table}>
               <View style={styles.tableHeader}>
-                <Text style={[styles.tableCell, styles.colItemName]}>Item Name</Text>
-                <Text style={[styles.tableCell, styles.colQuantity, styles.tableCellNumber]}>Quantity</Text>
-                <Text style={[styles.tableCell, styles.colValue, styles.tableCellNumber]}>Value</Text>
-                <Text style={[styles.tableCell, styles.colCount, styles.tableCellNumber]}>Transactions</Text>
+                <Text style={[styles.tableCell, styles.colItemName]}>{translations.itemName}</Text>
+                <Text style={[styles.tableCell, styles.colQuantity, styles.tableCellNumber]}>{translations.quantity}</Text>
+                <Text style={[styles.tableCell, styles.colValue, styles.tableCellNumber]}>{translations.value}</Text>
+                <Text style={[styles.tableCell, styles.colCount, styles.tableCellNumber]}>{translations.transactions}</Text>
               </View>
               {reportData.topMovingItems.map((item, index) => (
                 <View key={index} style={styles.tableRow}>
@@ -388,13 +408,13 @@ const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportDa
         {/* Low Stock Items */}
         {reportData.lowStockItems && reportData.lowStockItems.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Low Stock Items</Text>
+            <Text style={styles.sectionTitle}>{translations.lowStockItemsTitle}</Text>
             <View style={styles.table}>
               <View style={styles.tableHeader}>
-                <Text style={[styles.tableCell, styles.colItemName]}>Item Name</Text>
-                <Text style={[styles.tableCell, styles.colSKU]}>SKU</Text>
-                <Text style={[styles.tableCell, styles.colCurrentQty, styles.tableCellNumber]}>Current Qty</Text>
-                <Text style={[styles.tableCell, styles.colMinQty, styles.tableCellNumber]}>Min Qty</Text>
+                <Text style={[styles.tableCell, styles.colItemName]}>{translations.itemName}</Text>
+                <Text style={[styles.tableCell, styles.colSKU]}>{translations.sku}</Text>
+                <Text style={[styles.tableCell, styles.colCurrentQty, styles.tableCellNumber]}>{translations.currentQty}</Text>
+                <Text style={[styles.tableCell, styles.colMinQty, styles.tableCellNumber]}>{translations.minQty}</Text>
               </View>
               {reportData.lowStockItems.map((item, index) => (
                 <View key={index} style={styles.tableRow}>
@@ -411,12 +431,12 @@ const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportDa
         {/* Zero Stock Items */}
         {reportData.zeroStockItems && reportData.zeroStockItems.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Zero Stock Items</Text>
+            <Text style={styles.sectionTitle}>{translations.zeroStockItemsTitle}</Text>
             <View style={styles.table}>
               <View style={styles.tableHeader}>
-                <Text style={[styles.tableCell, styles.colItemName]}>Item Name</Text>
-                <Text style={[styles.tableCell, styles.colSKU]}>SKU</Text>
-                <Text style={[styles.tableCell, styles.colQuantity, styles.tableCellNumber]}>Quantity</Text>
+                <Text style={[styles.tableCell, styles.colItemName]}>{translations.itemName}</Text>
+                <Text style={[styles.tableCell, styles.colSKU]}>{translations.sku}</Text>
+                <Text style={[styles.tableCell, styles.colQuantity, styles.tableCellNumber]}>{translations.quantity}</Text>
               </View>
               {reportData.zeroStockItems.map((item, index) => (
                 <View key={index} style={styles.tableRow}>
@@ -431,7 +451,7 @@ const InventoryReportPDF: React.FC<InventoryReportPDFProps> = ({ store, reportDa
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text>Generated on {new Date().toLocaleDateString('en-US', {
+          <Text>{translations.generatedOn} {new Date().toLocaleDateString(language === 'bg' ? 'bg-BG' : language === 'de' ? 'de-DE' : 'en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

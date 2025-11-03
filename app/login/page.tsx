@@ -123,7 +123,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
               <label htmlFor="email" className="form-label">
-                {t.auth?.email || 'Email'}
+                {t.common.fields.email}
               </label>
               <input
                 id="email"
@@ -134,13 +134,13 @@ export default function LoginPage() {
                 required
                 autoComplete="email"
                 disabled={loading}
-                placeholder={t.auth?.email || 'Enter your email'}
+                placeholder={t.common.fields.email}
               />
             </div>
 
             <div className="form-group">
               <label htmlFor="password" className="form-label">
-                {t.auth?.password || 'Password'}
+                {t.common.fields.password}
               </label>
               <input
                 id="password"
@@ -151,7 +151,7 @@ export default function LoginPage() {
                 required
                 autoComplete="current-password"
                 disabled={loading}
-                placeholder={t.auth?.password || 'Enter your password'}
+                placeholder={t.common.fields.password}
               />
             </div>
 
@@ -163,7 +163,7 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <Spinner size="small" />
-                  {t.auth?.loggingIn || 'Logging in...'}
+                  {t.common.messages.loading}
                 </>
               ) : (
                 t.auth?.login || 'Login'

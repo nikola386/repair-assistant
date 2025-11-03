@@ -374,11 +374,11 @@ export default function TicketList({
               className="ticket-list__filter"
             >
               <option value="all">{t.tickets.allStatuses || 'All Statuses'}</option>
-              <option value="pending">{t.tickets.status?.pending || 'Pending'}</option>
-              <option value="in_progress">{t.tickets.status?.in_progress || 'In Progress'}</option>
-              <option value="waiting_parts">{t.tickets.status?.waiting_parts || 'Waiting Parts'}</option>
-              <option value="completed">{t.tickets.status?.completed || 'Completed'}</option>
-              <option value="cancelled">{t.tickets.status?.cancelled || 'Cancelled'}</option>
+              <option value="pending">{t.common.status.pending}</option>
+              <option value="in_progress">{t.common.status.in_progress}</option>
+              <option value="waiting_parts">{t.common.status.waiting_parts}</option>
+              <option value="completed">{t.common.status.completed}</option>
+              <option value="cancelled">{t.common.status.cancelled}</option>
             </select>
           </div>
           <div className="ticket-list__filter-group">
@@ -390,10 +390,10 @@ export default function TicketList({
               className="ticket-list__filter"
             >
               <option value="all">{t.tickets.allPriorities || 'All Priorities'}</option>
-              <option value="low">{t.tickets.priority?.low || 'Low'}</option>
-              <option value="medium">{t.tickets.priority?.medium || 'Medium'}</option>
-              <option value="high">{t.tickets.priority?.high || 'High'}</option>
-              <option value="urgent">{t.tickets.priority?.urgent || 'Urgent'}</option>
+              <option value="low">{t.common.priority.low}</option>
+              <option value="medium">{t.common.priority.medium}</option>
+              <option value="high">{t.common.priority.high}</option>
+              <option value="urgent">{t.common.priority.urgent}</option>
             </select>
           </div>
         </div>
@@ -427,7 +427,7 @@ export default function TicketList({
       {isLoading || isLoadingData ? (
         <div className="ticket-list__loading spinner-container spinner-container--inline">
           <Spinner size="large" />
-          <p>Loading tickets...</p>
+          <p>{t.tickets.list.loadingTickets}</p>
         </div>
       ) : ticketsData.length === 0 ? (
         <div className="ticket-list__empty">

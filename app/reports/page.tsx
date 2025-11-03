@@ -22,12 +22,12 @@ export default function ReportsPage() {
 
   const handleGenerateBusinessReport = async () => {
     if (!startDate || !endDate) {
-      showAlert.error('Please select both start and end dates')
+      showAlert.error(t.common.messages.selectBothDates)
       return
     }
 
     if (startDate > endDate) {
-      showAlert.error('Start date must be before end date')
+      showAlert.error(t.common.messages.startBeforeEnd)
       return
     }
 
@@ -56,10 +56,10 @@ export default function ReportsPage() {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       
-      showAlert.success('Business report downloaded successfully')
+      showAlert.success(t.reports.businessReport.downloadSuccess)
     } catch (error) {
       console.error('Error generating business report:', error)
-      showAlert.error('Failed to generate business report')
+      showAlert.error(t.reports.businessReport.downloadError)
     } finally {
       setIsGeneratingBusinessReport(false)
     }
@@ -75,12 +75,12 @@ export default function ReportsPage() {
 
   const handleGenerateInventoryReport = async () => {
     if (!startDate || !endDate) {
-      showAlert.error('Please select both start and end dates')
+      showAlert.error(t.common.messages.selectBothDates)
       return
     }
 
     if (startDate > endDate) {
-      showAlert.error('Start date must be before end date')
+      showAlert.error(t.common.messages.startBeforeEnd)
       return
     }
 
@@ -109,10 +109,10 @@ export default function ReportsPage() {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       
-      showAlert.success('Inventory report downloaded successfully')
+      showAlert.success(t.reports.inventoryReport.downloadSuccess)
     } catch (error) {
       console.error('Error generating inventory report:', error)
-      showAlert.error('Failed to generate inventory report')
+      showAlert.error(t.reports.inventoryReport.downloadError)
     } finally {
       setIsGeneratingInventoryReport(false)
     }
@@ -126,7 +126,7 @@ export default function ReportsPage() {
           <div className="reports-page__header">
             <h1>{t.reports?.title || 'Reports'}</h1>
             <p className="reports-page__subtitle">
-              Generate printable PDF reports for your repair business
+              {t.reports?.subtitle || 'Generate printable PDF reports for your repair business'}
             </p>
           </div>
           
@@ -136,9 +136,9 @@ export default function ReportsPage() {
               <div className="report-card__header">
                 <HiDocumentReport className="report-card__icon" />
                 <div>
-                  <h2 className="report-card__title">Monthly/Period Business Report</h2>
+                  <h2 className="report-card__title">{t.reports.businessReport.title}</h2>
                   <p className="report-card__description">
-                    Comprehensive business performance report with statistics, revenue breakdown, and customer analytics
+                    {t.reports.businessReport.description}
                   </p>
                 </div>
               </div>
@@ -147,28 +147,28 @@ export default function ReportsPage() {
                 <div className="report-card__section">
                   <label className="report-card__label">
                     <HiCalendar className="report-card__label-icon" />
-                    Select Date Range
+                    {t.reports.dateRange.selectDateRange}
                   </label>
                   <div className="report-card__date-range">
                     <div className="report-card__date-input">
-                      <label>Start Date</label>
+                      <label>{t.common.dates.startDate}</label>
                       <DatePicker
                         selected={startDate}
                         onChange={(date: Date | null) => date && setStartDate(date)}
                         dateFormat="yyyy-MM-dd"
-                        placeholderText="Select start date"
+                        placeholderText={t.common.dates.selectStartDate}
                         className="date-picker-input"
                         wrapperClassName="date-picker-wrapper"
                         maxDate={endDate}
                       />
                     </div>
                     <div className="report-card__date-input">
-                      <label>End Date</label>
+                      <label>{t.common.dates.endDate}</label>
                       <DatePicker
                         selected={endDate}
                         onChange={(date: Date | null) => date && setEndDate(date)}
                         dateFormat="yyyy-MM-dd"
-                        placeholderText="Select end date"
+                        placeholderText={t.common.dates.selectEndDate}
                         className="date-picker-input"
                         wrapperClassName="date-picker-wrapper"
                         minDate={startDate}
@@ -178,34 +178,34 @@ export default function ReportsPage() {
                   </div>
                   
                   <div className="report-card__quick-periods">
-                    <span className="report-card__quick-label">Quick Select:</span>
+                    <span className="report-card__quick-label">{t.reports.dateRange.quickSelect}</span>
                     <button
                       type="button"
                       className="btn btn-sm btn-outline"
                       onClick={() => handleQuickPeriod(7)}
                     >
-                      Last 7 Days
+                      {t.reports.dateRange.last7Days}
                     </button>
                     <button
                       type="button"
                       className="btn btn-sm btn-outline"
                       onClick={() => handleQuickPeriod(30)}
                     >
-                      Last 30 Days
+                      {t.reports.dateRange.last30Days}
                     </button>
                     <button
                       type="button"
                       className="btn btn-sm btn-outline"
                       onClick={() => handleQuickPeriod(90)}
                     >
-                      Last 90 Days
+                      {t.reports.dateRange.last90Days}
                     </button>
                     <button
                       type="button"
                       className="btn btn-sm btn-outline"
                       onClick={() => handleQuickPeriod(365)}
                     >
-                      Last Year
+                      {t.reports.dateRange.lastYear}
                     </button>
                   </div>
                 </div>
@@ -218,12 +218,12 @@ export default function ReportsPage() {
                   {isGeneratingBusinessReport ? (
                     <>
                       <Spinner size="small" />
-                      <span>Generating Report...</span>
+                      <span>{t.reports.businessReport.generating}</span>
                     </>
                   ) : (
                     <>
                       <HiDocumentReport />
-                      <span>Generate Business Report</span>
+                      <span>{t.reports.businessReport.generateButton}</span>
                     </>
                   )}
                 </button>
@@ -235,9 +235,9 @@ export default function ReportsPage() {
               <div className="report-card__header">
                 <HiDocumentReport className="report-card__icon" />
                 <div>
-                  <h2 className="report-card__title">Inventory Report</h2>
+                  <h2 className="report-card__title">{t.reports.inventoryReport.title}</h2>
                   <p className="report-card__description">
-                    View inventory value, turnover metrics, low stock items, and category breakdown
+                    {t.reports.inventoryReport.description}
                   </p>
                 </div>
               </div>
@@ -246,28 +246,28 @@ export default function ReportsPage() {
                 <div className="report-card__section">
                   <label className="report-card__label">
                     <HiCalendar className="report-card__label-icon" />
-                    Select Date Range (for turnover analysis)
+                    {t.reports.dateRange.selectDateRangeForTurnover}
                   </label>
                   <div className="report-card__date-range">
                     <div className="report-card__date-input">
-                      <label>Start Date</label>
+                      <label>{t.common.dates.startDate}</label>
                       <DatePicker
                         selected={startDate}
                         onChange={(date: Date | null) => date && setStartDate(date)}
                         dateFormat="yyyy-MM-dd"
-                        placeholderText="Select start date"
+                        placeholderText={t.common.dates.selectStartDate}
                         className="date-picker-input"
                         wrapperClassName="date-picker-wrapper"
                         maxDate={endDate}
                       />
                     </div>
                     <div className="report-card__date-input">
-                      <label>End Date</label>
+                      <label>{t.common.dates.endDate}</label>
                       <DatePicker
                         selected={endDate}
                         onChange={(date: Date | null) => date && setEndDate(date)}
                         dateFormat="yyyy-MM-dd"
-                        placeholderText="Select end date"
+                        placeholderText={t.common.dates.selectEndDate}
                         className="date-picker-input"
                         wrapperClassName="date-picker-wrapper"
                         minDate={startDate}
@@ -285,12 +285,12 @@ export default function ReportsPage() {
                   {isGeneratingInventoryReport ? (
                     <>
                       <Spinner size="small" />
-                      <span>Generating Report...</span>
+                      <span>{t.reports.inventoryReport.generating}</span>
                     </>
                   ) : (
                     <>
                       <HiDocumentReport />
-                      <span>Generate Inventory Report</span>
+                      <span>{t.reports.inventoryReport.generateButton}</span>
                     </>
                   )}
                 </button>
