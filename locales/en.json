@@ -386,7 +386,7 @@
       "completionRate": "Completion Rate",
       "overdueTickets": "Overdue Tickets",
       "highPriorityTickets": "High Priority Tickets",
-      "averageRevenuePerTicket": "Avg Revenue per Ticket",
+      "totalClients": "Total Clients",
       "revenueGrowth": "Revenue Growth",
       "lowStockItems": "Low Stock Items",
       "statusDistribution": "Status Distribution",

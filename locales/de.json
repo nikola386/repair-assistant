@@ -386,7 +386,7 @@
       "completionRate": "Abschlussrate",
       "overdueTickets": "Überfällige Tickets",
       "highPriorityTickets": "Tickets mit hoher Priorität",
-      "averageRevenuePerTicket": "Durchschnittlicher Umsatz pro Ticket",
+      "totalClients": "Gesamtkunden",
       "revenueGrowth": "Umsatzwachstum",
       "lowStockItems": "Niedrige Lagerbestände",
       "statusDistribution": "Statusverteilung",

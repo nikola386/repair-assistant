@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useSearchParams, usePathname } from 'next/navigation'
 import { useLanguage } from '../../contexts/LanguageContext'
 import TicketTable from './TicketTable'
 import Spinner from '../ui/Spinner'
@@ -40,11 +41,12 @@ export default function TicketList({
   refreshTrigger,
 }: TicketListProps) {
   const { t } = useLanguage()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
   
   // Initialize filters from URL params on first render (synchronously)
   const getInitialFilters = (): TicketsFilters => {
     if (typeof window === 'undefined') return { ...defaultTicketsFilters }
-    const searchParams = new URLSearchParams(window.location.search)
     const urlFilters = parseTicketsFiltersFromUrl(searchParams)
     return Object.keys(urlFilters).length > 0
       ? { ...defaultTicketsFilters, ...urlFilters }
@@ -73,9 +75,6 @@ export default function TicketList({
   
   // Sync filters from URL and update state
   const syncFiltersFromUrl = useCallback(() => {
-    if (typeof window === 'undefined') return
-    
-    const searchParams = new URLSearchParams(window.location.search)
     const urlFilters = parseTicketsFiltersFromUrl(searchParams)
     
     const updatedFilters = Object.keys(urlFilters).length > 0
@@ -85,8 +84,11 @@ export default function TicketList({
     setFiltersState(updatedFilters)
     setSearchQuery(updatedFilters.search || '')
     setStatusFilter(updatedFilters.status || 'all')
-    setPriorityFilter(updatedFilters.priority || 'all')
-  }, [])
+    // For comma-separated priorities (e.g., "high,urgent"), show "all" in dropdown since we can't display multiple
+    // But keep the actual filter value for backend filtering
+    const priorityValue = updatedFilters.priority || 'all'
+    setPriorityFilter(priorityValue.includes(',') ? 'all' : priorityValue)
+  }, [searchParams])
   
   // Set filters and optionally update URL
   const setFilters = useCallback((newFilters: Partial<TicketsFilters>, updateUrl: boolean = true) => {
@@ -129,16 +131,22 @@ export default function TicketList({
   useEffect(() => {
     setSearchQuery(filters.search || '')
     setStatusFilter(filters.status || 'all')
-    setPriorityFilter(filters.priority || 'all')
+    // For comma-separated priorities, show "all" in dropdown but keep filter value
+    const priorityValue = filters.priority || 'all'
+    setPriorityFilter(priorityValue.includes(',') ? 'all' : priorityValue)
   }, [filters.search, filters.status, filters.priority])
   
-  // Listen to URL changes (e.g., browser back/forward)
+  // Listen to URL changes (browser back/forward and Next.js navigation)
   useEffect(() => {
     const handlePopState = () => {
       syncFiltersFromUrl()
     }
     
     window.addEventListener('popstate', handlePopState)
+    
+    // Sync when searchParams change (Next.js navigation)
+    syncFiltersFromUrl()
+    
     return () => window.removeEventListener('popstate', handlePopState)
   }, [syncFiltersFromUrl])
   
@@ -170,7 +178,12 @@ export default function TicketList({
     params.append('limit', filters.limit.toString())
     if (filters.search.trim()) params.append('search', filters.search.trim())
     if (filters.status) params.append('status', filters.status)
-    if (filters.priority) params.append('priority', filters.priority)
+    // Support comma-separated priorities (e.g., "high,urgent")
+    if (filters.priority) {
+      params.append('priority', filters.priority)
+    } else if (priorityFilter !== 'all') {
+      params.append('priority', priorityFilter)
+    }
     
     fetch(`/api/tickets?${params.toString()}`)
       .then(async (response) => {

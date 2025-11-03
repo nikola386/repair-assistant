@@ -18,7 +18,7 @@ interface DashboardStats {
   chartData: ChartDataPoint[]
   overdueTickets: number
   highPriorityTickets: number
-  averageRevenuePerTicket: number
+  totalClients: number
   revenueGrowth: number | null // Percentage change from previous period
   lowStockItems: number
   statusDistribution: StatusDistributionItem[]
@@ -339,7 +339,7 @@ export async function GET(request: NextRequest) {
         status: {
           notIn: ['completed', 'cancelled'],
         },
-      },
+      } as any,
       select: {
         status: true,
         estimatedCompletionDate: true,
@@ -358,10 +358,12 @@ export async function GET(request: NextRequest) {
       return t.priority === 'high' || t.priority === 'urgent'
     }).length
 
-    // Calculate Average Revenue per Ticket
-    const averageRevenuePerTicket = completedTickets.length > 0 
-      ? Math.round((income / completedTickets.length) * 100) / 100 
-      : 0
+    // Calculate Total Clients
+    const totalClients = await db.customer.count({
+      where: {
+        storeId: storeId as any,
+      } as any,
+    })
 
     // Calculate Period-over-Period Growth
     // Get previous period data for comparison
@@ -376,7 +378,7 @@ export async function GET(request: NextRequest) {
           lt: startDate,
         },
         status: 'completed',
-      },
+      } as any,
       select: {
         actualCost: true,
         estimatedCost: true,
@@ -455,7 +457,7 @@ export async function GET(request: NextRequest) {
       chartData,
       overdueTickets: overdueTickets || 0,
       highPriorityTickets: highPriorityTickets || 0,
-      averageRevenuePerTicket: averageRevenuePerTicket || 0,
+      totalClients: totalClients || 0,
       revenueGrowth: revenueGrowth,
       lowStockItems: lowStockItems || 0,
       statusDistribution: statusDistribution || [],
@@ -482,7 +484,7 @@ export async function GET(request: NextRequest) {
       chartData: [],
       overdueTickets: 0,
       highPriorityTickets: 0,
-      averageRevenuePerTicket: 0,
+      totalClients: 0,
       revenueGrowth: null,
       lowStockItems: 0,
       statusDistribution: [],

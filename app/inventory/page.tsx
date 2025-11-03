@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
@@ -11,6 +12,7 @@ import { showAlert } from '@/lib/alerts'
 
 export default function InventoryPage() {
   const { t } = useLanguage()
+  const searchParams = useSearchParams()
   const [items, setItems] = useState<InventoryItem[]>([])
   const [pagination, setPagination] = useState({
     page: 1,
@@ -23,12 +25,28 @@ export default function InventoryPage() {
   const [showForm, setShowForm] = useState(false)
   const [categories, setCategories] = useState<string[]>([])
   const [locations, setLocations] = useState<string[]>([])
-  const [filters, setFilters] = useState({
-    search: '',
-    category: '',
-    location: '',
-    lowStock: false,
-  })
+  
+  // Initialize filters from URL params
+  const getFiltersFromUrl = () => {
+    return {
+      search: searchParams.get('search') || '',
+      category: searchParams.get('category') || '',
+      location: searchParams.get('location') || '',
+      lowStock: searchParams.get('lowStock') === 'true',
+    }
+  }
+  
+  const [filters, setFilters] = useState(getFiltersFromUrl)
+  
+  // Sync filters when URL changes
+  useEffect(() => {
+    setFilters({
+      search: searchParams.get('search') || '',
+      category: searchParams.get('category') || '',
+      location: searchParams.get('location') || '',
+      lowStock: searchParams.get('lowStock') === 'true',
+    })
+  }, [searchParams])
 
   // Fetch inventory items
   const fetchItems = async () => {

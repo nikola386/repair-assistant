@@ -183,9 +183,14 @@ export const ticketStorage = {
         where.status = status
       }
 
-      // Build priority filter
+      // Build priority filter - support comma-separated values (e.g., "high,urgent")
       if (priority) {
-        where.priority = priority
+        const priorities = priority.split(',').map(p => p.trim()).filter(Boolean)
+        if (priorities.length === 1) {
+          where.priority = priorities[0]
+        } else if (priorities.length > 1) {
+          where.priority = { in: priorities }
+        }
       }
 
       // Get total count and paginated results

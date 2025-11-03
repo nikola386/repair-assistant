@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
@@ -31,6 +32,7 @@ import {
   HiArrowUp,
   HiArrowDown,
   HiCube,
+  HiUsers,
 } from 'react-icons/hi'
 import { FaWrench, FaStopwatch, FaDollarSign } from 'react-icons/fa'
 
@@ -62,7 +64,7 @@ interface DashboardStats {
   // New high-priority stats
   overdueTickets: number
   highPriorityTickets: number
-  averageRevenuePerTicket: number
+  totalClients: number
   revenueGrowth: number | null
   lowStockItems: number
   statusDistribution: StatusDistributionItem[]
@@ -73,6 +75,7 @@ type ChartType = 'income' | 'expenses' | 'profit' | null
 
 export default function DashboardPage() {
   const { t } = useLanguage()
+  const router = useRouter()
   const [stats, setStats] = useState<DashboardStats>({
     totalRepairs: 0,
     inProgressRepairs: 0,
@@ -86,7 +89,7 @@ export default function DashboardPage() {
     chartData: [],
     overdueTickets: 0,
     highPriorityTickets: 0,
-    averageRevenuePerTicket: 0,
+    totalClients: 0,
     revenueGrowth: null,
     lowStockItems: 0,
     statusDistribution: [],
@@ -118,7 +121,7 @@ export default function DashboardPage() {
           chartData: [],
           overdueTickets: 0,
           highPriorityTickets: 0,
-          averageRevenuePerTicket: 0,
+          totalClients: 0,
           revenueGrowth: null,
           lowStockItems: 0,
           statusDistribution: [],
@@ -140,7 +143,7 @@ export default function DashboardPage() {
         chartData: data.chartData ?? [],
         overdueTickets: data.overdueTickets ?? 0,
         highPriorityTickets: data.highPriorityTickets ?? 0,
-        averageRevenuePerTicket: data.averageRevenuePerTicket ?? 0,
+        totalClients: data.totalClients ?? 0,
         revenueGrowth: data.revenueGrowth ?? null,
         lowStockItems: data.lowStockItems ?? 0,
         statusDistribution: data.statusDistribution ?? [],
@@ -160,7 +163,7 @@ export default function DashboardPage() {
         chartData: [],
         overdueTickets: 0,
         highPriorityTickets: 0,
-        averageRevenuePerTicket: 0,
+        totalClients: 0,
         revenueGrowth: null,
         lowStockItems: 0,
         statusDistribution: [],
@@ -290,6 +293,11 @@ export default function DashboardPage() {
     return t.common?.status?.[status as keyof typeof t.common.status] || status
   }
 
+  // Navigation handlers for stat cards
+  const handleStatCardClick = (path: string) => {
+    router.push(path)
+  }
+
   const renderFullChart = () => {
     if (!openChart || !stats.chartData || stats.chartData.length === 0) return null
 
@@ -387,7 +395,10 @@ export default function DashboardPage() {
           ) : (
             <div className="dashboard-page__stats">
               <div className="dashboard-stats-grid">
-                <div className="stat-card stat-card--repairs">
+                <div 
+                  className="stat-card stat-card--repairs stat-card--clickable"
+                  onClick={() => handleStatCardClick('/tickets')}
+                >
                   <div className="stat-card__icon">
                     <FaWrench />
                   </div>
@@ -399,7 +410,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="stat-card stat-card--in-progress">
+                <div 
+                  className="stat-card stat-card--in-progress stat-card--clickable"
+                  onClick={() => handleStatCardClick('/tickets?status=in_progress')}
+                >
                   <div className="stat-card__icon">
                     <HiCog />
                   </div>
@@ -411,7 +425,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="stat-card stat-card--waiting">
+                <div 
+                  className="stat-card stat-card--waiting stat-card--clickable"
+                  onClick={() => handleStatCardClick('/tickets?status=waiting_parts')}
+                >
                   <div className="stat-card__icon">
                     <HiClock />
                   </div>
@@ -459,7 +476,11 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="stat-card stat-card--overdue">
+                <div 
+                  className="stat-card stat-card--overdue stat-card--clickable"
+                  onClick={() => handleStatCardClick('/tickets')}
+                  title={t.dashboard?.stats?.overdueTickets || 'Overdue Tickets - Click to view all tickets'}
+                >
                   <div className="stat-card__icon">
                     <HiExclamation />
                   </div>
@@ -471,7 +492,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="stat-card stat-card--high-priority">
+                <div 
+                  className="stat-card stat-card--high-priority stat-card--clickable"
+                  onClick={() => handleStatCardClick('/tickets?priority=high,urgent')}
+                >
                   <div className="stat-card__icon">
                     <HiFire />
                   </div>
@@ -483,15 +507,18 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="stat-card stat-card--avg-revenue">
+                <div 
+                  className="stat-card stat-card--clients stat-card--clickable"
+                  onClick={() => handleStatCardClick('/clients')}
+                >
                   <div className="stat-card__icon">
-                    <FaDollarSign />
+                    <HiUsers />
                   </div>
                   <div className="stat-card__content">
                     <h3 className="stat-card__label">
-                      {t.dashboard?.stats?.averageRevenuePerTicket || 'Avg Revenue per Ticket'}
+                      {t.dashboard?.stats?.totalClients || 'Total Clients'}
                     </h3>
-                    <p className="stat-card__value">{formatCurrency(stats.averageRevenuePerTicket)}</p>
+                    <p className="stat-card__value">{stats.totalClients}</p>
                   </div>
                 </div>
 
@@ -515,7 +542,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="stat-card stat-card--low-stock">
+                <div 
+                  className="stat-card stat-card--low-stock stat-card--clickable"
+                  onClick={() => handleStatCardClick('/inventory?lowStock=true')}
+                >
                   <div className="stat-card__icon">
                     <HiCube />
                   </div>
@@ -630,6 +660,12 @@ export default function DashboardPage() {
                             outerRadius={50}
                             fill="#8884d8"
                             dataKey="count"
+                            onClick={(data: any) => {
+                              if (data && data.payload && data.payload.status) {
+                                handleStatCardClick(`/tickets?status=${data.payload.status}`)
+                              }
+                            }}
+                            style={{ cursor: 'pointer' }}
                           >
                             {stats.statusDistribution.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={getStatusBorderColor(entry.status)} />
