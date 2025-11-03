@@ -15,10 +15,7 @@
   }
 
   &__content {
-    background: var(--bg-white);
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px var(--shadow);
+    // No box styling - matches tickets page style
   }
 
   &__search {

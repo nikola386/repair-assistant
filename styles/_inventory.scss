@@ -1,0 +1,624 @@
+// Inventory Styles
+
+.inventory-page {
+  padding: 120px 0 60px;
+  min-height: 80vh;
+  overflow: visible;
+  position: relative;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--text-dark);
+      margin: 0;
+    }
+  }
+
+  &__form {
+    background: var(--bg-white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  &__content {
+    // No box styling - matches tickets page style
+    overflow: visible;
+    position: relative;
+  }
+
+  &__filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  &__search {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 200px;
+
+    &-input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid var(--border-gray);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      transition: border-color 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-yellow);
+      }
+    }
+
+    &-button {
+      padding: 0.75rem 1rem;
+      background: var(--primary-yellow);
+      color: var(--text-dark);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+
+      &:hover {
+        background: var(--primary-yellow-dark);
+      }
+    }
+  }
+
+  &__filter {
+    padding: 0.75rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: var(--bg-white);
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-yellow);
+    }
+  }
+
+  &__checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+  }
+
+  &__checkbox {
+    cursor: pointer;
+  }
+
+  &__loading,
+  &__empty,
+  &__error {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-gray);
+
+    p {
+      margin-top: 1rem;
+    }
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-gray);
+  }
+}
+
+// Inventory Form
+.inventory-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    h3 {
+      font-size: 1.2rem;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary-yellow);
+      padding-bottom: 0.5rem;
+    }
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__label {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+
+    .required {
+      color: var(--danger-red);
+    }
+  }
+
+  &__input,
+  &__textarea {
+    padding: 0.75rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-yellow);
+    }
+  }
+
+  &__textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  &__hint {
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    font-style: italic;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-gray);
+  }
+}
+
+// Inventory Table
+.inventory-table {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  position: relative;
+
+  &__empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-gray);
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    position: relative;
+    overflow: visible;
+
+      thead {
+      background: var(--bg-gray);
+      
+      th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-dark);
+        border-bottom: 2px solid var(--border-gray);
+        
+        // Make actions column narrower
+        &:last-child {
+          width: 60px;
+          min-width: 60px;
+        }
+      }
+    }
+
+      tbody {
+      overflow: visible;
+      position: relative;
+      
+      tr {
+        border-bottom: 1px solid var(--border-gray);
+        transition: background 0.2s ease;
+        position: relative;
+
+        &:hover {
+          background: var(--bg-gray);
+        }
+
+        &.inventory-table__row--low-stock {
+          background: rgba(255, 69, 0, 0.1);
+          
+          &:hover {
+            background: rgba(255, 69, 0, 0.15);
+          }
+        }
+      }
+
+      td {
+        padding: 1rem;
+        color: var(--text-dark);
+        position: relative;
+        overflow: visible;
+        
+        // Make actions cell narrower
+        &:last-child {
+          width: 60px;
+          min-width: 60px;
+          vertical-align: middle;
+          overflow: visible;
+        }
+      }
+    }
+
+    &__edit-input {
+      padding: 0.5rem;
+      border: 1px solid var(--border-gray);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      width: 100%;
+      max-width: 150px;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-yellow);
+      }
+    }
+
+    &__total-row {
+      background: var(--bg-gray);
+      font-weight: 600;
+
+      td {
+        padding: 1rem;
+        border-top: 2px solid var(--border-gray);
+      }
+    }
+
+    &__total-label {
+      text-align: right;
+    }
+
+    &__total-amount {
+      text-align: right;
+    }
+
+    &__edit-actions {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+      
+      .btn {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+      }
+    }
+    
+    &__actions {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
+  }
+
+  &__quantity--low {
+    color: #DC3545;
+    font-weight: 600;
+  }
+
+  &__status {
+    &--low {
+      color: #DC3545;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      background: rgba(220, 53, 69, 0.1);
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    &--ok {
+      color: #22C55E;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      background: rgba(34, 197, 94, 0.1);
+      border-radius: 4px;
+      display: inline-block;
+    }
+  }
+
+  &__menu {
+    position: relative;
+    display: inline-block;
+    z-index: 10;
+  }
+
+  &__menu-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: var(--text-gray);
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--bg-gray);
+      color: var(--text-dark);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__menu-dropdown {
+    position: fixed;
+    min-width: 140px;
+    background: var(--white);
+    border: 1px solid var(--border-gray);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem;
+    z-index: 1000;
+    animation: fadeInDown 0.2s ease-out;
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  &__menu-item {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-dark);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+    display: block;
+
+    &:hover:not(:disabled) {
+      background: var(--bg-gray);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &--danger {
+      color: #DC3545;
+
+      &:hover:not(:disabled) {
+        background: rgba(220, 53, 69, 0.1);
+        color: #DC3545;
+      }
+    }
+  }
+
+  &__adjust-form {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: var(--bg-gray);
+    border-radius: 4px;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  &__adjust-input {
+    padding: 0.5rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 120px;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-yellow);
+    }
+  }
+
+  &__adjust-actions {
+    display: flex;
+    gap: 0.25rem;
+    
+    .btn {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+  }
+}
+
+// Inventory Modal
+.inventory-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  &__content {
+    background: var(--white);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 32px;
+    border-bottom: 2px solid var(--border-gray);
+  }
+
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+  }
+
+  &__close {
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-gray);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    line-height: 1;
+
+    &:hover {
+      background: var(--bg-gray);
+      color: var(--text-dark);
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+  }
+
+  &__body {
+    padding: 32px;
+    overflow-y: auto;
+    flex: 1;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .inventory-page {
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__filters {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__search {
+      width: 100%;
+    }
+  }
+
+  .inventory-table {
+    &__table {
+      font-size: 0.8rem;
+
+      thead th,
+      tbody td {
+        padding: 0.5rem;
+      }
+    }
+  }
+
+  .inventory-modal {
+    padding: 10px;
+
+    &__content {
+      max-width: 100%;
+      max-height: 95vh;
+    }
+
+    &__header {
+      padding: 16px 20px;
+    }
+
+    &__title {
+      font-size: 1.25rem;
+    }
+
+    &__body {
+      padding: 20px;
+    }
+  }
+}
+

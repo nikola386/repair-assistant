@@ -42,7 +42,7 @@ export default function OnboardingPage() {
   const [logoPreview, setLogoPreview] = useState<string>('')
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY_COLOR)
   const [secondaryColor, setSecondaryColor] = useState(DEFAULT_SECONDARY_COLOR)
-  const [language, setLanguage] = useState<Language>('en')
+  const [language, setLocalLanguage] = useState<Language>('en')
 
   // Country dropdown state
   const [countries, setCountries] = useState<Country[]>([])
@@ -103,7 +103,7 @@ export default function OnboardingPage() {
               if (data.settings) {
                 setPrimaryColor(data.settings.primaryColor || DEFAULT_PRIMARY_COLOR)
                 setSecondaryColor(data.settings.secondaryColor || DEFAULT_SECONDARY_COLOR)
-                setLanguage((data.settings.language as Language) || 'en')
+                setLocalLanguage((data.settings.language as Language) || 'en')
               }
             }
             setFetching(false)
@@ -606,7 +606,7 @@ export default function OnboardingPage() {
                   <select
                     id="language"
                     value={language}
-                    onChange={(e) => setLanguage(e.target.value as Language)}
+                    onChange={(e) => setLocalLanguage(e.target.value as Language)}
                     className="form-input"
                     disabled={loading}
                   >

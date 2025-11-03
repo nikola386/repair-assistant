@@ -45,6 +45,7 @@ model Store {
   customers     Customer[]
   repairTickets RepairTicket[]
   settings      Settings?
+  inventoryItems InventoryItem[]
 
   @@map("stores")
 }
@@ -197,4 +198,29 @@ model Account {
   @@unique([provider, providerAccountId])
   @@index([userId])
   @@map("accounts")
+}
+
+model InventoryItem {
+  id             String   @id @default(uuid())
+  storeId        String   @map("store_id")
+  name           String
+  sku            String?  @map("sku")
+  description    String?  @db.Text
+  category       String?
+  location       String?
+  currentQuantity Decimal  @default(0) @map("current_quantity") @db.Decimal(10, 2)
+  minQuantity    Decimal  @default(0) @map("min_quantity") @db.Decimal(10, 2)
+  unitPrice      Decimal? @map("unit_price") @db.Decimal(10, 2)
+  costPrice      Decimal? @map("cost_price") @db.Decimal(10, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@unique([storeId, sku])
+  @@index([storeId])
+  @@index([category])
+  @@index([sku])
+  @@index([currentQuantity])
+  @@map("inventory_items")
 }
