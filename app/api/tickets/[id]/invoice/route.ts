@@ -6,6 +6,7 @@ import { db } from '@/lib/db'
 import React from 'react'
 import { renderToBuffer } from '@react-pdf/renderer'
 import InvoicePDF from '@/components/reports/InvoicePDF'
+import { ensurePdfFontsRegistered } from '@/lib/pdfFonts'
 
 // Mark route as dynamic
 export const dynamic = 'force-dynamic'
@@ -69,6 +70,9 @@ export async function GET(
     if (!ticket.expenses) {
       ticket.expenses = await ticketStorage.getExpensesByTicketId(ticket.id)
     }
+
+    // Ensure fonts are registered before rendering
+    await ensurePdfFontsRegistered()
 
     // Render PDF
     const pdfBuffer = await renderToBuffer(

@@ -2,6 +2,7 @@ import { RepairTicket, CreateTicketInput, UpdateTicketInput, PaginatedTicketsRes
 import { db } from './db'
 import { del } from '@vercel/blob'
 import { Decimal } from '@prisma/client/runtime/library'
+import { inventoryStorage } from './inventoryStorage'
 // Prisma generates TicketImage type automatically - use it directly
 // @ts-expect-error - Prisma types available after generate, TS server may need restart
 import type { TicketImage as PrismaTicketImage, Expense as PrismaExpense } from '@prisma/client'
@@ -18,6 +19,7 @@ const mapPrismaExpense = (expense: PrismaExpense): Expense => {
   return {
     id: expense.id,
     ticketId: expense.ticketId,
+    inventoryItemId: expense.inventoryItemId ?? undefined,
     name: expense.name,
     quantity: expense.quantity.toNumber(),
     price: expense.price.toNumber(),
@@ -565,9 +567,36 @@ export const ticketStorage = {
 
   createExpense: async (input: CreateExpenseInput): Promise<Expense> => {
     try {
+      // If expense is linked to an inventory item, deduct quantity
+      if (input.inventoryItemId) {
+        // Get the ticket to find the storeId
+        const ticket = await db.repairTicket.findUnique({
+          where: { id: input.ticketId },
+        })
+
+        if (!ticket || !ticket.storeId) {
+          throw new Error('Ticket not found')
+        }
+
+        // Verify inventory item belongs to the same store
+        const inventoryItem = await inventoryStorage.getById(input.inventoryItemId, ticket.storeId)
+        if (!inventoryItem) {
+          throw new Error('Inventory item not found or does not belong to this store')
+        }
+
+        // Check if enough quantity is available
+        if (inventoryItem.currentQuantity < input.quantity) {
+          throw new Error(`Insufficient inventory. Available: ${inventoryItem.currentQuantity}, Required: ${input.quantity}`)
+        }
+
+        // Deduct quantity from inventory
+        await inventoryStorage.adjustQuantity(input.inventoryItemId, ticket.storeId, -input.quantity)
+      }
+
       const result = await db.expense.create({
         data: {
           ticketId: input.ticketId,
+          inventoryItemId: input.inventoryItemId ?? null,
           name: input.name,
           quantity: new Decimal(input.quantity.toString()),
           price: new Decimal(input.price.toString()),
@@ -583,6 +612,44 @@ export const ticketStorage = {
 
   updateExpense: async (expenseId: string, input: UpdateExpenseInput): Promise<Expense | null> => {
     try {
+      // Get existing expense to check if it's linked to inventory
+      const existingExpense = await ticketStorage.getExpenseById(expenseId)
+      if (!existingExpense) {
+        throw new Error('Expense not found')
+      }
+
+      // If expense is linked to inventory and quantity is being updated, adjust inventory
+      if (existingExpense.inventoryItemId && input.quantity !== undefined) {
+        const ticket = await db.repairTicket.findUnique({
+          where: { id: existingExpense.ticketId },
+        })
+
+        if (!ticket || !ticket.storeId) {
+          throw new Error('Ticket not found')
+        }
+
+        const quantityChange = input.quantity - existingExpense.quantity
+        
+        if (quantityChange !== 0) {
+          // Check if enough quantity is available (if decreasing)
+          if (quantityChange < 0) {
+            // Restoring quantity, no check needed
+          } else {
+            // Deducting more quantity, check availability
+            const inventoryItem = await inventoryStorage.getById(existingExpense.inventoryItemId, ticket.storeId)
+            if (!inventoryItem) {
+              throw new Error('Inventory item not found')
+            }
+            if (inventoryItem.currentQuantity < quantityChange) {
+              throw new Error(`Insufficient inventory. Available: ${inventoryItem.currentQuantity}, Required: ${quantityChange}`)
+            }
+          }
+
+          // Adjust inventory quantity
+          await inventoryStorage.adjustQuantity(existingExpense.inventoryItemId, ticket.storeId, -quantityChange)
+        }
+      }
+
       const updateData: any = {}
 
       if (input.name !== undefined) {
@@ -597,7 +664,7 @@ export const ticketStorage = {
 
       if (Object.keys(updateData).length === 0) {
         // No updates, just return the existing expense
-        return await ticketStorage.getExpenseById(expenseId) || null
+        return existingExpense
       }
 
       const result = await db.expense.update({
@@ -614,9 +681,29 @@ export const ticketStorage = {
 
   deleteExpense: async (expenseId: string): Promise<boolean> => {
     try {
+      // Get existing expense to check if it's linked to inventory
+      const existingExpense = await ticketStorage.getExpenseById(expenseId)
+      
+      // Delete the expense first
       await db.expense.delete({
         where: { id: expenseId },
       })
+
+      // If expense was linked to inventory, restore the quantity
+      if (existingExpense?.inventoryItemId) {
+        const ticket = await db.repairTicket.findUnique({
+          where: { id: existingExpense.ticketId },
+        })
+
+        if (ticket && ticket.storeId) {
+          // Restore quantity to inventory
+          await inventoryStorage.adjustQuantity(
+            existingExpense.inventoryItemId,
+            ticket.storeId,
+            existingExpense.quantity
+          )
+        }
+      }
 
       return true
     } catch (error) {

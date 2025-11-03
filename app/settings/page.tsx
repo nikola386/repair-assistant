@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { HiCamera, HiTrash } from 'react-icons/hi'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Language, getAllLanguages } from '@/lib/languages'
@@ -294,7 +295,7 @@ export default function SettingsPage() {
         await updateSession({
           user: {
             ...session?.user,
-            image: data.user.profile_image,
+            image: data.user.profileImage,
           },
         })
       } else {
@@ -624,31 +625,30 @@ export default function SettingsPage() {
                               {userInitials}
                             </div>
                           )}
-                        </div>
-                        <div className="settings-page__avatar-actions">
-                          <label className="settings-page__upload-btn" htmlFor="profile-image-upload">
-                            {uploadingImage
-                              ? t.profile?.uploading || 'Uploading...'
-                              : t.profile?.uploadImage || 'Upload Image'}
-                            <input
-                              id="profile-image-upload"
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              disabled={uploadingImage}
-                              className="settings-page__hidden-input"
-                            />
-                          </label>
-                          {user?.profileImage && (
-                            <button
-                              className="settings-page__delete-btn"
-                              onClick={handleDeleteImage}
-                              disabled={uploadingImage}
-                              type="button"
-                            >
-                              {t.profile?.deleteImage || 'Delete'}
-                            </button>
-                          )}
+                          <div className="settings-page__avatar-overlay">
+                            <label className="settings-page__avatar-upload-btn" htmlFor="profile-image-upload" aria-label={uploadingImage ? t.profile?.uploading || 'Uploading...' : t.profile?.changeImage || 'Change Image'}>
+                              <HiCamera className="settings-page__avatar-icon" />
+                              <input
+                                id="profile-image-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                disabled={uploadingImage}
+                                className="settings-page__hidden-input"
+                              />
+                            </label>
+                            {user?.profileImage && (
+                              <button
+                                className="settings-page__avatar-delete-btn"
+                                onClick={handleDeleteImage}
+                                disabled={uploadingImage}
+                                type="button"
+                                aria-label={t.profile?.deleteImage || 'Delete Image'}
+                              >
+                                <HiTrash className="settings-page__avatar-icon" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
 

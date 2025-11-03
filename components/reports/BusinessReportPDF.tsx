@@ -1,11 +1,13 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { PDF_FONT_FAMILY } from '@/lib/pdfFonts'
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica',
+    // Use Roboto for Cyrillic support, falls back to Times-Roman if registration fails
+    fontFamily: PDF_FONT_FAMILY,
     backgroundColor: '#FFFFFF',
   },
   header: {

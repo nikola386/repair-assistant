@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protect all application routes
-  const protectedPaths = ['/dashboard', '/tickets', '/clients', '/reports', '/settings', '/profile']
+  const protectedPaths = ['/dashboard', '/tickets', '/clients', '/reports', '/settings']
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
   
   if (isProtectedPath) {
@@ -103,7 +103,6 @@ export const config = {
     '/clients/:path*',
     '/reports/:path*',
     '/settings/:path*',
-    '/profile/:path*',
     '/login',
     '/register',
     '/api/:path*',

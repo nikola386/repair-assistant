@@ -92,7 +92,7 @@ export async function POST(
   try {
     logger.info('Creating expense', { ticketId: params.id, userId: session.user.id, storeId: user.storeId }, requestId)
     const body = await request.json()
-    const { name, quantity, price } = body
+    const { name, quantity, price, inventoryItemId } = body
 
     // Validate required fields
     if (!name || quantity === undefined || price === undefined) {
@@ -127,6 +127,7 @@ export async function POST(
 
     const expenseInput: CreateExpenseInput = {
       ticketId: params.id,
+      inventoryItemId: inventoryItemId || undefined,
       name: name.trim(),
       quantity: numQuantity,
       price: numPrice,
@@ -144,6 +145,15 @@ export async function POST(
     const duration = Date.now() - startTime
     logger.error('Error creating expense', error, requestId)
     logger.error('Error creating expense details', { ticketId: params.id, duration }, requestId)
+    
+    // Return more specific error messages
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

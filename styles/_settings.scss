@@ -201,7 +201,19 @@
   }
 
   &__avatar-wrapper {
+    position: relative;
     flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.02);
+
+      .settings-page__avatar-overlay {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
   }
 
   &__avatar {
@@ -226,58 +238,80 @@
     border: 2px solid #e5e5e5;
   }
 
-  &__avatar-actions {
+  &__avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    flex: 1;
-
-    @media (max-width: 480px) {
-      width: 100%;
-      align-items: center;
-    }
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 10;
   }
 
-  &__upload-btn,
-  &__delete-btn {
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background: #fff;
-    color: var(--black);
+  &__avatar-upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    color: #fff;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-family: inherit;
-    display: inline-block;
-    width: fit-content;
+    padding: 0;
 
     &:hover {
-      background: #f9fafb;
-      border-color: #9ca3af;
+      transform: scale(1.1);
     }
 
     &:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
+  }
 
-    @media (max-width: 480px) {
-      width: 100%;
-      text-align: center;
+  &__avatar-delete-btn {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(220, 38, 38, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+
+    &:hover {
+      background: rgba(220, 38, 38, 1);
+      transform: scale(1.1);
+      border-color: #fff;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   }
 
-  &__delete-btn {
-    color: #dc2626;
-    border-color: #fecaca;
-    background: #fef2f2;
-
-    &:hover {
-      background: #fee2e2;
-      border-color: #fca5a5;
-    }
+  &__avatar-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
   }
 
   // Form
@@ -506,6 +540,31 @@
       width: 80px;
       height: 80px;
       font-size: 1.75rem;
+    }
+
+    &__avatar-overlay {
+      // On touch devices, show overlay on tap/touch
+      @media (hover: none) and (pointer: coarse) {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    &__avatar-upload-btn {
+      width: 36px;
+      height: 36px;
+    }
+
+    &__avatar-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    &__avatar-delete-btn {
+      width: 24px;
+      height: 24px;
+      top: 0.15rem;
+      right: 0.15rem;
     }
 
     &__card-header,

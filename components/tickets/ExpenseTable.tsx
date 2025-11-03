@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Expense } from '../../types/ticket'
+import { InventoryItem } from '../../types/inventory'
 import { showAlert } from '../../lib/alerts'
 
 interface ExpenseTableProps {
@@ -19,6 +20,13 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
   const [isAdding, setIsAdding] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
+  const [isLoadingInventory, setIsLoadingInventory] = useState(false)
+  const [inventorySearchQuery, setInventorySearchQuery] = useState('')
+  const [showInventoryDropdown, setShowInventoryDropdown] = useState(false)
+  const [filteredInventoryItems, setFilteredInventoryItems] = useState<InventoryItem[]>([])
+  const inventorySearchRef = useRef<HTMLInputElement>(null)
+  const inventoryDropdownRef = useRef<HTMLDivElement>(null)
   
   // Handle external trigger to add expense
   useEffect(() => {
@@ -31,10 +39,33 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
   }, [triggerAdd, editable, isAdding, onAddTriggered])
   
   const [newExpense, setNewExpense] = useState({
+    inventoryItemId: '',
     name: '',
     quantity: '',
     price: '',
   })
+  
+  // Fetch inventory items on mount
+  useEffect(() => {
+    const fetchInventoryItems = async () => {
+      try {
+        setIsLoadingInventory(true)
+        const response = await fetch('/api/inventory?limit=1000')
+        if (response.ok) {
+          const data = await response.json()
+          setInventoryItems(data.items || [])
+        }
+      } catch (error) {
+        console.error('Error fetching inventory items:', error)
+      } finally {
+        setIsLoadingInventory(false)
+      }
+    }
+    
+    if (editable) {
+      fetchInventoryItems()
+    }
+  }, [editable])
 
   const [editingExpense, setEditingExpense] = useState({
     name: '',
@@ -64,6 +95,70 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
     }
   }
 
+  // Filter inventory items based on search query
+  useEffect(() => {
+    if (!inventorySearchQuery.trim()) {
+      setFilteredInventoryItems([])
+      setShowInventoryDropdown(false)
+      return
+    }
+
+    const query = inventorySearchQuery.toLowerCase()
+    const filtered = inventoryItems
+      .filter(item => {
+        const nameMatch = item.name.toLowerCase().includes(query)
+        const skuMatch = item.sku?.toLowerCase().includes(query)
+        return nameMatch || skuMatch
+      })
+      .slice(0, 20) // Limit to 20 results for performance
+
+    setFilteredInventoryItems(filtered)
+    setShowInventoryDropdown(filtered.length > 0)
+  }, [inventorySearchQuery, inventoryItems])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        inventoryDropdownRef.current &&
+        !inventoryDropdownRef.current.contains(event.target as Node) &&
+        inventorySearchRef.current &&
+        !inventorySearchRef.current.contains(event.target as Node)
+      ) {
+        setShowInventoryDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleInventoryItemSelect = (item: InventoryItem) => {
+    setNewExpense({
+      inventoryItemId: item.id,
+      name: item.name,
+      quantity: '',
+      price: item.unitPrice?.toString() || item.costPrice?.toString() || '',
+    })
+    setInventorySearchQuery('')
+    setShowInventoryDropdown(false)
+    setFilteredInventoryItems([])
+  }
+
+  const handleInventoryItemChange = (inventoryItemId: string) => {
+    const selectedItem = inventoryItems.find(item => item.id === inventoryItemId)
+    if (selectedItem) {
+      setNewExpense({
+        inventoryItemId: selectedItem.id,
+        name: selectedItem.name,
+        quantity: '',
+        price: selectedItem.unitPrice?.toString() || selectedItem.costPrice?.toString() || '',
+      })
+    } else {
+      setNewExpense({ ...newExpense, inventoryItemId: '' })
+    }
+  }
+
   const handleAddExpense = async () => {
     if (!newExpense.name || !newExpense.quantity || !newExpense.price) {
       showAlert.error('Please fill in all fields')
@@ -78,12 +173,22 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
       return
     }
 
+    // If inventory item is selected, verify quantity is available
+    if (newExpense.inventoryItemId) {
+      const selectedItem = inventoryItems.find(item => item.id === newExpense.inventoryItemId)
+      if (selectedItem && selectedItem.currentQuantity < quantity) {
+        showAlert.error(`Insufficient inventory. Available: ${selectedItem.currentQuantity}, Required: ${quantity}`)
+        return
+      }
+    }
+
     try {
       setIsLoading(true)
       const response = await fetch(`/api/tickets/${ticketId}/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          inventoryItemId: newExpense.inventoryItemId || undefined,
           name: newExpense.name,
           quantity: quantity,
           price: price,
@@ -92,7 +197,16 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
 
       if (response.ok) {
         await fetchExpenses()
-        setNewExpense({ name: '', quantity: '', price: '' })
+        // Refresh inventory items to reflect updated quantities
+        const inventoryResponse = await fetch('/api/inventory?limit=1000')
+        if (inventoryResponse.ok) {
+          const inventoryData = await inventoryResponse.json()
+          setInventoryItems(inventoryData.items || [])
+        }
+        setNewExpense({ inventoryItemId: '', name: '', quantity: '', price: '' })
+        setInventorySearchQuery('')
+        setShowInventoryDropdown(false)
+        setFilteredInventoryItems([])
         setIsAdding(false)
       } else {
         const error = await response.json()
@@ -183,7 +297,10 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
 
   const cancelAdd = () => {
     setIsAdding(false)
-    setNewExpense({ name: '', quantity: '', price: '' })
+    setNewExpense({ inventoryItemId: '', name: '', quantity: '', price: '' })
+    setInventorySearchQuery('')
+    setShowInventoryDropdown(false)
+    setFilteredInventoryItems([])
   }
 
   const cancelEdit = () => {
@@ -216,6 +333,87 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
       <div className="expense-table__content">
         {isAdding && editable && (
           <div className="expense-table__add-form">
+            <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+              <input
+                ref={inventorySearchRef}
+                type="text"
+                placeholder="Search inventory items (optional)..."
+                value={inventorySearchQuery}
+                onChange={(e) => setInventorySearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (filteredInventoryItems.length > 0) {
+                    setShowInventoryDropdown(true)
+                  }
+                }}
+                className="expense-table__input"
+                style={{ width: '100%' }}
+              />
+              {showInventoryDropdown && filteredInventoryItems.length > 0 && (
+                <div
+                  ref={inventoryDropdownRef}
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    backgroundColor: 'white',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    zIndex: 1000,
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    marginTop: '4px',
+                  }}
+                >
+                  {filteredInventoryItems.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleInventoryItemSelect(item)}
+                      style={{
+                        padding: '10px 15px',
+                        cursor: 'pointer',
+                        borderBottom: '1px solid #f0f0f0',
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'white'
+                      }}
+                    >
+                      <div style={{ fontWeight: '500', marginBottom: '4px' }}>
+                        {item.name}
+                        {item.sku && <span style={{ color: '#666', marginLeft: '8px' }}>({item.sku})</span>}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#666' }}>
+                        Qty: {item.currentQuantity}
+                        {item.unitPrice && ` • Price: $${item.unitPrice.toFixed(2)}`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {inventorySearchQuery && filteredInventoryItems.length === 0 && !isLoadingInventory && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'white',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  padding: '10px 15px',
+                  marginTop: '4px',
+                  fontSize: '14px',
+                  color: '#666',
+                  zIndex: 1000,
+                }}>
+                  No items found
+                </div>
+              )}
+            </div>
             <div className="expense-table__form-row">
               <input
                 type="text"
@@ -228,7 +426,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                 type="number"
                 placeholder="Quantity"
                 min="0"
-                step="0.01"
+                step="1"
                 value={newExpense.quantity}
                 onChange={(e) => setNewExpense({ ...newExpense, quantity: e.target.value })}
                 className="expense-table__input"
@@ -247,7 +445,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                   type="button"
                   className="btn btn-primary btn-sm"
                   onClick={handleAddExpense}
-                  disabled={isLoading}
+                  disabled={isLoading || isLoadingInventory}
                 >
                   Save
                 </button>
@@ -294,7 +492,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                           <input
                             type="number"
                             min="0"
-                            step="0.01"
+                            step="1"
                             value={editingExpense.quantity}
                             onChange={(e) => setEditingExpense({ ...editingExpense, quantity: e.target.value })}
                             className="expense-table__table__edit-input"

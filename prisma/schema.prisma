@@ -149,17 +149,20 @@ model TicketImage {
 }
 
 model Expense {
-  id        String   @id @default(uuid())
-  ticketId  String   @map("ticket_id")
-  name      String
-  quantity  Decimal  @db.Decimal(10, 2)
-  price     Decimal  @db.Decimal(10, 2)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid())
+  ticketId       String   @map("ticket_id")
+  inventoryItemId String? @map("inventory_item_id")
+  name           String
+  quantity       Decimal  @db.Decimal(10, 2)
+  price          Decimal  @db.Decimal(10, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  ticket RepairTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticket        RepairTicket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
 
   @@index([ticketId])
+  @@index([inventoryItemId])
   @@map("expenses")
 }
 
@@ -215,7 +218,8 @@ model InventoryItem {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  store    Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  expenses Expense[]
 
   @@unique([storeId, sku])
   @@index([storeId])

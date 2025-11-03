@@ -54,9 +54,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       // Update token when profile is updated
       if (trigger === 'update' && sessionData?.user) {
-        token.image = sessionData.user.image || token.image
-        token.email = sessionData.user.email || token.email
-        token.name = sessionData.user.name || token.name
+        // Explicitly check for undefined to allow null values to be set
+        if (sessionData.user.image !== undefined) {
+          token.image = sessionData.user.image
+        }
+        if (sessionData.user.email !== undefined) {
+          token.email = sessionData.user.email
+        }
+        if (sessionData.user.name !== undefined) {
+          token.name = sessionData.user.name
+        }
       }
       return token
     },

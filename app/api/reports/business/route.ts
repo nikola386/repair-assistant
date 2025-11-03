@@ -6,6 +6,7 @@ import React from 'react'
 import { renderToBuffer } from '@react-pdf/renderer'
 import BusinessReportPDF from '@/components/reports/BusinessReportPDF'
 import { Prisma } from '@prisma/client'
+import { ensurePdfFontsRegistered } from '@/lib/pdfFonts'
 
 // Mark route as dynamic
 export const dynamic = 'force-dynamic'
@@ -235,6 +236,9 @@ export async function GET(request: NextRequest) {
       byDeviceType,
       topCustomers,
     }
+
+    // Ensure fonts are registered before rendering
+    await ensurePdfFontsRegistered()
 
     // Render PDF
     const pdfBuffer = await renderToBuffer(

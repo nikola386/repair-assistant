@@ -46,6 +46,10 @@ function generateChartData(
     price: Decimal
     createdAt: Date
     ticketId: string
+    inventoryItemId: string | null
+    inventoryItem: {
+      costPrice: Decimal | null
+    } | null
   }>
 ): ChartDataPoint[] {
   // Determine interval based on period length
@@ -120,7 +124,14 @@ function generateChartData(
   for (const expense of expenses) {
     const date = new Date(expense.createdAt)
     date.setHours(0, 0, 0, 0)
-    const amount = expense.quantity.toNumber() * expense.price.toNumber()
+    
+    // Use costPrice from inventory item if available, otherwise use expense price
+    let costPerUnit = expense.price.toNumber()
+    if (expense.inventoryItemId && expense.inventoryItem?.costPrice) {
+      costPerUnit = expense.inventoryItem.costPrice.toNumber()
+    }
+    
+    const amount = expense.quantity.toNumber() * costPerUnit
     
     let dateKey: string
     if (intervalDays === 1) {
@@ -234,7 +245,7 @@ export async function GET(request: NextRequest) {
     const completedTickets = tickets.filter((t: typeof tickets[0]) => t.status === 'completed')
     const completedTicketIds = completedTickets.map(t => t.id)
 
-    // Get expenses only for completed tickets in the date range, with creation date
+    // Get expenses only for completed tickets in the date range, with creation date and inventory item info
     const expenses = completedTicketIds.length > 0 
       ? await db.expense.findMany({
           where: {
@@ -247,6 +258,12 @@ export async function GET(request: NextRequest) {
             price: true,
             createdAt: true,
             ticketId: true,
+            inventoryItemId: true,
+            inventoryItem: {
+              select: {
+                costPrice: true,
+              },
+            },
           },
         })
       : []
@@ -264,10 +281,16 @@ export async function GET(request: NextRequest) {
       income += cost
     }
 
-    // Calculate expenses: sum of all expense amounts (quantity * price) for completed tickets only
+    // Calculate expenses: sum of all expense amounts using costPrice for inventory items
     let totalExpenses = 0
     for (const expense of expenses) {
-      const amount = expense.quantity.toNumber() * expense.price.toNumber()
+      // Use costPrice from inventory item if available, otherwise use expense price
+      let costPerUnit = expense.price.toNumber()
+      if (expense.inventoryItemId && expense.inventoryItem?.costPrice) {
+        costPerUnit = expense.inventoryItem.costPrice.toNumber()
+      }
+      
+      const amount = expense.quantity.toNumber() * costPerUnit
       totalExpenses += amount
     }
 

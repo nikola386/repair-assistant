@@ -8,6 +8,7 @@ export type { TicketImage } from '../lib/ticketStorage'
 export interface Expense {
   id: string
   ticketId: string
+  inventoryItemId?: string
   name: string
   quantity: number
   price: number
@@ -80,6 +81,7 @@ export interface PaginatedTicketsResponse {
 
 export interface CreateExpenseInput {
   ticketId: string
+  inventoryItemId?: string
   name: string
   quantity: number
   price: number

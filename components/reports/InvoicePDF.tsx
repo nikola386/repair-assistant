@@ -1,13 +1,15 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { RepairTicket } from '@/types/ticket'
+import { PDF_FONT_FAMILY } from '@/lib/pdfFonts'
 
 // Define styles for the PDF
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica',
+    // Use Roboto for Cyrillic support, falls back to Times-Roman if registration fails
+    fontFamily: PDF_FONT_FAMILY,
     backgroundColor: '#FFFFFF',
   },
   header: {
