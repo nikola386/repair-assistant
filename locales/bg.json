@@ -52,7 +52,8 @@
       "selectBothDates": "Моля, изберете и начална, и крайна дата",
       "startBeforeEnd": "Началната дата трябва да е преди крайната дата",
       "confirmDelete": "Сигурни ли сте, че искате да изтриете този артикул?",
-      "noItemsFound": "Не са намерени артикули"
+      "noItemsFound": "Не са намерени артикули",
+      "itemsPerPage": "Артикули на страница:"
     },
     "labels": {
       "actions": "Действия",
@@ -125,6 +126,8 @@
     "actualCompletionDate": "Реална Дата на Завършване",
     "estimatedCost": "Очаквана Цена",
     "actualCost": "Реална Цена",
+    "deviceInfo": "Устройство",
+    "issueDescription": "Описание на Проблема",
     "printQr": "Принтирай QR Код",
     "form": {
       "title": "Създай Ремонтен Билет",
@@ -202,6 +205,10 @@
     "title": "Клиенти",
     "searchPlaceholder": "Търсене на клиенти...",
     "noClientsFound": "Не са намерени клиенти",
+    "name": "Име",
+    "email": "Имейл",
+    "phone": "Телефон",
+    "tickets": "Билети",
     "totalTickets": "Общо Билети",
     "repairs": "Ремонти",
     "noRepairs": "Не са намерени ремонти за този клиент"
@@ -254,6 +261,7 @@
       "allCategories": "Всички Категории",
       "allLocations": "Всички Местоположения",
       "pageInfo": "Страница {page} от {totalPages} ({total} артикула)",
+      "cancel": "Отказ",
       "createSuccess": "Артикулът е създаден успешно",
       "createError": "Грешка при създаване на артикул",
       "fetchError": "Грешка при зареждане на артикули"
@@ -332,12 +340,28 @@
       "terms4": "• Тази фактура е валидна за 30 дни от датата на издаване.",
       "thankYou": "Благодарим Ви!",
       "generatedOn": "Генериран на",
-      "repairShop": "Сервиз"
+      "repairShop": "Сервиз",
+      "vat": "ДДС"
     }
   },
   "dashboard": {
     "title": "Табло",
-    "selectPeriod": "Избери Период"
+    "selectPeriod": "Избери Период",
+    "periods": {
+      "last7Days": "Последни 7 Дни",
+      "last30Days": "Последни 30 Дни",
+      "last180Days": "Последни 180 Дни",
+      "last360Days": "Последна Година"
+    },
+    "stats": {
+      "totalRepairs": "Общо Ремонти",
+      "inProgress": "В Процес",
+      "waiting": "Изчакване",
+      "income": "Приходи",
+      "expenses": "Разходи",
+      "grossProfit": "Брутна Печалба",
+      "grossProfitPercentage": "Брутна Печалба %"
+    }
   },
   "settings": {
     "title": "Настройки",
@@ -354,7 +378,11 @@
     "resetColors": "Възстанови по подразбиране",
     "colorsUpdateError": "Неуспешна актуализация на цветовете",
     "appearanceUpdateSuccess": "Външният вид е актуализиран успешно",
-    "appearanceUpdateError": "Неуспешна актуализация на външния вид"
+    "appearanceUpdateError": "Неуспешна актуализация на външния вид",
+    "store": "Информация за Магазина",
+    "storeDescription": "Актуализирайте информацията за вашия магазин.",
+    "storeUpdateSuccess": "Информацията за магазина е актуализирана успешно",
+    "storeUpdateError": "Грешка при актуализация на информацията за магазина"
   },
   "onboarding": {
     "title": "Добре дошли! Нека Настройм Вашият Магазин",
@@ -382,6 +410,8 @@
     "websitePlaceholder": "https://example.com",
     "phone": "Телефон",
     "phonePlaceholder": "Въведете телефонен номер",
+    "currency": "Валута",
+    "vatNumber": "ДДС Номер",
     "vatNumberPlaceholder": "ДДС Номер (по избор)",
     "invalidVatNumber": "Невалиден ДДС номер",
     "logo": "Лого",

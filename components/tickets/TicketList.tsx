@@ -400,7 +400,7 @@ export default function TicketList({
 
         <div className="ticket-list__view-controls">
           <div className="ticket-list__items-per-page ticket-list__filter-group">
-            <label htmlFor="items-per-page">Items per page:</label>
+            <label htmlFor="items-per-page">{t.common.messages.itemsPerPage}</label>
             <select
               id="items-per-page"
               value={pagination.limit}

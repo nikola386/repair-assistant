@@ -112,7 +112,7 @@ export default function ClientDetailPage() {
           <div className="client-detail-page__content">
             <div className="client-detail-page__info">
               <div className="client-detail-page__section">
-                <h2>{t.tickets?.customerInfo || 'Customer Information'}</h2>
+                <h2>{t.common.info.customerInformation}</h2>
                 <div className="client-detail-page__info-grid">
                   <div>
                     <label>{t.tickets?.form?.customerName || 'Name'}</label>

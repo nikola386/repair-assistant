@@ -125,7 +125,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
       },
       {
         accessorKey: 'status',
-        header: 'Status',
+        header: t.common.fields.status,
         enableSorting: true,
         cell: (info) => {
           const ticket = info.row.original
@@ -141,7 +141,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
       },
       {
         accessorKey: 'priority',
-        header: t.tickets.form?.priority || 'Priority',
+        header: t.common.fields.priority,
         enableSorting: true,
         cell: (info) => {
           const ticket = info.row.original
