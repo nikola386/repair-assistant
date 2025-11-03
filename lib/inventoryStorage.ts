@@ -64,14 +64,24 @@ export const inventoryStorage = {
         ]
       }
 
-      // Category filter
+      // Category filter - support comma-separated values (e.g., "Electronics,Accessories")
       if (filters?.category) {
-        where.category = filters.category
+        const categories = filters.category.split(',').map(c => c.trim()).filter(Boolean)
+        if (categories.length === 1) {
+          where.category = categories[0]
+        } else if (categories.length > 1) {
+          where.category = { in: categories }
+        }
       }
 
-      // Location filter
+      // Location filter - support comma-separated values (e.g., "Warehouse A,Warehouse B")
       if (filters?.location) {
-        where.location = filters.location
+        const locations = filters.location.split(',').map(l => l.trim()).filter(Boolean)
+        if (locations.length === 1) {
+          where.location = locations[0]
+        } else if (locations.length > 1) {
+          where.location = { in: locations }
+        }
       }
 
       // Get all items matching the base filters (for low stock, we need to get all then filter)

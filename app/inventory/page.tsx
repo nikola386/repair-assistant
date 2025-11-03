@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams, usePathname } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
+import MultiSelect from '@/components/ui/MultiSelect'
 import InventoryTable from '@/components/inventory/InventoryTable'
 import InventoryForm from '@/components/inventory/InventoryForm'
 import { InventoryItem, CreateInventoryItemInput } from '@/types/inventory'
@@ -13,6 +14,7 @@ import { showAlert } from '@/lib/alerts'
 export default function InventoryPage() {
   const { t } = useLanguage()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const [items, setItems] = useState<InventoryItem[]>([])
   const [pagination, setPagination] = useState({
     page: 1,
@@ -26,26 +28,38 @@ export default function InventoryPage() {
   const [categories, setCategories] = useState<string[]>([])
   const [locations, setLocations] = useState<string[]>([])
   
+  // Convert comma-separated string to array for multi-select
+  const parseFilterArray = (value: string | undefined): string[] => {
+    if (!value) return []
+    return value.split(',').map(v => v.trim()).filter(Boolean)
+  }
+
   // Initialize filters from URL params
   const getFiltersFromUrl = () => {
     return {
       search: searchParams.get('search') || '',
-      category: searchParams.get('category') || '',
-      location: searchParams.get('location') || '',
+      category: searchParams.get('category') || '', // Can be comma-separated
+      location: searchParams.get('location') || '', // Can be comma-separated
       lowStock: searchParams.get('lowStock') === 'true',
     }
   }
   
   const [filters, setFilters] = useState(getFiltersFromUrl)
+  // Local state for UI (arrays for multi-select)
+  const [categoryFilter, setCategoryFilter] = useState<string[]>(parseFilterArray(filters.category))
+  const [locationFilter, setLocationFilter] = useState<string[]>(parseFilterArray(filters.location))
   
   // Sync filters when URL changes
   useEffect(() => {
-    setFilters({
+    const urlFilters = {
       search: searchParams.get('search') || '',
       category: searchParams.get('category') || '',
       location: searchParams.get('location') || '',
       lowStock: searchParams.get('lowStock') === 'true',
-    })
+    }
+    setFilters(urlFilters)
+    setCategoryFilter(parseFilterArray(urlFilters.category))
+    setLocationFilter(parseFilterArray(urlFilters.location))
   }, [searchParams])
 
   // Fetch inventory items
@@ -57,8 +71,10 @@ export default function InventoryPage() {
       params.append('page', pagination.page.toString())
       params.append('limit', pagination.limit.toString())
       if (filters.search.trim()) params.append('search', filters.search.trim())
-      if (filters.category) params.append('category', filters.category)
-      if (filters.location) params.append('location', filters.location)
+      const categoryValue = categoryFilter.length > 0 ? categoryFilter.join(',') : ''
+      const locationValue = locationFilter.length > 0 ? locationFilter.join(',') : ''
+      if (categoryValue) params.append('category', categoryValue)
+      if (locationValue) params.append('location', locationValue)
       if (filters.lowStock) params.append('lowStock', 'true')
 
       const response = await fetch(`/api/inventory?${params.toString()}`)
@@ -151,8 +167,32 @@ export default function InventoryPage() {
     await fetchItems()
   }
 
+  // Sync filters to URL
+  const syncFiltersToUrl = useCallback((newFilters: typeof filters, newPagination = pagination, newCategoryFilter = categoryFilter, newLocationFilter = locationFilter) => {
+    if (typeof window === 'undefined') return
+    
+    const params = new URLSearchParams()
+    
+    if (newFilters.search.trim()) params.set('search', newFilters.search.trim())
+    const categoryValue = newCategoryFilter.length > 0 ? newCategoryFilter.join(',') : ''
+    const locationValue = newLocationFilter.length > 0 ? newLocationFilter.join(',') : ''
+    if (categoryValue) params.set('category', categoryValue)
+    if (locationValue) params.set('location', locationValue)
+    if (newFilters.lowStock) params.set('lowStock', 'true')
+    if (newPagination.page > 1) params.set('page', newPagination.page.toString())
+    if (newPagination.limit !== 50) params.set('limit', newPagination.limit.toString())
+    
+    const newUrl = params.toString() 
+      ? `${pathname}?${params.toString()}`
+      : pathname
+    
+    window.history.replaceState({}, '', newUrl)
+  }, [pagination, pathname, categoryFilter, locationFilter])
+
   const handleSearch = () => {
-    setPagination({ ...pagination, page: 1 })
+    const newPagination = { ...pagination, page: 1 }
+    setPagination(newPagination)
+    syncFiltersToUrl(filters, newPagination, categoryFilter, locationFilter)
     fetchItems()
   }
 
@@ -214,37 +254,45 @@ export default function InventoryPage() {
                 </button>
               </div>
 
-              <select
-                value={filters.category}
-                onChange={(e) => {
-                  setFilters({ ...filters, category: e.target.value })
-                  setPagination({ ...pagination, page: 1 })
-                }}
-                className="inventory-page__filter"
-              >
-                <option value="">{t.inventory.page.allCategories}</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+              <div className="inventory-page__filter-group">
+                <label htmlFor="category-filter">{t.common.fields.category}:</label>
+                <MultiSelect
+                  id="category-filter"
+                  options={categories.map(cat => ({ value: cat, label: cat }))}
+                  selectedValues={categoryFilter}
+                  onChange={(values) => {
+                    setCategoryFilter(values)
+                    const categoryValue = values.length > 0 ? values.join(',') : ''
+                    const newFilters = { ...filters, category: categoryValue }
+                    setFilters(newFilters)
+                    const newPagination = { ...pagination, page: 1 }
+                    setPagination(newPagination)
+                    syncFiltersToUrl(newFilters, newPagination, values, locationFilter)
+                  }}
+                  placeholder={t.inventory.page.allCategories}
+                  allLabel={t.inventory.page.allCategories}
+                />
+              </div>
 
-              <select
-                value={filters.location}
-                onChange={(e) => {
-                  setFilters({ ...filters, location: e.target.value })
-                  setPagination({ ...pagination, page: 1 })
-                }}
-                className="inventory-page__filter"
-              >
-                <option value="">{t.inventory.page.allLocations}</option>
-                {locations.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </select>
+              <div className="inventory-page__filter-group">
+                <label htmlFor="location-filter">{t.common.fields.location}:</label>
+                <MultiSelect
+                  id="location-filter"
+                  options={locations.map(loc => ({ value: loc, label: loc }))}
+                  selectedValues={locationFilter}
+                  onChange={(values) => {
+                    setLocationFilter(values)
+                    const locationValue = values.length > 0 ? values.join(',') : ''
+                    const newFilters = { ...filters, location: locationValue }
+                    setFilters(newFilters)
+                    const newPagination = { ...pagination, page: 1 }
+                    setPagination(newPagination)
+                    syncFiltersToUrl(newFilters, newPagination, categoryFilter, values)
+                  }}
+                  placeholder={t.inventory.page.allLocations}
+                  allLabel={t.inventory.page.allLocations}
+                />
+              </div>
 
               <label className="inventory-page__checkbox-label">
                 <input

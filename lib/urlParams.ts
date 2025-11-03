@@ -50,10 +50,10 @@ export const parseTicketsFiltersFromUrl = (searchParams: URLSearchParams): Parti
   if (search) filters.search = search
   
   const status = searchParams.get('status')
-  if (status) filters.status = status
+  if (status) filters.status = status // Can be comma-separated
   
   const priority = searchParams.get('priority')
-  if (priority) filters.priority = priority
+  if (priority) filters.priority = priority // Can be comma-separated
   
   return filters
 }

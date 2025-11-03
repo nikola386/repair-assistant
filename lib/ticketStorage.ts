@@ -178,9 +178,14 @@ export const ticketStorage = {
         ]
       }
 
-      // Build status filter
+      // Build status filter - support comma-separated values (e.g., "pending,in_progress")
       if (status) {
-        where.status = status
+        const statuses = status.split(',').map(s => s.trim()).filter(Boolean)
+        if (statuses.length === 1) {
+          where.status = statuses[0]
+        } else if (statuses.length > 1) {
+          where.status = { in: statuses }
+        }
       }
 
       // Build priority filter - support comma-separated values (e.g., "high,urgent")

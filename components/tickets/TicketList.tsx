@@ -5,6 +5,7 @@ import { useSearchParams, usePathname } from 'next/navigation'
 import { useLanguage } from '../../contexts/LanguageContext'
 import TicketTable from './TicketTable'
 import Spinner from '../ui/Spinner'
+import MultiSelect from '../ui/MultiSelect'
 import { 
   defaultTicketsFilters, 
   TicketsFilters,
@@ -30,6 +31,12 @@ interface TicketListProps {
 
 const generateCacheKey = (filters: TicketsFilters): string => {
   return `${filters.page}-${filters.limit}-${filters.search || ''}-${filters.status || ''}-${filters.priority || ''}`
+}
+
+// Convert comma-separated string to array for multi-select
+const parseFilterArray = (value: string | undefined): string[] => {
+  if (!value) return []
+  return value.split(',').map(v => v.trim()).filter(Boolean)
 }
 
 export default function TicketList({
@@ -70,8 +77,8 @@ export default function TicketList({
   
   // Local state for UI (search query before debounce/search action) - initialized from URL
   const [searchQuery, setSearchQuery] = useState(filters.search || '')
-  const [statusFilter, setStatusFilter] = useState<string>(filters.status || 'all')
-  const [priorityFilter, setPriorityFilter] = useState<string>(filters.priority || 'all')
+  const [statusFilter, setStatusFilter] = useState<string[]>(parseFilterArray(filters.status))
+  const [priorityFilter, setPriorityFilter] = useState<string[]>(parseFilterArray(filters.priority))
   
   // Sync filters from URL and update state
   const syncFiltersFromUrl = useCallback(() => {
@@ -83,11 +90,8 @@ export default function TicketList({
     
     setFiltersState(updatedFilters)
     setSearchQuery(updatedFilters.search || '')
-    setStatusFilter(updatedFilters.status || 'all')
-    // For comma-separated priorities (e.g., "high,urgent"), show "all" in dropdown since we can't display multiple
-    // But keep the actual filter value for backend filtering
-    const priorityValue = updatedFilters.priority || 'all'
-    setPriorityFilter(priorityValue.includes(',') ? 'all' : priorityValue)
+    setStatusFilter(parseFilterArray(updatedFilters.status))
+    setPriorityFilter(parseFilterArray(updatedFilters.priority))
   }, [searchParams])
   
   // Set filters and optionally update URL
@@ -130,10 +134,8 @@ export default function TicketList({
   // Sync local UI state with filters (when URL changes or filters are updated externally)
   useEffect(() => {
     setSearchQuery(filters.search || '')
-    setStatusFilter(filters.status || 'all')
-    // For comma-separated priorities, show "all" in dropdown but keep filter value
-    const priorityValue = filters.priority || 'all'
-    setPriorityFilter(priorityValue.includes(',') ? 'all' : priorityValue)
+    setStatusFilter(parseFilterArray(filters.status))
+    setPriorityFilter(parseFilterArray(filters.priority))
   }, [filters.search, filters.status, filters.priority])
   
   // Listen to URL changes (browser back/forward and Next.js navigation)
@@ -178,12 +180,7 @@ export default function TicketList({
     params.append('limit', filters.limit.toString())
     if (filters.search.trim()) params.append('search', filters.search.trim())
     if (filters.status) params.append('status', filters.status)
-    // Support comma-separated priorities (e.g., "high,urgent")
-    if (filters.priority) {
-      params.append('priority', filters.priority)
-    } else if (priorityFilter !== 'all') {
-      params.append('priority', priorityFilter)
-    }
+    if (filters.priority) params.append('priority', filters.priority)
     
     fetch(`/api/tickets?${params.toString()}`)
       .then(async (response) => {
@@ -226,17 +223,19 @@ export default function TicketList({
 
   // Function to trigger search manually (on Enter or button click)
   const triggerSearch = () => {
+    const statusValue = statusFilter.length > 0 ? statusFilter.join(',') : ''
+    const priorityValue = priorityFilter.length > 0 ? priorityFilter.join(',') : ''
     setFilters({
       search: searchQuery,
-      status: statusFilter !== 'all' ? statusFilter : '',
-      priority: priorityFilter !== 'all' ? priorityFilter : '',
+      status: statusValue,
+      priority: priorityValue,
       page: 1, // Reset to first page on new search
     })
     if (onFiltersChange) {
       onFiltersChange({ 
         search: searchQuery, 
-        status: statusFilter !== 'all' ? statusFilter : undefined, 
-        priority: priorityFilter !== 'all' ? priorityFilter : undefined 
+        status: statusValue || undefined, 
+        priority: priorityValue || undefined 
       })
     }
   }
@@ -254,32 +253,36 @@ export default function TicketList({
     setSearchQuery(value)
   }
 
-  const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value)
+  const handleStatusFilterChange = (values: string[]) => {
+    setStatusFilter(values)
+    const statusValue = values.length > 0 ? values.join(',') : ''
     setFilters({
-      status: value !== 'all' ? value : '',
+      status: statusValue,
       page: 1, // Reset to first page when filter changes
     })
     if (onFiltersChange) {
+      const priorityValue = priorityFilter.length > 0 ? priorityFilter.join(',') : ''
       onFiltersChange({ 
         search: filters.search || undefined, 
-        status: value !== 'all' ? value : undefined, 
-        priority: priorityFilter !== 'all' ? priorityFilter : undefined 
+        status: statusValue || undefined, 
+        priority: priorityValue || undefined 
       })
     }
   }
 
-  const handlePriorityFilterChange = (value: string) => {
-    setPriorityFilter(value)
+  const handlePriorityFilterChange = (values: string[]) => {
+    setPriorityFilter(values)
+    const priorityValue = values.length > 0 ? values.join(',') : ''
     setFilters({
-      priority: value !== 'all' ? value : '',
+      priority: priorityValue,
       page: 1, // Reset to first page when filter changes
     })
     if (onFiltersChange) {
+      const statusValue = statusFilter.length > 0 ? statusFilter.join(',') : ''
       onFiltersChange({ 
         search: filters.search || undefined, 
-        status: statusFilter !== 'all' ? statusFilter : undefined, 
-        priority: value !== 'all' ? value : undefined 
+        status: statusValue || undefined, 
+        priority: priorityValue || undefined 
       })
     }
   }
@@ -380,34 +383,38 @@ export default function TicketList({
           </div>
           <div className="ticket-list__filter-group">
             <label htmlFor="status-filter">{t.tickets.filterByStatus || 'Status'}:</label>
-            <select
+            <MultiSelect
               id="status-filter"
-              value={statusFilter}
-              onChange={(e) => handleStatusFilterChange(e.target.value)}
-              className="ticket-list__filter"
-            >
-              <option value="all">{t.tickets.allStatuses || 'All Statuses'}</option>
-              <option value="pending">{t.common.status.pending}</option>
-              <option value="in_progress">{t.common.status.in_progress}</option>
-              <option value="waiting_parts">{t.common.status.waiting_parts}</option>
-              <option value="completed">{t.common.status.completed}</option>
-              <option value="cancelled">{t.common.status.cancelled}</option>
-            </select>
+              options={[
+                { value: 'pending', label: t.common.status.pending },
+                { value: 'in_progress', label: t.common.status.in_progress },
+                { value: 'waiting_parts', label: t.common.status.waiting_parts },
+                { value: 'completed', label: t.common.status.completed },
+                { value: 'cancelled', label: t.common.status.cancelled },
+              ]}
+              selectedValues={statusFilter}
+              onChange={handleStatusFilterChange}
+              placeholder={t.tickets.allStatuses || 'All Statuses'}
+              allLabel={t.tickets.allStatuses || 'All Statuses'}
+              className=""
+            />
           </div>
           <div className="ticket-list__filter-group">
             <label htmlFor="priority-filter">{t.tickets.filterByPriority || 'Priority'}:</label>
-            <select
+            <MultiSelect
               id="priority-filter"
-              value={priorityFilter}
-              onChange={(e) => handlePriorityFilterChange(e.target.value)}
-              className="ticket-list__filter"
-            >
-              <option value="all">{t.tickets.allPriorities || 'All Priorities'}</option>
-              <option value="low">{t.common.priority.low}</option>
-              <option value="medium">{t.common.priority.medium}</option>
-              <option value="high">{t.common.priority.high}</option>
-              <option value="urgent">{t.common.priority.urgent}</option>
-            </select>
+              options={[
+                { value: 'low', label: t.common.priority.low },
+                { value: 'medium', label: t.common.priority.medium },
+                { value: 'high', label: t.common.priority.high },
+                { value: 'urgent', label: t.common.priority.urgent },
+              ]}
+              selectedValues={priorityFilter}
+              onChange={handlePriorityFilterChange}
+              placeholder={t.tickets.allPriorities || 'All Priorities'}
+              allLabel={t.tickets.allPriorities || 'All Priorities'}
+              className=""
+            />
           </div>
         </div>
 
