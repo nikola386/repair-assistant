@@ -1,10 +1,16 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { RepairTicket, PaginatedTicketsResponse } from '../../types/ticket'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import TicketTable from './TicketTable'
 import Spinner from '../ui/Spinner'
+import { 
+  defaultTicketsFilters, 
+  TicketsFilters,
+  parseTicketsFiltersFromUrl,
+  syncTicketsFiltersToUrl 
+} from '@/lib/urlParams'
+import { RepairTicket, PaginatedTicketsResponse } from '@/types/ticket'
 
 interface TicketListProps {
   onRefresh?: () => Promise<any>
@@ -21,6 +27,10 @@ interface TicketListProps {
   refreshTrigger?: number | string // Trigger refresh when this value changes
 }
 
+const generateCacheKey = (filters: TicketsFilters): string => {
+  return `${filters.page}-${filters.limit}-${filters.search || ''}-${filters.status || ''}-${filters.priority || ''}`
+}
+
 export default function TicketList({
   onRefresh,
   isLoading = false,
@@ -30,26 +40,191 @@ export default function TicketList({
   refreshTrigger,
 }: TicketListProps) {
   const { t } = useLanguage()
-  const [tickets, setTickets] = useState<RepairTicket[]>([])
+  
+  // Initialize filters from URL params on first render (synchronously)
+  const getInitialFilters = (): TicketsFilters => {
+    if (typeof window === 'undefined') return { ...defaultTicketsFilters }
+    const searchParams = new URLSearchParams(window.location.search)
+    const urlFilters = parseTicketsFiltersFromUrl(searchParams)
+    return Object.keys(urlFilters).length > 0
+      ? { ...defaultTicketsFilters, ...urlFilters }
+      : { ...defaultTicketsFilters }
+  }
+  
+  // Local state - initialized from URL params
+  const [filters, setFiltersState] = useState<TicketsFilters>(getInitialFilters)
+  const [ticketsData, setTicketsData] = useState<RepairTicket[]>([])
   const [pagination, setPagination] = useState({
-    page: initialFilters.page || 1,
-    limit: initialFilters.limit || 12,
+    page: 1,
+    limit: 12,
     total: 0,
     totalPages: 0,
   })
-  const [statusFilter, setStatusFilter] = useState<string>(initialFilters.status || 'all')
-  const [priorityFilter, setPriorityFilter] = useState<string>(initialFilters.priority || 'all')
-  const [searchQuery, setSearchQuery] = useState(initialFilters.search || '')
-  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery)
+  const [isLoadingData, setIsLoadingData] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   
-  const [isFetching, setIsFetching] = useState(false)
+  // Simple cache using useRef (component-level, cleared on unmount)
+  const cacheRef = useRef<Map<string, PaginatedTicketsResponse>>(new Map())
+  
+  // Local state for UI (search query before debounce/search action) - initialized from URL
+  const [searchQuery, setSearchQuery] = useState(filters.search || '')
+  const [statusFilter, setStatusFilter] = useState<string>(filters.status || 'all')
+  const [priorityFilter, setPriorityFilter] = useState<string>(filters.priority || 'all')
+  
+  // Sync filters from URL and update state
+  const syncFiltersFromUrl = useCallback(() => {
+    if (typeof window === 'undefined') return
+    
+    const searchParams = new URLSearchParams(window.location.search)
+    const urlFilters = parseTicketsFiltersFromUrl(searchParams)
+    
+    const updatedFilters = Object.keys(urlFilters).length > 0
+      ? { ...defaultTicketsFilters, ...urlFilters }
+      : { ...defaultTicketsFilters }
+    
+    setFiltersState(updatedFilters)
+    setSearchQuery(updatedFilters.search || '')
+    setStatusFilter(updatedFilters.status || 'all')
+    setPriorityFilter(updatedFilters.priority || 'all')
+  }, [])
+  
+  // Set filters and optionally update URL
+  const setFilters = useCallback((newFilters: Partial<TicketsFilters>, updateUrl: boolean = true) => {
+    setFiltersState((prev) => {
+      const updatedFilters = { ...prev, ...newFilters }
+      // Reset to page 1 when filters change (except when page itself is being set)
+      if (!newFilters.page && (newFilters.search !== undefined || newFilters.status !== undefined || newFilters.priority !== undefined || newFilters.limit !== undefined)) {
+        updatedFilters.page = 1
+      }
+      
+      // Sync to URL
+      if (updateUrl && typeof window !== 'undefined') {
+        syncTicketsFiltersToUrl(updatedFilters, window.location.pathname)
+      }
+      
+      return updatedFilters
+    })
+  }, [])
+  
+  // Clear cache
+  const clearCache = useCallback(() => {
+    cacheRef.current.clear()
+  }, [])
+  
+  // Handle initial filters prop (for backward compatibility)
+  useEffect(() => {
+    if (Object.keys(initialFilters).length > 0) {
+      setFilters({
+        page: initialFilters.page || 1,
+        limit: initialFilters.limit || 12,
+        search: initialFilters.search || '',
+        status: initialFilters.status || '',
+        priority: initialFilters.priority || '',
+      }, false) // Don't update URL since we're initializing
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  
+  // Sync local UI state with filters (when URL changes or filters are updated externally)
+  useEffect(() => {
+    setSearchQuery(filters.search || '')
+    setStatusFilter(filters.status || 'all')
+    setPriorityFilter(filters.priority || 'all')
+  }, [filters.search, filters.status, filters.priority])
+  
+  // Listen to URL changes (e.g., browser back/forward)
+  useEffect(() => {
+    const handlePopState = () => {
+      syncFiltersFromUrl()
+    }
+    
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [syncFiltersFromUrl])
+  
+  // Fetch tickets when filters change (using filters directly to avoid stale closures)
+  useEffect(() => {
+    const cacheKey = generateCacheKey(filters)
+    
+    // Check cache first
+    const cachedData = cacheRef.current.get(cacheKey)
+    if (cachedData) {
+      setTicketsData(cachedData.tickets)
+      setPagination({
+        page: cachedData.page,
+        limit: cachedData.limit,
+        total: cachedData.total,
+        totalPages: cachedData.totalPages,
+      })
+      setIsLoadingData(false)
+      setError(null)
+      return
+    }
+    
+    // Fetch from API
+    setIsLoadingData(true)
+    setError(null)
+    
+    const params = new URLSearchParams()
+    params.append('page', filters.page.toString())
+    params.append('limit', filters.limit.toString())
+    if (filters.search.trim()) params.append('search', filters.search.trim())
+    if (filters.status) params.append('status', filters.status)
+    if (filters.priority) params.append('priority', filters.priority)
+    
+    fetch(`/api/tickets?${params.toString()}`)
+      .then(async (response) => {
+        if (response.ok) {
+          const data: PaginatedTicketsResponse = await response.json()
+          
+          // Store in cache
+          cacheRef.current.set(cacheKey, data)
+          
+          setTicketsData(data.tickets)
+          setPagination({
+            page: data.page,
+            limit: data.limit,
+            total: data.total,
+            totalPages: data.totalPages,
+          })
+          setIsLoadingData(false)
+          setError(null)
+        } else {
+          throw new Error('Failed to fetch tickets')
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching tickets:', error)
+        setIsLoadingData(false)
+        setError(error instanceof Error ? error.message : 'Failed to fetch tickets')
+      })
+  }, [filters.page, filters.limit, filters.search, filters.status, filters.priority])
+  
+  // Clear cache and refetch when refreshTrigger changes (e.g., after creating/updating a ticket)
+  useEffect(() => {
+    if (refreshTrigger !== undefined) {
+      clearCache()
+      // Force refetch by triggering the filters effect
+      // We'll just set filters to current values to trigger the fetch
+      setFiltersState((prev) => ({ ...prev }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshTrigger])
 
   // Function to trigger search manually (on Enter or button click)
   const triggerSearch = () => {
-    setDebouncedSearch(searchQuery)
-    setPagination((prev) => ({ ...prev, page: 1 }))
+    setFilters({
+      search: searchQuery,
+      status: statusFilter !== 'all' ? statusFilter : '',
+      priority: priorityFilter !== 'all' ? priorityFilter : '',
+      page: 1, // Reset to first page on new search
+    })
     if (onFiltersChange) {
-      onFiltersChange({ search: searchQuery, status: statusFilter !== 'all' ? statusFilter : undefined, priority: priorityFilter !== 'all' ? priorityFilter : undefined })
+      onFiltersChange({ 
+        search: searchQuery, 
+        status: statusFilter !== 'all' ? statusFilter : undefined, 
+        priority: priorityFilter !== 'all' ? priorityFilter : undefined 
+      })
     }
   }
 
@@ -61,45 +236,6 @@ export default function TicketList({
     }
   }
 
-  const fetchTickets = useCallback(async () => {
-    setIsFetching(true)
-    try {
-      const params = new URLSearchParams()
-      params.append('page', pagination.page.toString())
-      params.append('limit', pagination.limit.toString())
-      if (debouncedSearch.trim()) params.append('search', debouncedSearch.trim())
-      if (statusFilter !== 'all') params.append('status', statusFilter)
-      if (priorityFilter !== 'all') params.append('priority', priorityFilter)
-
-      const response = await fetch(`/api/tickets?${params.toString()}`)
-      if (response.ok) {
-        const data: PaginatedTicketsResponse = await response.json()
-        setTickets(data.tickets)
-        setPagination((prev) => ({
-          ...prev,
-          total: data.total,
-          totalPages: data.totalPages,
-        }))
-      }
-    } catch (error) {
-      console.error('Error fetching tickets:', error)
-    } finally {
-      setIsFetching(false)
-    }
-  }, [pagination.page, pagination.limit, debouncedSearch, statusFilter, priorityFilter])
-
-  // Fetch tickets when filters or pagination change
-  useEffect(() => {
-    fetchTickets()
-  }, [fetchTickets])
-
-  // Refresh tickets when refreshTrigger changes
-  useEffect(() => {
-    if (refreshTrigger !== undefined) {
-      fetchTickets()
-    }
-  }, [refreshTrigger, fetchTickets])
-
   const handleSearchChange = (value: string) => {
     // Only update the search query state, don't trigger search automatically
     setSearchQuery(value)
@@ -107,29 +243,43 @@ export default function TicketList({
 
   const handleStatusFilterChange = (value: string) => {
     setStatusFilter(value)
-    setPagination((prev) => ({ ...prev, page: 1 }))
+    setFilters({
+      status: value !== 'all' ? value : '',
+      page: 1, // Reset to first page when filter changes
+    })
     if (onFiltersChange) {
-      onFiltersChange({ search: debouncedSearch || undefined, status: value !== 'all' ? value : undefined, priority: priorityFilter !== 'all' ? priorityFilter : undefined })
+      onFiltersChange({ 
+        search: filters.search || undefined, 
+        status: value !== 'all' ? value : undefined, 
+        priority: priorityFilter !== 'all' ? priorityFilter : undefined 
+      })
     }
   }
 
   const handlePriorityFilterChange = (value: string) => {
     setPriorityFilter(value)
-    setPagination((prev) => ({ ...prev, page: 1 }))
+    setFilters({
+      priority: value !== 'all' ? value : '',
+      page: 1, // Reset to first page when filter changes
+    })
     if (onFiltersChange) {
-      onFiltersChange({ search: debouncedSearch || undefined, status: statusFilter !== 'all' ? statusFilter : undefined, priority: value !== 'all' ? value : undefined })
+      onFiltersChange({ 
+        search: filters.search || undefined, 
+        status: statusFilter !== 'all' ? statusFilter : undefined, 
+        priority: value !== 'all' ? value : undefined 
+      })
     }
   }
 
   const handlePageChange = (newPage: number) => {
-    setPagination((prev) => ({ ...prev, page: newPage }))
+    setFilters({ page: newPage })
     if (onPaginationChange) {
       onPaginationChange(newPage, pagination.limit)
     }
   }
 
   const handleLimitChange = (newLimit: number) => {
-    setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }))
+    setFilters({ limit: newLimit, page: 1 })
     if (onPaginationChange) {
       onPaginationChange(1, newLimit)
     }
@@ -139,7 +289,9 @@ export default function TicketList({
     if (onRefresh) {
       await onRefresh()
     }
-    await fetchTickets()
+    clearCache()
+    // Force refetch by updating filters
+    setFiltersState((prev) => ({ ...prev }))
   }
 
   // Generate page numbers to display
@@ -267,23 +419,23 @@ export default function TicketList({
       <div className="ticket-list__count">
         {t.tickets?.showingResults
           ? t.tickets.showingResults
-              .replace('{count}', tickets.length.toString())
+              .replace('{count}', ticketsData.length.toString())
               .replace('{total}', pagination.total.toString())
-          : `Showing ${tickets.length} of ${pagination.total} tickets`}
+          : `Showing ${ticketsData.length} of ${pagination.total} tickets`}
       </div>
 
-      {isLoading || isFetching ? (
+      {isLoading || isLoadingData ? (
         <div className="ticket-list__loading spinner-container spinner-container--inline">
           <Spinner size="large" />
           <p>Loading tickets...</p>
         </div>
-      ) : tickets.length === 0 ? (
+      ) : ticketsData.length === 0 ? (
         <div className="ticket-list__empty">
           <p>{t.tickets?.noTicketsFound || 'No tickets found'}</p>
         </div>
       ) : (
         <>
-          <TicketTable tickets={tickets} />
+          <TicketTable tickets={ticketsData} />
 
           {pagination.totalPages > 1 && (
             <div className="ticket-list__pagination">

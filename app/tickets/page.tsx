@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import TicketList from '@/components/tickets/TicketList'
 import Navigation from '@/components/layout/Navigation'
@@ -8,25 +7,6 @@ import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function TicketsPage() {
   const { t } = useLanguage()
-  const [paginationParams, setPaginationParams] = useState({
-    page: 1,
-    limit: 12,
-    search: '',
-    status: '',
-    priority: '',
-  })
-
-  const handleFiltersChange = (filters: { search?: string; status?: string; priority?: string }) => {
-    setPaginationParams((prev) => ({
-      ...prev,
-      ...filters,
-      page: 1, // Reset to first page when filters change
-    }))
-  }
-
-  const handlePaginationChange = (page: number, limit: number) => {
-    setPaginationParams((prev) => ({ ...prev, page, limit }))
-  }
 
   return (
     <>
@@ -43,11 +23,7 @@ export default function TicketsPage() {
             </Link>
           </div>
 
-          <TicketList
-            onFiltersChange={handleFiltersChange}
-            onPaginationChange={handlePaginationChange}
-            initialFilters={paginationParams}
-          />
+          <TicketList />
         </div>
       </main>
     </>

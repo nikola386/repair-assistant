@@ -13,7 +13,8 @@ import {
 import { RepairTicket } from '../../types/ticket'
 import { useLanguage } from '../../contexts/LanguageContext'
 import Link from 'next/link'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { filterPersistence } from '@/lib/filterPersistence'
 
 interface TicketTableProps {
   tickets: RepairTicket[]
@@ -21,8 +22,21 @@ interface TicketTableProps {
 
 export default function TicketTable({ tickets }: TicketTableProps) {
   const { t } = useLanguage()
-  const [sorting, setSorting] = useState<SortingState>([])
+  
+  // Load persisted sorting state
+  const [sorting, setSorting] = useState<SortingState>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = filterPersistence.loadTicketsSorting()
+      return saved || []
+    }
+    return []
+  })
   const [columnFilters] = useState<ColumnFiltersState>([])
+  
+  // Persist sorting state when it changes
+  useEffect(() => {
+    filterPersistence.saveTicketsSorting(sorting)
+  }, [sorting])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString()
