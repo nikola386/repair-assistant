@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { userStorage } from '@/lib/userStorage'
 import { withAuth } from '@/lib/auth.middleware'
+import { validatePassword } from '@/lib/validation'
 
 export async function PATCH(request: NextRequest) {
   const authResult = await withAuth(request, { action: 'password update' })
@@ -21,33 +22,10 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Validate password strength
-    if (newPassword.length < 8) {
+    const passwordError = validatePassword(newPassword)
+    if (passwordError) {
       return NextResponse.json(
-        { error: 'New password must be at least 12 characters long' },
-        { status: 400 }
-      )
-    }
-    if (!/[A-Z]/.test(newPassword)) {
-      return NextResponse.json(
-        { error: 'Password must contain at least one uppercase letter' },
-        { status: 400 }
-      )
-    }
-    if (!/[a-z]/.test(newPassword)) {
-      return NextResponse.json(
-        { error: 'Password must contain at least one lowercase letter' },
-        { status: 400 }
-      )
-    }
-    if (!/[0-9]/.test(newPassword)) {
-      return NextResponse.json(
-        { error: 'Password must contain at least one number' },
-        { status: 400 }
-      )
-    }
-    if (!/[^A-Za-z0-9]/.test(newPassword)) {
-      return NextResponse.json(
-        { error: 'Password must contain at least one special character' },
+        { error: passwordError },
         { status: 400 }
       )
     }

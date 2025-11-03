@@ -9,6 +9,8 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { Language, getAllLanguages } from '@/lib/languages'
 import LogoUpload from '@/components/ui/LogoUpload'
 import { showAlert } from '@/lib/alerts'
+import { validatePasswordClient } from '@/lib/validation'
+import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR, CURRENCIES } from '@/lib/constants'
 
 import type { User } from '@/lib/userStorage'
 
@@ -18,15 +20,6 @@ interface Country {
   name: string
   requiresVat: boolean
 }
-
-const CURRENCIES = [
-  { code: 'USD', name: 'US Dollar' },
-  { code: 'EUR', name: 'Euro' },
-  { code: 'GBP', name: 'British Pound' },
-  { code: 'BGN', name: 'Bulgarian Lev' },
-  { code: 'CAD', name: 'Canadian Dollar' },
-  { code: 'AUD', name: 'Australian Dollar' },
-]
 
 type Tab = 'profile' | 'password' | 'store' | 'appearance'
 
@@ -54,8 +47,8 @@ export default function SettingsPage() {
   })
 
   const [appearanceFormData, setAppearanceFormData] = useState({
-    primaryColor: '#FFD700',
-    secondaryColor: '#000000',
+    primaryColor: DEFAULT_PRIMARY_COLOR,
+    secondaryColor: DEFAULT_SECONDARY_COLOR,
     language: 'en' as Language,
   })
 
@@ -123,12 +116,12 @@ export default function SettingsPage() {
         const data = await response.json()
         if (data.settings) {
           setAppearanceFormData({
-            primaryColor: data.settings.primaryColor || '#FFD700',
-            secondaryColor: data.settings.secondaryColor || '#000000',
+            primaryColor: data.settings.primaryColor || DEFAULT_PRIMARY_COLOR,
+            secondaryColor: data.settings.secondaryColor || DEFAULT_SECONDARY_COLOR,
             language: (data.settings.language as Language) || 'en',
           })
           // Apply colors immediately
-          applyColors(data.settings.primaryColor || '#FFD700', data.settings.secondaryColor || '#000000')
+          applyColors(data.settings.primaryColor || DEFAULT_PRIMARY_COLOR, data.settings.secondaryColor || DEFAULT_SECONDARY_COLOR)
         }
         if (data.store) {
           setStoreFormData({
@@ -226,8 +219,10 @@ export default function SettingsPage() {
       return
     }
 
-    if (passwordFormData.newPassword.length < 6) {
-      const errorMsg = t.profile?.passwordTooShort || 'Password must be at least 6 characters long'
+    // Validate password strength
+    const passwordValidation = validatePasswordClient(passwordFormData.newPassword)
+    if (!passwordValidation.valid) {
+      const errorMsg = passwordValidation.error || t.profile?.passwordTooShort || 'Password validation failed'
       setError(errorMsg)
       showAlert.error(errorMsg)
       return

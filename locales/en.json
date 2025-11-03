@@ -44,7 +44,7 @@
     }
   },
   "welcome": {
-    "title": "Welcome to Maistor Zhichko",
+    "title": "Welcome to Repair Assistant",
     "text": "We offer accessible and reliable computer maintenance services, specializing in operating system reinstallation, data recovery, and hardware repairs. Our goal is to provide fast and effective solutions for all your technological needs, focusing on quality and customer satisfaction. With us, you can count on professionalism and attention to detail that will restore and improve your equipment's performance."
   },
   "deviceTypes": {
@@ -112,7 +112,7 @@
   "footer": {
     "description": "We offer fast and affordable services for operating system reinstallation, data recovery, and hardware repairs. We care for your technological needs with professionalism and attention to detail.",
     "contact": "Contact",
-    "copyright": "© 2024 Maistor Zhichko. All rights reserved.",
+    "copyright": "© 2024 Repair Assistant. All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "termsOfUse": "Terms of Use",
     "cookiePolicy": "Cookie Policy"
@@ -129,7 +129,7 @@
       "sections": {
         "introduction": {
           "title": "Introduction",
-          "content": "Maistor Zhichko is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website."
+          "content": "Repair Assistant is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website."
         },
         "dataCollection": {
           "title": "What Information We Collect",
@@ -159,7 +159,7 @@
       "sections": {
         "introduction": {
           "title": "Introduction",
-          "content": "Welcome to Maistor Zhichko's website. By using our website, you agree to comply with the following terms of use."
+          "content": "Welcome to Repair Assistant's website. By using our website, you agree to comply with the following terms of use."
         },
         "acceptance": {
           "title": "Acceptance of Terms",
@@ -175,11 +175,11 @@
         },
         "intellectualProperty": {
           "title": "Intellectual Property",
-          "content": "All materials on this website, including text, graphics, logos, and images, are the property of Maistor Zhichko and are protected by copyright laws."
+          "content": "All materials on this website, including text, graphics, logos, and images, are the property of Repair Assistant and are protected by copyright laws."
         },
         "limitation": {
           "title": "Limitation of Liability",
-          "content": "Maistor Zhichko is not liable for any direct, indirect, incidental, or consequential damages arising from the use of our website."
+          "content": "Repair Assistant is not liable for any direct, indirect, incidental, or consequential damages arising from the use of our website."
         }
       }
     },

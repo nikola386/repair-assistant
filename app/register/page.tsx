@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
 import { showAlert } from '@/lib/alerts'
+import { validatePasswordClient } from '@/lib/validation'
 
 export default function RegisterPage() {
   const { t } = useLanguage()
@@ -39,9 +40,10 @@ export default function RegisterPage() {
       return
     }
 
-    // Validate password length
-    if (password.length < 6) {
-      const errorMsg = t.auth?.passwordTooShort || 'Password must be at least 6 characters long'
+    // Validate password strength
+    const passwordValidation = validatePasswordClient(password)
+    if (!passwordValidation.valid) {
+      const errorMsg = passwordValidation.error || t.auth?.passwordTooShort || 'Password validation failed'
       setError(errorMsg)
       showAlert.error(errorMsg)
       return

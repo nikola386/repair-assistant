@@ -1,4 +1,5 @@
 import { db } from './db'
+import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from './constants'
 // Prisma generates Settings type automatically from schema
 // Import will work after TypeScript server reloads (Cmd+Shift+P → "TypeScript: Restart TS Server")
 // @ts-expect-error - Prisma types available after generate, TS server may need restart
@@ -30,8 +31,8 @@ export class SettingsStorage {
       },
       create: {
         storeId,
-        primaryColor: data.primaryColor ?? '#FFD700',
-        secondaryColor: data.secondaryColor ?? '#000000',
+        primaryColor: data.primaryColor ?? DEFAULT_PRIMARY_COLOR,
+        secondaryColor: data.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
         language: data.language ?? 'en',
       },
     })

@@ -9,6 +9,7 @@ import Spinner from '@/components/ui/Spinner'
 import Steps from '@/components/ui/Steps'
 import LogoUpload from '@/components/ui/LogoUpload'
 import { showAlert } from '@/lib/alerts'
+import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR, CURRENCIES } from '@/lib/constants'
 
 interface Country {
   id: string
@@ -16,15 +17,6 @@ interface Country {
   name: string
   requiresVat: boolean
 }
-
-const CURRENCIES = [
-  { code: 'USD', name: 'US Dollar' },
-  { code: 'EUR', name: 'Euro' },
-  { code: 'GBP', name: 'British Pound' },
-  { code: 'BGN', name: 'Bulgarian Lev' },
-  { code: 'CAD', name: 'Canadian Dollar' },
-  { code: 'AUD', name: 'Australian Dollar' },
-]
 
 export default function OnboardingPage() {
   const { t, setLanguage } = useLanguage()
@@ -48,8 +40,8 @@ export default function OnboardingPage() {
   // Step 3: Appearance
   const [logo, setLogo] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string>('')
-  const [primaryColor, setPrimaryColor] = useState('#FFD700')
-  const [secondaryColor, setSecondaryColor] = useState('#000000')
+  const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY_COLOR)
+  const [secondaryColor, setSecondaryColor] = useState(DEFAULT_SECONDARY_COLOR)
   const [language, setLanguage] = useState<Language>('en')
 
   // Country dropdown state
@@ -109,8 +101,8 @@ export default function OnboardingPage() {
                 setLogoPreview(data.store.logo)
               }
               if (data.settings) {
-                setPrimaryColor(data.settings.primaryColor || '#FFD700')
-                setSecondaryColor(data.settings.secondaryColor || '#000000')
+                setPrimaryColor(data.settings.primaryColor || DEFAULT_PRIMARY_COLOR)
+                setSecondaryColor(data.settings.secondaryColor || DEFAULT_SECONDARY_COLOR)
                 setLanguage((data.settings.language as Language) || 'en')
               }
             }

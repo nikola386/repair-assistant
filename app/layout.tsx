@@ -8,8 +8,13 @@ import ProtectedRoutes from '@/components/ProtectedRoutes'
 import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
-  title: 'Dashboard - Майстор Жичко',
+  title: 'Dashboard - Repair Assistant',
   description: 'Repair management dashboard',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 }
 
 export default function RootLayout({

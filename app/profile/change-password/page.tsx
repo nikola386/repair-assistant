@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { showAlert } from '@/lib/alerts'
+import { validatePasswordClient } from '@/lib/validation'
 
 export default function ChangePasswordPage() {
   const { t } = useLanguage()
@@ -41,9 +42,10 @@ export default function ChangePasswordPage() {
       return
     }
 
-    // Validate password length
-    if (formData.newPassword.length < 6) {
-      const errorMsg = t.profile?.passwordTooShort || 'Password must be at least 6 characters long'
+    // Validate password strength
+    const passwordValidation = validatePasswordClient(formData.newPassword)
+    if (!passwordValidation.valid) {
+      const errorMsg = passwordValidation.error || t.profile?.passwordTooShort || 'Password validation failed'
       setError(errorMsg)
       showAlert.error(errorMsg)
       return

@@ -44,7 +44,7 @@
     }
   },
   "welcome": {
-    "title": "Willkommen bei Maistor Zhichko",
+    "title": "Willkommen bei Repair Assistant",
     "text": "Wir bieten zugängliche und zuverlässige Computerwartungsservices, spezialisiert auf Neuinstallation von Betriebssystemen, Datenwiederherstellung und Hardware-Reparaturen. Unser Ziel ist es, schnelle und effektive Lösungen für alle Ihre technologischen Bedürfnisse zu bieten und uns dabei auf Qualität und Kundenzufriedenheit zu konzentrieren. Bei uns können Sie auf Professionalität und Aufmerksamkeit für Details zählen, die die Leistung Ihrer Geräte wiederherstellen und verbessern werden."
   },
   "deviceTypes": {
@@ -112,7 +112,7 @@
   "footer": {
     "description": "Wir bieten schnelle und erschwingliche Services für Neuinstallation von Betriebssystemen, Datenwiederherstellung und Hardware-Reparaturen. Wir kümmern uns mit Professionalität und Aufmerksamkeit für Details um Ihre technologischen Bedürfnisse.",
     "contact": "Kontakt",
-    "copyright": "© 2024 Maistor Zhichko. Alle Rechte vorbehalten.",
+    "copyright": "© 2024 Repair Assistant. Alle Rechte vorbehalten.",
     "privacyPolicy": "Datenschutzrichtlinie",
     "termsOfUse": "Nutzungsbedingungen",
     "cookiePolicy": "Cookie-Richtlinie"
@@ -129,7 +129,7 @@
       "sections": {
         "introduction": {
           "title": "Einleitung",
-          "content": "Maistor Zhichko verpflichtet sich, Ihre Privatsphäre zu schützen. Diese Datenschutzrichtlinie erklärt, wie wir Ihre persönlichen Informationen sammeln, verwenden, offenlegen und schützen, wenn Sie unsere Website besuchen."
+          "content": "Repair Assistant verpflichtet sich, Ihre Privatsphäre zu schützen. Diese Datenschutzrichtlinie erklärt, wie wir Ihre persönlichen Informationen sammeln, verwenden, offenlegen und schützen, wenn Sie unsere Website besuchen."
         },
         "dataCollection": {
           "title": "Welche Informationen wir sammeln",
@@ -159,7 +159,7 @@
       "sections": {
         "introduction": {
           "title": "Einleitung",
-          "content": "Willkommen auf der Website von Maistor Zhichko. Durch die Nutzung unserer Website erklären Sie sich damit einverstanden, die folgenden Nutzungsbedingungen einzuhalten."
+          "content": "Willkommen auf der Website von Repair Assistant. Durch die Nutzung unserer Website erklären Sie sich damit einverstanden, die folgenden Nutzungsbedingungen einzuhalten."
         },
         "acceptance": {
           "title": "Annahme der Bedingungen",
@@ -175,11 +175,11 @@
         },
         "intellectualProperty": {
           "title": "Geistiges Eigentum",
-          "content": "Alle Materialien auf dieser Website, einschließlich Text, Grafiken, Logos und Bilder, sind Eigentum von Maistor Zhichko und durch Urheberrechtsgesetze geschützt."
+          "content": "Alle Materialien auf dieser Website, einschließlich Text, Grafiken, Logos und Bilder, sind Eigentum von Repair Assistant und durch Urheberrechtsgesetze geschützt."
         },
         "limitation": {
           "title": "Haftungsbeschränkung",
-          "content": "Maistor Zhichko haftet nicht für direkte, indirekte, zufällige oder Folgekosten, die aus der Nutzung unserer Website entstehen."
+          "content": "Repair Assistant haftet nicht für direkte, indirekte, zufällige oder Folgekosten, die aus der Nutzung unserer Website entstehen."
         }
       }
     },
