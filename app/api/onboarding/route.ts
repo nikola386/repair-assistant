@@ -5,6 +5,34 @@ import { db } from '@/lib/db'
 import { put, del } from '@vercel/blob'
 import { isValidLanguage, SUPPORTED_LANGUAGES } from '@/lib/languages'
 
+// Magic bytes (file signatures) for file type validation
+const MAGIC_BYTES: Record<string, number[][]> = {
+  'image/jpeg': [[0xFF, 0xD8, 0xFF]],
+  'image/png': [[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]],
+  'image/gif': [[0x47, 0x49, 0x46, 0x38, 0x37, 0x61], [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]],
+  'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF header, WEBP follows
+}
+
+/**
+ * Validate file content using magic bytes
+ */
+async function validateFileContent(file: File, expectedMimeType: string): Promise<boolean> {
+  const signatures = MAGIC_BYTES[expectedMimeType]
+  if (!signatures) {
+    return false
+  }
+
+  const buffer = await file.arrayBuffer()
+  const bytes = new Uint8Array(buffer)
+
+  return signatures.some(signature => {
+    if (bytes.length < signature.length) {
+      return false
+    }
+    return signature.every((byte, index) => bytes[index] === byte)
+  })
+}
+
 export async function POST(request: NextRequest) {
   const authResult = await withAuth(request, { action: 'onboarding setup' })
   if (authResult.response) {
@@ -96,6 +124,15 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      // Validate file content using magic bytes
+      const isValidContent = await validateFileContent(logoFile, logoFile.type)
+      if (!isValidContent) {
+        return NextResponse.json(
+          { error: 'File content does not match declared file type. Possible file spoofing detected.' },
+          { status: 400 }
+        )
+      }
+
       // Delete old logo if exists
       if (existingStore?.logo) {
         try {
@@ -108,11 +145,24 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Generate unique filename
+      // Generate unique filename using secure random
       const timestamp = Date.now()
-      const random = Math.random().toString(36).substring(2, 9)
-      const fileExtension = logoFile.name.split('.').pop()
-      const fileName = `stores/${storeId}-${timestamp}-${random}.${fileExtension}`
+      const bytes = new Uint8Array(6)
+      crypto.getRandomValues(bytes)
+      const random = Array.from(bytes, byte => byte.toString(36)).join('').substring(0, 9)
+      // Sanitize filename - remove path separators and special characters
+      const sanitizedFileName = logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_').replace(/\.\./g, '_')
+      const fileExtension = sanitizedFileName.split('.').pop() || 'bin'
+      // Validate extension is safe
+      const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+      const ext = fileExtension.toLowerCase()
+      if (!allowedExtensions.includes(ext)) {
+        return NextResponse.json(
+          { error: 'Invalid file extension' },
+          { status: 400 }
+        )
+      }
+      const fileName = `stores/${storeId}-${timestamp}-${random}.${ext}`
 
       // Upload file to Vercel Blob
       const blob = await put(fileName, logoFile, {

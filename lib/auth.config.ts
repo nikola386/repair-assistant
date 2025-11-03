@@ -45,9 +45,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  session: {
-    strategy: 'jwt',
-  },
   callbacks: {
     async jwt({ token, user, trigger, session: sessionData }) {
       if (user) {
@@ -74,6 +71,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: '/login',
   },
-  secret: process.env.NEXTAUTH_SECRET || 'your-secret-key-change-in-production',
+  secret: (() => {
+    const secret = process.env.NEXTAUTH_SECRET
+    if (!secret) {
+      throw new Error(
+        'NEXTAUTH_SECRET environment variable is required. Please set it to a strong, randomly generated secret (minimum 32 characters).'
+      )
+    }
+    if (secret.length < 32) {
+      throw new Error(
+        'NEXTAUTH_SECRET must be at least 32 characters long for security. Please use a stronger secret.'
+      )
+    }
+    return secret
+  })(),
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' 
+        ? '__Secure-authjs.session-token' 
+        : 'authjs.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
 })
 

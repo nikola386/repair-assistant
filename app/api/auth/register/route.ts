@@ -1,14 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { userStorage } from '@/lib/userStorage'
 import { z } from 'zod'
+import { rateLimit, getRateLimitHeaders } from '@/lib/rateLimit'
+
+// Password validation schema with complexity requirements
+const passwordSchema = z
+  .string()
+  .min(8, 'Password must be at least 12 characters long')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number')
+  .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character')
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  name: z.string().min(1, 'Name is required'),
+  password: passwordSchema,
+  name: z.string().min(1, 'Name is required').max(200, 'Name must be less than 200 characters'),
 })
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 3 registrations per IP per hour
+  const rateLimitResponse = rateLimit(request, 3, 60 * 60 * 1000)
+  if (rateLimitResponse) {
+    return rateLimitResponse
+  }
+
   try {
     const body = await request.json()
     
@@ -41,6 +57,7 @@ export async function POST(request: NextRequest) {
       storeName: `${name.trim()}'s Store`, // Temporary store name
     })
 
+    const headers = getRateLimitHeaders(request, 3)
     return NextResponse.json(
       { 
         message: 'User registered successfully',
@@ -50,7 +67,10 @@ export async function POST(request: NextRequest) {
           name: user.name,
         }
       },
-      { status: 201 }
+      { 
+        status: 201,
+        headers,
+      }
     )
   } catch (error) {
     console.error('Registration error:', error)

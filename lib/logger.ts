@@ -21,8 +21,15 @@ export function generateRequestId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID()
   }
-  // Fallback for older Node.js versions
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+  // Fallback: use crypto.randomBytes for secure random generation
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const bytes = new Uint8Array(6)
+    crypto.getRandomValues(bytes)
+    const randomStr = Array.from(bytes, byte => byte.toString(36)).join('').substring(0, 9)
+    return `${Date.now()}-${randomStr}`
+  }
+  // Last resort: should not happen in modern environments
+  throw new Error('Secure random number generation is not available')
 }
 
 class Logger {

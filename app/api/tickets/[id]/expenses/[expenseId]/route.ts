@@ -78,6 +78,16 @@ export async function PATCH(
       updateInput.price = numPrice
     }
 
+    // Verify expense belongs to ticket before updating
+    const existingExpense = await ticketStorage.getExpenseById(params.expenseId)
+    if (!existingExpense || existingExpense.ticketId !== params.id) {
+      logger.warn('Expense not found or does not belong to ticket', { expenseId: params.expenseId, ticketId: params.id }, requestId)
+      return NextResponse.json(
+        { error: 'Expense not found' },
+        { status: 404 }
+      )
+    }
+
     const expense = await ticketStorage.updateExpense(params.expenseId, updateInput)
     
     if (!expense) {
@@ -140,6 +150,17 @@ export async function DELETE(
 
   try {
     logger.info('Deleting expense', { expenseId: params.expenseId, ticketId: params.id, userId: session.user.id, storeId: user.storeId }, requestId)
+    
+    // Verify expense belongs to ticket before deleting
+    const existingExpense = await ticketStorage.getExpenseById(params.expenseId)
+    if (!existingExpense || existingExpense.ticketId !== params.id) {
+      logger.warn('Expense not found or does not belong to ticket', { expenseId: params.expenseId, ticketId: params.id }, requestId)
+      return NextResponse.json(
+        { error: 'Expense not found' },
+        { status: 404 }
+      )
+    }
+    
     const deleted = await ticketStorage.deleteExpense(params.expenseId)
     
     if (!deleted) {

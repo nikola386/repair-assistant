@@ -29,7 +29,10 @@ const mapPrismaExpense = (expense: PrismaExpense): Expense => {
 // Generate unique ticket number
 const generateTicketNumber = (): string => {
   const timestamp = Date.now().toString(36).toUpperCase()
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase()
+  // Use secure random bytes instead of Math.random()
+  const bytes = new Uint8Array(3)
+  crypto.getRandomValues(bytes)
+  const random = Array.from(bytes, byte => byte.toString(36)).join('').substring(0, 4).toUpperCase()
   return `TK-${timestamp}-${random}`
 }
 
