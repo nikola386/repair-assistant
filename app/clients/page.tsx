@@ -232,7 +232,9 @@ export default function ClientsPage() {
               </div>
             ) : (
               <div className="clients-page__list">
-                <table className="clients-table">
+                <div className="clients-table">
+                  <div className="clients-table__table-container">
+                    <table className="clients-table__table">
                   <thead>
                     <tr>
                       <th>{t.clients?.name || 'Name'}</th>
@@ -263,7 +265,9 @@ export default function ClientsPage() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                    </table>
+                  </div>
+                </div>
               </div>
             )}
           </div>

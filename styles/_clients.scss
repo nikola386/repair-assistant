@@ -94,39 +94,89 @@
   }
 
   &__list {
-    overflow-x: auto;
+    // No overflow styling - handled by table-container
   }
 }
 
 .clients-table {
   width: 100%;
-  border-collapse: collapse;
+  overflow-x: auto;
+  overflow-y: visible;
+  position: relative;
 
-  thead {
-    background: var(--bg-gray);
+  &__table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--bg-white);
+    -webkit-overflow-scrolling: touch;
+    
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
 
-    th {
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      color: var(--text-dark);
-      border-bottom: 2px solid var(--border-gray);
+    &::-webkit-scrollbar-track {
+      background: var(--bg-gray);
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--border-gray);
+      border-radius: 4px;
+      
+      &:hover {
+        background: var(--primary-yellow);
+      }
     }
   }
 
-  tbody {
-    tr {
-      border-bottom: 1px solid var(--border-gray);
-      transition: background-color 0.2s ease;
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-white);
+    font-size: 0.9rem;
+    position: relative;
+    table-layout: auto;
 
-      &:hover {
-        background: var(--bg-gray);
+    thead {
+      th {
+        padding: 1rem 0.75rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-dark);
+        background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+        border-bottom: 2px solid var(--border-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);
       }
     }
 
-    td {
-      padding: 1rem;
-      color: var(--text-dark);
+    tbody {
+      overflow: visible;
+      position: relative;
+
+      tr {
+        border-bottom: 1px solid var(--border-gray);
+        transition: background 0.2s ease;
+        position: relative;
+
+        &:hover {
+          background: var(--bg-gray);
+        }
+      }
+
+      td {
+        padding: 1rem 0.75rem;
+        color: var(--text-dark);
+        position: relative;
+        overflow: visible;
+      }
     }
   }
 

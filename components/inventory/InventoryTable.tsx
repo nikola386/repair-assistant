@@ -212,7 +212,8 @@ export default function InventoryTable({
   return (
     <>
       <div className="inventory-table">
-        <table className="inventory-table__table">
+        <div className="inventory-table__table-container">
+          <table className="inventory-table__table">
           <thead>
             <tr>
               <th>{t.common.fields.name}</th>
@@ -355,6 +356,7 @@ export default function InventoryTable({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Edit Modal */}

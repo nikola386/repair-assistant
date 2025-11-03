@@ -38,42 +38,68 @@
   &__filters {
     display: flex;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     flex-wrap: wrap;
     align-items: center;
   }
 
   &__search {
-    display: flex;
-    gap: 0.5rem;
     flex: 1;
     min-width: 200px;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
 
     &-input {
       flex: 1;
       padding: 0.75rem;
       border: 1px solid var(--border-gray);
       border-radius: 4px;
-      font-size: 0.9rem;
+      font-size: 1rem;
+      font-family: inherit;
+      height: 44px;
+      box-sizing: border-box;
       transition: border-color 0.3s ease;
 
       &:focus {
         outline: none;
         border-color: var(--primary-yellow);
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
       }
     }
 
     &-button {
-      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
       background: var(--primary-yellow);
-      color: var(--text-dark);
-      border: none;
+      border: 1px solid var(--primary-yellow);
       border-radius: 4px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      color: var(--text-dark);
+      transition: all 0.3s ease;
+      min-width: 44px;
+      height: 44px;
+      box-sizing: border-box;
 
       &:hover {
         background: var(--primary-yellow-dark);
+        border-color: var(--primary-yellow-dark);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
       }
     }
   }
@@ -82,14 +108,18 @@
     padding: 0.75rem;
     border: 1px solid var(--border-gray);
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: 1rem;
+    font-family: inherit;
     background: var(--bg-white);
     cursor: pointer;
+    height: 44px;
+    box-sizing: border-box;
     transition: border-color 0.3s ease;
 
     &:focus {
       outline: none;
       border-color: var(--primary-yellow);
+      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
     }
   }
 
@@ -213,22 +243,56 @@
     color: var(--text-gray);
   }
 
+  &__table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--bg-white);
+    -webkit-overflow-scrolling: touch;
+    
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--bg-gray);
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--border-gray);
+      border-radius: 4px;
+      
+      &:hover {
+        background: var(--primary-yellow);
+      }
+    }
+  }
+
   &__table {
     width: 100%;
     border-collapse: collapse;
+    background: var(--bg-white);
     font-size: 0.9rem;
     position: relative;
-    overflow: visible;
+    table-layout: auto;
 
       thead {
-      background: var(--bg-gray);
-      
       th {
-        padding: 1rem;
+        padding: 1rem 0.75rem;
         text-align: left;
         font-weight: 600;
+        font-size: 0.85rem;
         color: var(--text-dark);
+        background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
         border-bottom: 2px solid var(--border-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);
         
         // Make actions column narrower
         &:last-child {
@@ -261,7 +325,7 @@
       }
 
       td {
-        padding: 1rem;
+        padding: 1rem 0.75rem;
         color: var(--text-dark);
         position: relative;
         overflow: visible;
