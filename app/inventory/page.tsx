@@ -162,7 +162,7 @@ export default function InventoryPage() {
 
           {showForm && (
             <div className="inventory-page__form">
-              <InventoryForm
+               <InventoryForm
                 onSubmit={handleCreateItem}
                 onCancel={() => setShowForm(false)}
               />

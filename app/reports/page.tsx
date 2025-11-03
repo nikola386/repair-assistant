@@ -211,7 +211,7 @@ export default function ReportsPage() {
                 </div>
 
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-sm btn-primary"
                   onClick={handleGenerateBusinessReport}
                   disabled={isGeneratingBusinessReport || !startDate || !endDate}
                 >
@@ -278,7 +278,7 @@ export default function ReportsPage() {
                 </div>
 
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-sm btn-primary"
                   onClick={handleGenerateInventoryReport}
                   disabled={isGeneratingInventoryReport || !startDate || !endDate}
                 >
