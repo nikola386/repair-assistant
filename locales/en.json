@@ -27,7 +27,9 @@
     "fields": {
       "name": "Name",
       "email": "Email",
+      "phone": "Phone",
       "password": "Password",
+      "date": "Date",
       "status": "Status",
       "priority": "Priority",
       "quantity": "Quantity",
@@ -62,13 +64,17 @@
       "importantDates": "Important Dates"
     },
     "dates": {
+      "date": "Date",
       "createdAt": "Created",
       "updatedAt": "Updated",
       "startDate": "Start Date",
       "endDate": "End Date",
       "selectStartDate": "Select start date",
       "selectEndDate": "Select end date",
-      "selectDate": "Select a date"
+      "selectDate": "Select a date",
+      "dateReceived": "Date Received",
+      "estimatedCompletion": "Estimated Completion",
+      "completedOn": "Completed On"
     }
   },
   "nav": {

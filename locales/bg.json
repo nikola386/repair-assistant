@@ -66,6 +66,7 @@
       "importantDates": "Важни Дати"
     },
     "dates": {
+      "date": "Дата",
       "createdAt": "Създаден",
       "updatedAt": "Актуализиран",
       "startDate": "Начална Дата",
