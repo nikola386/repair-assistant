@@ -7,10 +7,7 @@ export const runtime = 'nodejs'
 const { GET: originalGET, POST: originalPOST } = handlers
 
 // Wrap POST handler to add rate limiting for login attempts
-export async function POST(
-  request: NextRequest,
-  context?: { params: Promise<{ catchall: string[] }> }
-) {
+export async function POST(request: NextRequest) {
   // Rate limiting: 5 login attempts per IP per 15 minutes
   const rateLimitResponse = rateLimit(request, 5, 15 * 60 * 1000)
   if (rateLimitResponse) {
@@ -18,7 +15,7 @@ export async function POST(
   }
 
   // Call original POST handler
-  const response = await originalPOST(request, context as any)
+  const response = await originalPOST(request)
   
   // Add rate limit headers to response
   if (response) {

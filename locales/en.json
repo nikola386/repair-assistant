@@ -101,7 +101,14 @@
     "namePlaceholder": "Enter your name",
     "alreadyHaveAccount": "Already have an account?",
     "loginError": "Invalid email or password",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "nameRequired": "Name is required",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password"
   },
   "cookies": {
     "message": "We use cookies to enhance your experience on this website. By continuing to use the site, you agree to our use of cookies.",
@@ -115,7 +122,6 @@
     "deleteError": "Error deleting ticket",
     "updateError": "Error updating ticket",
     "noTicketsFound": "No tickets found",
-    "noTickets": "No tickets found",
     "searchPlaceholder": "Search tickets...",
     "filterByStatus": "Filter by Status",
     "filterByPriority": "Filter by Priority",
@@ -156,7 +162,8 @@
       "fileTypesHint": "PNG, JPG, GIF, PDF up to 2MB",
       "uploadingImages": "Uploading images...",
       "filesWillUploadAfter": "{count} file(s) will be uploaded after ticket creation",
-      "successfullyUploaded": "Successfully uploaded {count} file(s)"
+      "successfullyUploaded": "Successfully uploaded {count} file(s)",
+      "priority": "Priority"
     },
     "detail": {
       "loadingTicket": "Loading ticket...",
@@ -181,7 +188,8 @@
       "noExpenses": "No expenses added yet",
       "totalExpenses": "Total Expenses",
       "expenseName": "Expense name",
-      "searchInventoryPlaceholder": "Search inventory items (optional)..."
+      "searchInventoryPlaceholder": "Search inventory items (optional)...",
+      "addExpense": "+ Add Expense"
     },
     "list": {
       "loadingTickets": "Loading tickets..."
@@ -324,7 +332,32 @@
       "thankYou": "Thank You!",
       "generatedOn": "Generated on",
       "repairShop": "Repair Shop",
-      "vat": "VAT"
+      "vat": "VAT",
+      "days": "days",
+      "day": "day",
+      "hours": "hours",
+      "waiting": "Waiting",
+      "deviceType": "Device Type",
+      "count": "Count",
+      "revenue": "Revenue",
+      "expenses": "Expenses",
+      "customer": "Customer",
+      "tickets": "Tickets",
+      "category": "Category",
+      "items": "Items",
+      "quantity": "Quantity",
+      "value": "Value",
+      "transactions": "Transactions",
+      "sku": "SKU",
+      "currentQty": "Current Qty",
+      "minQty": "Min Qty",
+      "website": "Website",
+      "brand": "Brand",
+      "model": "Model",
+      "issueDescription": "Issue Description",
+      "unitPrice": "Unit Price",
+      "estimatedCost": "Estimated Cost",
+      "notes": "Notes"
     }
   },
   "profile": {
@@ -452,6 +485,8 @@
     "secondaryColor": "Secondary Color",
     "complete": "Complete Setup",
     "completing": "Completing setup...",
-    "error": "Failed to complete setup"
+    "error": "Failed to complete setup",
+    "back": "Back",
+    "next": "Next"
   }
 }

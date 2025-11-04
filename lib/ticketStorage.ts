@@ -4,7 +4,6 @@ import { del } from '@vercel/blob'
 import { Decimal } from '@prisma/client/runtime/library'
 import { inventoryStorage } from './inventoryStorage'
 // Prisma generates TicketImage type automatically - use it directly
-// @ts-expect-error - Prisma types available after generate, TS server may need restart
 import type { TicketImage as PrismaTicketImage, Expense as PrismaExpense } from '@prisma/client'
 
 // Re-export as TicketImage for domain usage (convert Date to string)
@@ -45,7 +44,7 @@ const mapPrismaImage = (image: PrismaTicketImage): TicketImage => {
     fileSize: image.fileSize ?? undefined,
     mimeType: image.mimeType ?? undefined,
     createdAt: image.createdAt.toISOString(),
-  }
+  } as TicketImage
 }
 
 // Helper function to get or create a customer

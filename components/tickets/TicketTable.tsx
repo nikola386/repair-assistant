@@ -247,7 +247,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
               <tr>
                 <td colSpan={columns.length} className="ticket-list__empty-cell">
                   <div className="ticket-list__empty">
-                    <p>{(t.tickets as any)?.noTickets || t.tickets.noTicketsFound || 'No tickets found'}</p>
+                    <p>{ t.tickets.noTicketsFound || 'No tickets found'}</p>
                   </div>
                 </td>
               </tr>

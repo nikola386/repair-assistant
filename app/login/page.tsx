@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
 import { showAlert } from '@/lib/alerts'
 
-export default function LoginPage() {
+function LoginForm() {
   const { t } = useLanguage()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -173,6 +173,28 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="login-page">
+        <div className="login-container">
+          <div className="login-card">
+            <div className="login-header">
+              <h1 className="login-title">Login</h1>
+              <p className="login-subtitle">Welcome to Repair Assistant</p>
+            </div>
+            <div style={{ padding: '20px', textAlign: 'center' }}>
+              <Spinner size="small" />
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
 

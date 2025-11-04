@@ -2,6 +2,6 @@
   "buildCommand": "prisma generate && prisma migrate deploy && npm run build",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["iad1"]
+  "regions": ["fra1"]
 }
 

@@ -1,365 +1,420 @@
 /**
- * Script to insert 100 sample ticket records into the database
+ * Script to seed tickets with expenses into the database
  * 
  * Usage: 
  *   npx tsx scripts/seed-tickets.ts
  * 
- * Note: This script should be run only once to populate the database with sample data.
- * Requires tsx to be installed: npm install -g tsx
+ * This script will:
+ * - Create a store if it doesn't exist
+ * - Create inventory items
+ * - Create customers (some with multiple tickets)
+ * - Create tickets covering all statuses and priorities
+ * - Create expenses linked to tickets, some mapped to inventory items
  */
 
 import { db } from '../lib/db'
 import { Decimal } from '@prisma/client/runtime/library'
+import { ticketStorage } from '../lib/ticketStorage'
+import { inventoryStorage } from '../lib/inventoryStorage'
+import type { TicketStatus, TicketPriority } from '../types/ticket'
 
-// Sample data arrays for generating realistic tickets
-const firstNames = [
-  'Ivan', 'Maria', 'Georgi', 'Elena', 'Dimitar', 'Sofia', 'Petar', 'Nadezhda',
-  'Nikolay', 'Viktoriya', 'Stoyan', 'Yana', 'Martin', 'Daniela', 'Radoslav',
-  'Kristina', 'Alexander', 'Gabriela', 'Hristo', 'Iva'
+// Store configuration
+const STORE_NAME = 'Майстор Жичко'
+const STORE_EMAIL = 'shop@repairassistant.com'
+
+// Configuration
+const TOTAL_TICKETS = 10000
+const CUSTOMERS_TO_CREATE = 2000 // Average ~5 tickets per customer
+
+// Inventory items to create - increased quantities for 10k tickets
+const INVENTORY_ITEMS = [
+  { name: 'iPhone Screen', sku: 'IPH-SCR-001', category: 'Screens', location: 'Shelf A1', currentQuantity: 5000, minQuantity: 100, unitPrice: 45.00, costPrice: 30.00, description: 'Original quality iPhone screen replacement' },
+  { name: 'Samsung Screen', sku: 'SAM-SCR-001', category: 'Screens', location: 'Shelf A2', currentQuantity: 5000, minQuantity: 100, unitPrice: 50.00, costPrice: 35.00, description: 'Original quality Samsung screen replacement' },
+  { name: 'Battery 3000mAh', sku: 'BAT-3000', category: 'Batteries', location: 'Shelf B1', currentQuantity: 8000, minQuantity: 200, unitPrice: 25.00, costPrice: 15.00, description: 'High capacity battery replacement' },
+  { name: 'Battery 4000mAh', sku: 'BAT-4000', category: 'Batteries', location: 'Shelf B2', currentQuantity: 8000, minQuantity: 200, unitPrice: 30.00, costPrice: 18.00, description: 'Extra high capacity battery replacement' },
+  { name: 'Charging Port', sku: 'CHG-PORT-001', category: 'Components', location: 'Shelf C1', currentQuantity: 6000, minQuantity: 150, unitPrice: 15.00, costPrice: 8.00, description: 'Universal charging port replacement' },
+  { name: 'Camera Module', sku: 'CAM-MOD-001', category: 'Components', location: 'Shelf C2', currentQuantity: 5000, minQuantity: 100, unitPrice: 35.00, costPrice: 20.00, description: 'Rear camera module replacement' },
+  { name: 'Back Glass', sku: 'GLASS-BACK-001', category: 'Glass', location: 'Shelf D1', currentQuantity: 7000, minQuantity: 150, unitPrice: 20.00, costPrice: 12.00, description: 'Back glass replacement' },
+  { name: 'Home Button', sku: 'HOME-BTN-001', category: 'Components', location: 'Shelf C3', currentQuantity: 6000, minQuantity: 100, unitPrice: 12.00, costPrice: 6.00, description: 'Home button replacement' },
+  { name: 'Speaker Module', sku: 'SPK-MOD-001', category: 'Audio', location: 'Shelf E1', currentQuantity: 6500, minQuantity: 150, unitPrice: 18.00, costPrice: 10.00, description: 'Speaker module replacement' },
+  { name: 'Logic Board Repair', sku: 'LB-REP-001', category: 'Repair Services', location: 'Workbench', currentQuantity: 99999, minQuantity: 0, unitPrice: 150.00, costPrice: 0, description: 'Logic board repair service' },
 ]
 
-const lastNames = [
-  'Petrov', 'Ivanov', 'Georgiev', 'Dimitrov', 'Stoyanov', 'Nikolov', 'Todorov',
-  'Petrova', 'Ivanova', 'Georgieva', 'Dimitrova', 'Stoyanova', 'Nikolova',
-  'Todorova', 'Atanasov', 'Atanasova', 'Vasilev', 'Vasileva', 'Mladenov', 'Mladenova'
+// Customer name templates for generation
+const FIRST_NAMES = ['John', 'Sarah', 'Mike', 'Emily', 'David', 'Lisa', 'Robert', 'Jennifer', 'Michael', 'Jessica', 'Christopher', 'Ashley', 'Daniel', 'Amanda', 'Matthew', 'Michelle', 'Andrew', 'Melissa', 'Joshua', 'Nicole', 'James', 'Stephanie', 'Ryan', 'Lauren', 'Justin', 'Kimberly', 'Brandon', 'Amy', 'Jason', 'Angela']
+const LAST_NAMES = ['Smith', 'Johnson', 'Williams', 'Davis', 'Brown', 'Anderson', 'Taylor', 'Martinez', 'Wilson', 'Moore', 'Jackson', 'Thompson', 'White', 'Harris', 'Martin', 'Garcia', 'Lee', 'Clark', 'Lewis', 'Robinson', 'Walker', 'Young', 'King', 'Wright', 'Lopez', 'Hill', 'Scott', 'Green', 'Adams', 'Baker']
+
+// Device types and brands
+const DEVICE_TYPES = ['Smartphone', 'Tablet', 'Laptop', 'Smartwatch', 'Gaming Console']
+const BRANDS = ['Apple', 'Samsung', 'Google', 'OnePlus', 'Xiaomi', 'Dell', 'HP', 'Lenovo', 'Sony']
+const MODELS = ['iPhone 12', 'iPhone 13', 'iPhone 14', 'Galaxy S21', 'Galaxy S22', 'Pixel 6', 'Pixel 7', 'MacBook Pro', 'ThinkPad X1']
+
+// Issue descriptions
+const ISSUE_DESCRIPTIONS = [
+  'Screen cracked and touch not responding',
+  'Battery drains very quickly, needs replacement',
+  'Phone not charging, charging port appears damaged',
+  'Camera not working, black screen when trying to take photos',
+  'Back glass shattered, needs replacement',
+  'Speaker not working, no sound output',
+  'Home button not responding',
+  'Logic board repair needed, device not booting',
+  'Water damage, device not turning on',
+  'Screen flickering issue',
+  'Battery swelling, safety concern',
+  'Charging port loose, cable falls out easily',
 ]
 
-const deviceTypes = [
-  'Smartphone', 'Laptop', 'Tablet', 'Desktop Computer', 'Smartwatch',
-  'Gaming Console', 'TV', 'Monitor', 'Printer', 'Router', 'Camera', 'Headphones'
+// Expense templates (some will be linked to inventory, some not)
+const EXPENSE_TEMPLATES = [
+  { name: 'Screen Replacement', inventoryCategory: 'Screens', quantity: 1 },
+  { name: 'Battery Replacement', inventoryCategory: 'Batteries', quantity: 1 },
+  { name: 'Charging Port Repair', inventoryCategory: 'Components', quantity: 1 },
+  { name: 'Camera Module Replacement', inventoryCategory: 'Components', quantity: 1 },
+  { name: 'Back Glass Replacement', inventoryCategory: 'Glass', quantity: 1 },
+  { name: 'Home Button Replacement', inventoryCategory: 'Components', quantity: 1 },
+  { name: 'Speaker Module Replacement', inventoryCategory: 'Audio', quantity: 1 },
+  { name: 'Logic Board Repair Service', inventoryCategory: 'Repair Services', quantity: 1 },
+  { name: 'Labor Fee', inventoryCategory: null, quantity: 1 },
+  { name: 'Diagnostic Fee', inventoryCategory: null, quantity: 1 },
 ]
 
-const deviceBrands = [
-  'Apple', 'Samsung', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'Sony',
-  'Microsoft', 'LG', 'Huawei', 'Xiaomi', 'Nintendo', 'PlayStation', 'Canon'
-]
+// All statuses and priorities
+const STATUSES: TicketStatus[] = ['pending', 'in_progress', 'waiting_parts', 'completed', 'cancelled']
+const PRIORITIES: TicketPriority[] = ['low', 'medium', 'high', 'urgent']
 
-const deviceModels = [
-  'iPhone 14', 'Galaxy S23', 'MacBook Pro', 'ThinkPad', 'ZenBook',
-  'Surface Pro', 'iPad Air', 'XPS 13', 'Galaxy Tab', 'AirPods Pro'
-]
+// Helper function to get or create store
+async function getOrCreateStore() {
+  let store = await db.store.findFirst({
+    where: { name: STORE_NAME },
+  })
 
-const issueDescriptions = [
-  'Screen not turning on', 'Battery draining too fast', 'Overheating issues',
-  'Camera not working', 'WiFi connectivity problems', 'Charging port damaged',
-  'Keyboard keys not responding', 'Display flickering', 'Slow performance',
-  'Water damage', 'Software crash', 'Hard drive failure', 'No sound output',
-  'Touch screen unresponsive', 'Blue screen of death', 'Keyboard backlight not working',
-  'Webcam not detected', 'USB ports not working', 'Fans making loud noise',
-  'Display has dead pixels', 'System freezing', 'Cannot connect to internet'
-]
+  if (!store) {
+    throw new Error('Store not found');
+  } else {
+    console.log(`✅ Using existing store: ${store.name}`)
+  }
 
-const notes = [
-  'Customer mentioned device worked fine until yesterday',
-  'Warranty expired 2 months ago',
-  'Device was dropped recently',
-  'Customer wants urgent repair',
-  'Original packaging available',
-  'Device has been repaired before',
-  'Water damage visible on inspection',
-  'Customer prefers original parts',
-  'Budget constraints discussed',
-  null,
-  null,
-  null,
-  null
-]
-
-const statuses = ['pending', 'in_progress', 'waiting_parts', 'completed', 'cancelled'] as const
-const priorities = ['low', 'medium', 'high', 'urgent'] as const
-
-const expenseNames = [
-  'Screen Replacement', 'Battery', 'Charging Port', 'Camera Module', 'Logic Board',
-  'Keyboard', 'Trackpad', 'RAM Upgrade', 'SSD Replacement', 'Cooling Fan',
-  'Motherboard', 'Display Assembly', 'Back Cover', 'Speaker', 'Microphone',
-  'Charging Cable', 'Power Adapter', 'Screen Protector', 'Case', 'Labor Fee'
-]
-
-// Generate random date within a range (0 to maxDaysAgo days ago)
-const randomDateInRange = (maxDaysAgo: number): Date => {
-  const date = new Date()
-  const daysAgo = Math.floor(Math.random() * maxDaysAgo)
-  date.setDate(date.getDate() - daysAgo)
-  date.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60), Math.floor(Math.random() * 60))
-  return date
+  return store
 }
 
-// Generate random date string (for date-only fields)
-const randomDateString = (maxDaysAgo: number): string => {
-  const date = new Date()
-  const daysAgo = Math.floor(Math.random() * maxDaysAgo)
-  date.setDate(date.getDate() - daysAgo)
-  return date.toISOString().split('T')[0]
-}
-
-// Generate random future date (up to 30 days ahead)
-const randomFutureDate = (maxDaysAhead: number): string => {
-  const date = new Date()
-  date.setDate(date.getDate() + Math.floor(Math.random() * maxDaysAhead) + 1)
-  return date.toISOString().split('T')[0]
-}
-
-// Generate random phone number
-const randomPhone = (): string => {
-  const prefix = ['088', '089', '087', '098']
-  const prefixIdx = Math.floor(Math.random() * prefix.length)
-  const num = Math.floor(1000000 + Math.random() * 9000000)
-  return `${prefix[prefixIdx]}${num}`
-}
-
-// Generate unique ticket number
-const generateTicketNumber = (): string => {
-  const timestamp = Date.now().toString(36).toUpperCase()
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase()
-  return `TK-${timestamp}-${random}`
-}
-
-// Generate random email
-const randomEmail = (firstName: string, lastName: string): string => {
-  const domains = ['gmail.com', 'yahoo.com', 'abv.bg', 'mail.bg', 'outlook.com']
-  const domain = domains[Math.floor(Math.random() * domains.length)]
-  const num = Math.floor(Math.random() * 1000)
-  return `${firstName.toLowerCase()}.${lastName.toLowerCase()}${num > 0 ? num : ''}@${domain}`
-}
-
-// Generate a single random ticket
-const generateTicket = () => {
-  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]
-  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)]
-  const deviceType = deviceTypes[Math.floor(Math.random() * deviceTypes.length)]
-  const deviceBrand = Math.random() > 0.2 ? deviceBrands[Math.floor(Math.random() * deviceBrands.length)] : undefined
-  const deviceModel = deviceBrand && Math.random() > 0.3 ? deviceModels[Math.floor(Math.random() * deviceModels.length)] : undefined
+// Helper function to create inventory items
+async function createInventoryItems(storeId: string): Promise<Map<string, string[]>> {
+  const inventoryMap = new Map<string, string[]>() // category -> array of inventory item ids
   
-  const status = statuses[Math.floor(Math.random() * statuses.length)]
-  const priority = priorities[Math.floor(Math.random() * priorities.length)]
+  console.log(`\n📦 Creating ${INVENTORY_ITEMS.length} inventory items...`)
   
-  // Generate estimated cost (50% chance)
-  const estimatedCost = Math.random() > 0.5 
-    ? Math.floor(50 + Math.random() * 950) // 50-1000 BGN
-    : undefined
+  for (const item of INVENTORY_ITEMS) {
+    try {
+      const created = await inventoryStorage.create(storeId, {
+        name: item.name,
+        sku: item.sku,
+        category: item.category,
+        location: item.location,
+        currentQuantity: item.currentQuantity,
+        minQuantity: item.minQuantity,
+        unitPrice: item.unitPrice,
+        costPrice: item.costPrice,
+        description: item.description,
+      })
+      
+      // Add to category array
+      if (!inventoryMap.has(item.category)) {
+        inventoryMap.set(item.category, [])
+      }
+      inventoryMap.get(item.category)!.push(created.id)
+      
+      console.log(`   ✓ Created: ${item.name} (${item.currentQuantity} in stock)`)
+    } catch (error) {
+      console.error(`   ✗ Error creating ${item.name}:`, error)
+    }
+  }
+  
+  return inventoryMap
+}
 
-  // Generate estimated completion date (60% chance, more likely for in-progress tickets)
-  const estimatedCompletionDate = (status === 'in_progress' || status === 'pending') && Math.random() > 0.4
-    ? randomFutureDate(30)
-    : undefined
+// Helper function to get or create customer
+async function getOrCreateCustomer(
+  name: string,
+  email: string,
+  phone: string,
+  storeId: string
+): Promise<string> {
+  const existing = await db.customer.findFirst({
+    where: {
+      storeId,
+      email: {
+        equals: email.toLowerCase(),
+        mode: 'insensitive',
+      },
+    },
+  })
 
-  // Generate notes (30% chance)
-  const ticketNotes = Math.random() > 0.7 
-    ? notes[Math.floor(Math.random() * notes.length)]
-    : undefined
+  if (existing) {
+    return existing.id
+  }
 
-  // Generate actual cost for completed tickets (80% chance, should be close to estimated)
-  const actualCost = status === 'completed' && Math.random() > 0.2
-    ? estimatedCost 
-      ? Math.floor(estimatedCost * (0.8 + Math.random() * 0.4)) // ±20% variation
-      : Math.floor(50 + Math.random() * 950)
-    : undefined
+  const customer = await db.customer.create({
+    data: {
+      name,
+      email: email.toLowerCase(),
+      phone,
+      storeId,
+    },
+  })
 
-  // Generate ticket creation date (within last 180 days)
-  const createdAt = randomDateInRange(180)
+  return customer.id
+}
 
-  // Generate actual completion date for completed tickets
-  // Completion date should be after creation date, but not in the future
-  const actualCompletionDate = status === 'completed'
-    ? (() => {
-        const completionDate = new Date(createdAt)
-        // Add 1-30 days after creation, but ensure it doesn't exceed today
-        const daysAfterCreation = Math.floor(Math.random() * 30) + 1
-        completionDate.setDate(completionDate.getDate() + daysAfterCreation)
-        
-        // If completion date is in the future, cap it to today
-        const today = new Date()
-        if (completionDate > today) {
-          completionDate.setTime(today.getTime())
-        }
-        
-        return completionDate.toISOString().split('T')[0]
-      })()
-    : undefined
+// Helper function to generate random customer data
+function generateCustomerData(index: number) {
+  const firstName = FIRST_NAMES[index % FIRST_NAMES.length]
+  const lastName = LAST_NAMES[Math.floor(index / FIRST_NAMES.length) % LAST_NAMES.length]
+  const name = `${firstName} ${lastName}`
+  const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${index}@email.com`
+  const phone = `+1-555-${String(1000 + (index % 9000)).slice(1)}`
+  
+  return { name, email, phone }
+}
+
+// Helper function to generate ticket data
+function generateTicketData(
+  customerName: string,
+  customerEmail: string,
+  customerPhone: string,
+  ticketIndex: number
+) {
+  // Distribute statuses and priorities more evenly
+  const status = STATUSES[ticketIndex % STATUSES.length]
+  const priority = PRIORITIES[ticketIndex % PRIORITIES.length]
+  const deviceType = DEVICE_TYPES[ticketIndex % DEVICE_TYPES.length]
+  const brand = BRANDS[ticketIndex % BRANDS.length]
+  const model = MODELS[ticketIndex % MODELS.length]
+  const issueDescription = ISSUE_DESCRIPTIONS[ticketIndex % ISSUE_DESCRIPTIONS.length]
+
+  // Calculate dates based on status - spread over last 2 years
+  const now = new Date()
+  const daysAgo = (ticketIndex % 730) // Spread over ~2 years
+  const createdAt = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000))
+  
+  let estimatedCompletionDate: Date | undefined
+  let actualCompletionDate: Date | undefined
+  
+  if (status === 'completed') {
+    estimatedCompletionDate = new Date(createdAt.getTime() + 5 * 24 * 60 * 60 * 1000)
+    actualCompletionDate = new Date(createdAt.getTime() + 4 * 24 * 60 * 60 * 1000)
+  } else if (status === 'in_progress' || status === 'waiting_parts') {
+    estimatedCompletionDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+  }
+
+  const estimatedCost = 50 + Math.random() * 200
+  const actualCost = status === 'completed' ? estimatedCost * (0.8 + Math.random() * 0.4) : undefined
 
   return {
-    customerName: `${firstName} ${lastName}`,
-    customerEmail: randomEmail(firstName, lastName),
-    customerPhone: randomPhone(),
+    customerName,
+    customerEmail,
+    customerPhone,
     deviceType,
-    deviceBrand,
-    deviceModel,
-    issueDescription: issueDescriptions[Math.floor(Math.random() * issueDescriptions.length)],
+    deviceBrand: brand,
+    deviceModel: model,
+    issueDescription,
     status,
     priority,
     estimatedCost,
     actualCost,
     estimatedCompletionDate,
     actualCompletionDate,
-    notes: ticketNotes || undefined,
     createdAt,
   }
 }
 
-// Generate random expenses for a ticket
-const generateExpenses = (ticketId: string, ticketCreatedAt: Date, ticketCost?: number): Array<{
-  ticketId: string
-  name: string
-  quantity: Decimal
-  price: Decimal
-  createdAt: Date
-}> => {
-  // 40% chance of having expenses, more likely for in_progress or completed tickets
-  if (Math.random() > 0.6) {
-    const expenseCount = Math.floor(Math.random() * 3) + 1 // 1-3 expenses
-    const expenses = []
+// Helper function to create expenses for a ticket
+async function createExpensesForTicket(
+  ticketId: string,
+  storeId: string,
+  inventoryMap: Map<string, string[]>,
+  ticketData: any
+) {
+  const expensesToCreate = Math.floor(Math.random() * 3) + 1 // 1-3 expenses per ticket
+  
+  for (let i = 0; i < expensesToCreate; i++) {
+    const template = EXPENSE_TEMPLATES[Math.floor(Math.random() * EXPENSE_TEMPLATES.length)]
     
-    for (let i = 0; i < expenseCount; i++) {
-      const name = expenseNames[Math.floor(Math.random() * expenseNames.length)]
-      const quantity = new Decimal(Math.floor(Math.random() * 3) + 1) // 1-3 quantity
-      // Price varies, but if we have ticket cost, distribute it across expenses
-      const basePrice = ticketCost && expenseCount > 0
-        ? (ticketCost / expenseCount) * (0.7 + Math.random() * 0.6)
-        : Math.floor(10 + Math.random() * 490) // 10-500 BGN
-      const price = new Decimal(basePrice.toFixed(2))
+    let inventoryItemId: string | undefined
+    let name = template.name
+    let quantity = template.quantity
+    let price = 0
+
+    // Try to link to inventory if available
+    if (template.inventoryCategory && inventoryMap.has(template.inventoryCategory)) {
+      const categoryItems = inventoryMap.get(template.inventoryCategory)!
+      // Randomly select one item from the category
+      inventoryItemId = categoryItems[Math.floor(Math.random() * categoryItems.length)]
       
-      expenses.push({
+      // Get inventory item to use its price
+      if (inventoryItemId) {
+        const inventoryItem = await inventoryStorage.getById(inventoryItemId, storeId)
+        if (inventoryItem && inventoryItem.unitPrice) {
+          price = inventoryItem.unitPrice
+          name = inventoryItem.name
+        }
+      }
+    } else {
+      // Manual expense (not linked to inventory)
+      price = template.name.includes('Labor') ? 50 + Math.random() * 50 : 20 + Math.random() * 30
+    }
+
+    try {
+      await ticketStorage.createExpense({
         ticketId,
+        inventoryItemId,
         name,
         quantity,
         price,
-        createdAt: ticketCreatedAt, // Use the same date as the ticket
       })
+    } catch (error) {
+      console.error(`   ✗ Error creating expense ${name}:`, error)
     }
-    
-    return expenses
   }
-  
-  return []
 }
 
+// Main seeding function
 async function seedTickets() {
   try {
-    console.log('Checking existing tickets...')
-    const existingCount = await db.repairTicket.count()
-    
-    if (existingCount > 0) {
-      console.log(`Found ${existingCount} existing tickets in the database.`)
-      console.log('⚠️  Warning: This will add 100 more tickets.')
-      console.log('Continuing with ticket generation...')
-    }
-    
-    console.log('Generating 100 tickets...')
-    const tickets = Array.from({ length: 100 }, () => generateTicket())
-    
-    // Helper function to get or create a customer
-    const getOrCreateCustomer = async (
-      name: string,
-      email: string,
-      phone: string
-    ): Promise<string> => {
-      // Try to find existing customer by email (case-insensitive)
-      const existing = await db.customer.findFirst({
-        where: {
-          email: {
-            equals: email.toLowerCase(),
-            mode: 'insensitive',
-          },
-        },
-      })
+    console.log('🚀 Starting ticket seeding process...\n')
 
-      if (existing) {
-        // Update customer info if it has changed
-        await db.customer.update({
-          where: { id: existing.id },
-          data: {
-            name,
-            phone,
-          },
-        })
+    // Get or create store
+    const store = await getOrCreateStore()
+    const storeId = store.id
 
-        return existing.id
-      }
+    // Create inventory items
+    const inventoryMap = await createInventoryItems(storeId)
 
-      // Create new customer
-      const newCustomer = await db.customer.create({
-        data: {
-          name,
-          email: email.toLowerCase(),
-          phone,
-        },
-      })
-
-      return newCustomer.id
-    }
+    // Create customers and tickets
+    console.log(`\n👥 Creating ${CUSTOMERS_TO_CREATE} customers and ${TOTAL_TICKETS} tickets...`)
+    console.log(`   This may take a while. Progress will be shown every 100 tickets.\n`)
     
-    console.log('Inserting tickets into database...')
-    let successCount = 0
-    let errorCount = 0
-    
-    for (let i = 0; i < tickets.length; i++) {
-      try {
-        const ticket = tickets[i]
-        const ticketNumber = generateTicketNumber()
-        
-        // Get or create customer
+    let totalTicketsCreated = 0
+    let totalExpensesCreated = 0
+    let totalCustomersCreated = 0
+    const customerMap = new Map<string, { id: string; name: string; email: string; phone: string }>()
+
+    // Create tickets
+    for (let ticketIndex = 0; ticketIndex < TOTAL_TICKETS; ticketIndex++) {
+      // Determine which customer this ticket belongs to
+      // Each customer gets 1-10 tickets (weighted towards fewer tickets)
+      const customerIndex = Math.floor(Math.random() * CUSTOMERS_TO_CREATE)
+      const customerKey = `customer_${customerIndex}`
+      
+      let customer
+      if (customerMap.has(customerKey)) {
+        customer = customerMap.get(customerKey)!
+      } else {
+        const customerData = generateCustomerData(customerIndex)
         const customerId = await getOrCreateCustomer(
-          ticket.customerName,
-          ticket.customerEmail,
-          ticket.customerPhone
+          customerData.name,
+          customerData.email,
+          customerData.phone,
+          storeId
         )
-        
-        const createdTicket = await db.repairTicket.create({
-          data: {
-            ticketNumber,
-            customerId,
-            deviceType: ticket.deviceType,
-            deviceBrand: ticket.deviceBrand || null,
-            deviceModel: ticket.deviceModel || null,
-            issueDescription: ticket.issueDescription,
-            status: ticket.status,
-            priority: ticket.priority || 'medium',
-            estimatedCost: ticket.estimatedCost ? new Decimal(ticket.estimatedCost.toString()) : null,
-            actualCost: ticket.actualCost ? new Decimal(ticket.actualCost.toString()) : null,
-            estimatedCompletionDate: ticket.estimatedCompletionDate ? new Date(ticket.estimatedCompletionDate) : null,
-            actualCompletionDate: ticket.actualCompletionDate ? new Date(ticket.actualCompletionDate) : null,
-            notes: ticket.notes || null,
-            createdAt: ticket.createdAt, // Set the ticket creation date explicitly
-          },
-        })
+        customer = {
+          id: customerId,
+          name: customerData.name,
+          email: customerData.email,
+          phone: customerData.phone,
+        }
+        customerMap.set(customerKey, customer)
+        totalCustomersCreated++
+      }
 
-        // Create expenses for some tickets (with same date as ticket)
-        const expenses = generateExpenses(
-          createdTicket.id,
-          ticket.createdAt, // Pass the ticket's creation date
-          ticket.actualCost || ticket.estimatedCost || undefined
-        )
-        
-        if (expenses.length > 0) {
-          await db.expense.createMany({
-            data: expenses,
-          })
-        }
-        
-        successCount++
-        if ((i + 1) % 10 === 0) {
-          console.log(`Progress: ${i + 1}/100 tickets inserted...`)
-        }
-      } catch (error) {
-        console.error(`Error inserting ticket ${i + 1}:`, error)
-        errorCount++
+      const ticketData = generateTicketData(
+        customer.name,
+        customer.email,
+        customer.phone,
+        ticketIndex
+      )
+
+      // Create ticket
+      const ticket = await ticketStorage.create(
+        {
+          customerName: ticketData.customerName,
+          customerEmail: ticketData.customerEmail,
+          customerPhone: ticketData.customerPhone,
+          deviceType: ticketData.deviceType,
+          deviceBrand: ticketData.deviceBrand,
+          deviceModel: ticketData.deviceModel,
+          issueDescription: ticketData.issueDescription,
+          priority: ticketData.priority,
+          estimatedCost: ticketData.estimatedCost,
+          estimatedCompletionDate: ticketData.estimatedCompletionDate?.toISOString().split('T')[0],
+          notes: `Status: ${ticketData.status}, Priority: ${ticketData.priority}`,
+        },
+        storeId
+      )
+
+      // Update ticket status and dates (since create always sets status to 'pending')
+      await ticketStorage.update(
+        ticket.id,
+        {
+          status: ticketData.status,
+          actualCost: ticketData.actualCost,
+          actualCompletionDate: ticketData.actualCompletionDate?.toISOString().split('T')[0],
+        },
+        storeId
+      )
+
+      // Create expenses for this ticket
+      await createExpensesForTicket(ticket.id, storeId, inventoryMap, ticketData)
+      
+      const expenses = await ticketStorage.getExpensesByTicketId(ticket.id)
+      totalExpensesCreated += expenses.length
+
+      totalTicketsCreated++
+
+      // Progress indicator
+      if (totalTicketsCreated % 100 === 0) {
+        const progress = ((totalTicketsCreated / TOTAL_TICKETS) * 100).toFixed(1)
+        console.log(`   Progress: ${totalTicketsCreated}/${TOTAL_TICKETS} tickets (${progress}%) - ${totalExpensesCreated} expenses created`)
       }
     }
-    
-    console.log('\n✅ Ticket seeding completed!')
-    console.log(`Successfully inserted: ${successCount} tickets`)
-    if (errorCount > 0) {
-      console.log(`Errors: ${errorCount} tickets`)
+
+    // Summary
+    console.log('\n' + '='.repeat(60))
+    console.log('📊 Seeding Summary:')
+    console.log('='.repeat(60))
+    console.log(`   Store: ${store.name}`)
+    console.log(`   Inventory Items: ${INVENTORY_ITEMS.length}`)
+    console.log(`   Customers Created: ${totalCustomersCreated}`)
+    console.log(`   Tickets Created: ${totalTicketsCreated}`)
+    console.log(`   Expenses Created: ${totalExpensesCreated}`)
+    console.log('\n   Status Distribution:')
+    for (const status of STATUSES) {
+      const count = await db.repairTicket.count({
+        where: { storeId, status },
+      })
+      console.log(`     - ${status}: ${count}`)
     }
-    
+    console.log('\n   Priority Distribution:')
+    for (const priority of PRIORITIES) {
+      const count = await db.repairTicket.count({
+        where: { storeId, priority },
+      })
+      console.log(`     - ${priority}: ${count}`)
+    }
+    console.log('='.repeat(60))
+    console.log('✅ Seeding completed successfully!')
+
     // Close database connection
     await db.$disconnect()
     process.exit(0)
-  } catch (error) {
-    console.error('Error seeding tickets:', error)
+  } catch (error: any) {
+    console.error('\n❌ Error seeding tickets:', error.message)
+    console.error(error)
     await db.$disconnect()
     process.exit(1)
   }
 }
 
+// Run the seeding function
 seedTickets()
+

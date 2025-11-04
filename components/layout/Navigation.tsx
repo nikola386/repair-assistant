@@ -122,10 +122,10 @@ export default function Navigation() {
                 <Link href="/tickets">{t.nav.tickets}</Link>
               </li>
               <li>
-                <Link href="/clients">{t.nav.clients}</Link>
+                <Link href="/inventory">{t.nav.inventory}</Link>
               </li>
               <li>
-                <Link href="/inventory">{t.nav.inventory || 'Inventory'}</Link>
+                <Link href="/clients">{t.nav.clients}</Link>
               </li>
               <li>
                 <Link href="/reports">{t.nav.reports}</Link>

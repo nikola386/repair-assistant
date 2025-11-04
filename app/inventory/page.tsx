@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, usePathname } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -8,10 +8,10 @@ import Spinner from '@/components/ui/Spinner'
 import MultiSelect from '@/components/ui/MultiSelect'
 import InventoryTable from '@/components/inventory/InventoryTable'
 import InventoryForm from '@/components/inventory/InventoryForm'
-import { InventoryItem, CreateInventoryItemInput } from '@/types/inventory'
+import { InventoryItem, CreateInventoryItemInput, UpdateInventoryItemInput } from '@/types/inventory'
 import { showAlert } from '@/lib/alerts'
 
-export default function InventoryPage() {
+function InventoryPageContent() {
   const { t } = useLanguage()
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -129,12 +129,21 @@ export default function InventoryPage() {
     }
   }, [items.length])
 
-  const handleCreateItem = async (data: CreateInventoryItemInput) => {
+  const handleCreateItem = async (data: CreateInventoryItemInput | UpdateInventoryItemInput) => {
+    // Ensure name is present for create operation
+    if (!data.name) {
+      showAlert.error(t.inventory.form.nameRequired)
+      return
+    }
+    
+    // Type assertion: when creating, name is required
+    const createData = data as CreateInventoryItemInput
+    
     try {
       const response = await fetch('/api/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(createData),
       })
 
       if (response.ok) {
@@ -360,6 +369,25 @@ export default function InventoryPage() {
         </div>
       </main>
     </>
+  )
+}
+
+export default function InventoryPage() {
+  return (
+    <Suspense fallback={
+      <>
+        <Navigation />
+        <main className="inventory-page">
+          <div className="inventory-page__container">
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+              <Spinner />
+            </div>
+          </div>
+        </main>
+      </>
+    }>
+      <InventoryPageContent />
+    </Suspense>
   )
 }
 

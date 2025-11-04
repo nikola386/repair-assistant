@@ -101,7 +101,14 @@
     "namePlaceholder": "Въведете вашето име",
     "alreadyHaveAccount": "Вече имате акаунт?",
     "loginError": "Невалиден имейл или парола",
-    "loading": "Зареждане..."
+    "loading": "Зареждане...",
+    "passwordMismatch": "Паролите не съвпадат",
+    "passwordTooShort": "Паролата трябва да бъде поне 8 символа",
+    "nameRequired": "Името е задължително",
+    "name": "Име",
+    "email": "Имейл",
+    "password": "Парола",
+    "confirmPassword": "Потвърди Парола"
   },
   "cookies": {
     "message": "Използваме бисквитки, за да подобрим вашето изживяване на този сайт. Продължавайки да използвате сайта, вие се съгласявате с използването на бисквитки.",
@@ -121,6 +128,11 @@
     "allStatuses": "Всички Статуси",
     "allPriorities": "Всички Приоритети",
     "showingResults": "Показване на {count} от {total} билета",
+    "showing": "Показване",
+    "to": "до",
+    "of": "от",
+    "previous": "Предишен",
+    "next": "Следващ",
     "updateStatus": "Актуализирай Статус",
     "estimatedCompletionDate": "Очаквана Дата на Завършване",
     "actualCompletionDate": "Реална Дата на Завършване",
@@ -150,7 +162,8 @@
       "fileTypesHint": "PNG, JPG, GIF, PDF до 2MB",
       "uploadingImages": "Качване на изображения...",
       "filesWillUploadAfter": "{count} файл(а) ще бъдат качени след създаването на билета",
-      "successfullyUploaded": "Успешно качени {count} файл(а)"
+      "successfullyUploaded": "Успешно качени {count} файл(а)",
+      "priority": "Приоритет"
     },
     "detail": {
       "loadingTicket": "Зареждане на билет...",
@@ -162,7 +175,9 @@
       "noFilesUploaded": "Все още няма качени файлове",
       "clickToSelectImages": "Кликнете за избор на изображения",
       "uploadingFiles": "Качване на {count} файл(а)...",
-      "addExpense": "+ Добави Разход"
+      "addExpense": "+ Добави Разход",
+      "expenses": "Разходи",
+      "generatingInvoice": "Генериране на фактура..."
     },
     "expenses": {
       "title": "Разходи",
@@ -173,7 +188,8 @@
       "noExpenses": "Все още няма добавени разходи",
       "totalExpenses": "Общо Разходи",
       "expenseName": "Име на разход",
-      "searchInventoryPlaceholder": "Търсене на артикули от склад (по избор)..."
+      "searchInventoryPlaceholder": "Търсене на артикули от склад (по избор)...",
+      "addExpense": "+ Добави Разход"
     },
     "list": {
       "loadingTickets": "Зареждане на билети..."
@@ -199,7 +215,11 @@
     "imageUploadSuccess": "Профилната снимка е качена успешно",
     "imageUploadError": "Неуспешно качване на снимка",
     "imageDeleteSuccess": "Профилната снимка е изтрита успешно",
-    "imageDeleteError": "Неуспешно изтриване на снимка"
+    "imageDeleteError": "Неуспешно изтриване на снимка",
+    "name": "Име",
+    "uploading": "Качване...",
+    "changeImage": "Промени Снимка",
+    "saving": "Запазване..."
   },
   "clients": {
     "title": "Клиенти",
@@ -223,6 +243,7 @@
     "unitPrice": "Единична Цена",
     "lowStock": "Ограничена Наличност",
     "ok": "OK",
+    "adjust": "Коригирай",
     "form": {
       "basicInformation": "Основна Информация",
       "organization": "Организация",
@@ -242,6 +263,7 @@
       "costPriceLabel": "Себестойност (Покупна Цена)",
       "optional": "По избор",
       "optionalDescription": "Описание по избор",
+      "description": "Описание",
       "categoryPlaceholder": "напр., Екрани, Батерии, Кабели",
       "locationPlaceholder": "напр., Рафт А-1, Склад 2"
     },
@@ -274,6 +296,7 @@
       "title": "Месечен/Периодичен Бизнес Отчет",
       "description": "Изчерпателен отчет за бизнес производителност със статистики, разбивка на приходите и клиентска аналитика",
       "generateButton": "Генерирай Бизнес Отчет",
+      "generating": "Генериране...",
       "downloadSuccess": "Бизнес отчетът е изтеглен успешно",
       "downloadError": "Грешка при генериране на бизнес отчет"
     },
@@ -281,6 +304,7 @@
       "title": "Отчет за Склад",
       "description": "Вижте стойността на склада, показатели за оборот, артикули с ниска наличност и разбивка по категории",
       "generateButton": "Генерирай Отчет за Склад",
+      "generating": "Генериране...",
       "downloadSuccess": "Отчетът за склад е изтеглен успешно",
       "downloadError": "Грешка при генериране на отчет за склад"
     },
@@ -346,7 +370,32 @@
       "thankYou": "Благодарим Ви!",
       "generatedOn": "Генериран на",
       "repairShop": "Сервиз",
-      "vat": "ДДС"
+      "vat": "ДДС",
+      "days": "дни",
+      "day": "ден",
+      "hours": "часа",
+      "waiting": "Чакащи",
+      "deviceType": "Тип Устройство",
+      "count": "Брой",
+      "revenue": "Приходи",
+      "expenses": "Разходи",
+      "customer": "Клиент",
+      "tickets": "Билети",
+      "category": "Категория",
+      "items": "Артикули",
+      "quantity": "Количество",
+      "value": "Стойност",
+      "transactions": "Транзакции",
+      "sku": "SKU",
+      "currentQty": "Текущо Количество",
+      "minQty": "Мин. Количество",
+      "website": "Уебсайт",
+      "brand": "Марка",
+      "model": "Модел",
+      "issueDescription": "Описание на Проблема",
+      "unitPrice": "Единична Цена",
+      "estimatedCost": "Очаквана Цена",
+      "notes": "Бележки"
     }
   },
   "dashboard": {
@@ -436,6 +485,8 @@
     "secondaryColor": "Вторичен Цвят",
     "complete": "Завърши Настройката",
     "completing": "Завършване на настройката...",
-    "error": "Неуспешно завършване на настройката"
+    "error": "Неуспешно завършване на настройката",
+    "back": "Назад",
+    "next": "Напред"
   }
 }

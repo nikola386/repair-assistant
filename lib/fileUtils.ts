@@ -93,7 +93,7 @@ export async function compressAndConvertToJpg(file: File): Promise<File> {
 
     // Create a new File object with the compressed image
     const compressedFile = new File(
-      [compressedBuffer],
+      [new Uint8Array(compressedBuffer)],
       file.name.replace(/\.[^/.]+$/, '.jpg'), // Replace extension with .jpg
       {
         type: 'image/jpeg',

@@ -336,10 +336,11 @@ export default function DashboardPage() {
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             }}
             formatter={(value: number) => {
-              if (openChart === 'profit' || openChart === 'income' || openChart === 'expenses') {
-                return formatCurrency(value)
-              }
-              return `${value.toFixed(1)}%`
+              const formattedValue = openChart === 'profit' || openChart === 'income' || openChart === 'expenses'
+                ? formatCurrency(value)
+                : `${value.toFixed(1)}%`
+              const label = getChartTitle(openChart)
+              return [formattedValue, label]
             }}
             labelFormatter={(label) => formatChartDate(label)}
           />
@@ -616,7 +617,11 @@ export default function DashboardPage() {
                               padding: '8px',
                               fontSize: '12px',
                             }}
-                            formatter={(value: number) => formatCurrency(value)}
+                            formatter={(value: number) => [
+                              formatCurrency(value),
+                              t.dashboard?.stats?.income || 'Income',
+                            ]}
+                            labelFormatter={(label) => formatChartDate(label)}
                           />
                           <Line
                             type="monotone"
@@ -756,7 +761,11 @@ export default function DashboardPage() {
                               padding: '8px',
                               fontSize: '12px',
                             }}
-                            formatter={(value: number) => formatCurrency(value)}
+                            formatter={(value: number) => [
+                              formatCurrency(value),
+                              t.dashboard?.stats?.grossProfit || 'Gross Profit',
+                            ]}
+                            labelFormatter={(label) => formatChartDate(label)}
                           />
                           <Line
                             type="monotone"

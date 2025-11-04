@@ -1,8 +1,6 @@
 import { db } from './db'
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from './constants'
 // Prisma generates Settings type automatically from schema
-// Import will work after TypeScript server reloads (Cmd+Shift+P → "TypeScript: Restart TS Server")
-// @ts-expect-error - Prisma types available after generate, TS server may need restart
 import type { Settings } from '@prisma/client'
 
 export type { Settings }
@@ -14,14 +12,12 @@ export interface UpdateSettingsInput {
 
 export class SettingsStorage {
   async findByStoreId(storeId: string): Promise<Settings | null> {
-    // @ts-expect-error - settings available after Prisma generate
     return db.settings.findUnique({
       where: { storeId },
     })
   }
 
   async createOrUpdate(storeId: string, data: UpdateSettingsInput): Promise<Settings> {
-    // @ts-expect-error - settings available after Prisma generate  
     return db.settings.upsert({
       where: { storeId },
       update: {

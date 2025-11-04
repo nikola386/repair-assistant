@@ -4,7 +4,6 @@ import { userStorage } from '@/lib/userStorage'
 import { db } from '@/lib/db'
 import { inventoryStorage } from '@/lib/inventoryStorage'
 import { logger, generateRequestId } from '@/lib/logger'
-import { Decimal, Prisma } from '@prisma/client'
 import React from 'react'
 import { renderToBuffer } from '@react-pdf/renderer'
 import InventoryReportPDF from '@/components/reports/InventoryReportPDF'
@@ -83,7 +82,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get expenses linked to inventory items to calculate turnover
-    const expensesWithInventory = await db.expense.findMany({
+    const expensesWithInventory = await (db as any).expense.findMany({
       where: {
         inventoryItemId: {
           not: null,
@@ -145,7 +144,7 @@ export async function GET(request: NextRequest) {
       end.setHours(23, 59, 59, 999)
 
       const dateFilteredExpenses = expensesWithInventory.filter(
-        (expense) =>
+        (expense: any) =>
           expense.createdAt >= start && expense.createdAt <= end
       )
 

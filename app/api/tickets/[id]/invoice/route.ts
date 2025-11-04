@@ -88,8 +88,11 @@ export async function GET(
       React.createElement(InvoicePDF, { ticket, store, translations, language })
     )
 
+    // Convert Buffer to Uint8Array for NextResponse
+    const pdfArray = new Uint8Array(pdfBuffer)
+
     // Return PDF as response
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfArray, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

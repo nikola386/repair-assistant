@@ -3,7 +3,8 @@ export type TicketStatus = 'pending' | 'in_progress' | 'waiting_parts' | 'comple
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent'
 
 // TicketImage now comes from ticketStorage (based on Prisma type)
-export type { TicketImage } from '../lib/ticketStorage'
+import type { TicketImage } from '../lib/ticketStorage'
+export type { TicketImage }
 
 export interface Expense {
   id: string

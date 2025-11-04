@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
         storeId: storeId,
         primaryColor: DEFAULT_PRIMARY_COLOR,
         secondaryColor: DEFAULT_SECONDARY_COLOR,
+        language: 'en',
         createdAt: new Date(),
         updatedAt: new Date(),
       }

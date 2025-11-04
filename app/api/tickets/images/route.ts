@@ -9,10 +9,10 @@ import {
   validateFileSize,
   ALLOWED_FILE_TYPES,
   MAX_FILE_SIZE,
+  ALLOWED_FILE_EXTENSIONS,
 } from '@/lib/fileValidation'
 import {
   generateUniqueFileName,
-  ALLOWED_FILE_EXTENSIONS,
   compressAndConvertToJpg,
 } from '@/lib/fileUtils'
 

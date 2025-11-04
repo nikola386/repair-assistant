@@ -5,7 +5,7 @@ import bg from '../locales/bg.json'
 import de from '../locales/de.json'
 
 // Merge common translations with PDF-specific translations
-function mergeTranslations(locale: typeof en): typeof en.reports.pdf {
+function mergeTranslations(locale: typeof en) {
   const pdf = locale.reports.pdf
   const common = locale.common
   
@@ -35,6 +35,29 @@ function mergeTranslations(locale: typeof en): typeof en.reports.pdf {
     medium: common.priority.medium,
     high: common.priority.high,
     urgent: common.priority.urgent,
+  } as typeof pdf & {
+    name: string
+    email: string
+    phone: string
+    date: string
+    status: string
+    priority: string
+    total: string
+    customerInformation: string
+    deviceInformation: string
+    importantDates: string
+    dateReceived: string
+    estimatedCompletion: string
+    completedOn: string
+    pending: string
+    inProgress: string
+    waitingParts: string
+    completed: string
+    cancelled: string
+    low: string
+    medium: string
+    high: string
+    urgent: string
   }
 }
 
