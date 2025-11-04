@@ -12,15 +12,15 @@ import LogoUpload from '@/components/ui/LogoUpload'
 import { showAlert } from '@/lib/alerts'
 import { validatePasswordClient } from '@/lib/validation'
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR, CURRENCIES } from '@/lib/constants'
+import {
+  getCachedProfileData,
+  updateProfileCache,
+  getCachedCountries,
+  setCachedCountries,
+  type Country,
+} from '@/lib/cache'
 
 import type { User } from '@/lib/userStorage'
-
-interface Country {
-  id: string
-  code: string
-  name: string
-  requiresVat: boolean
-}
 
 type Tab = 'profile' | 'password' | 'store' | 'appearance'
 
@@ -75,6 +75,19 @@ export default function SettingsPage() {
   const [settingsLoading, setSettingsLoading] = useState(false)
 
   const fetchProfile = useCallback(async () => {
+    // Check cache first
+    const cachedData = getCachedProfileData()
+    if (cachedData) {
+      setUser(cachedData.user)
+      setProfileFormData({
+        name: cachedData.user.name || '',
+        email: cachedData.user.email || '',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Fetch from API if no cache
     try {
       const response = await fetch('/api/profile')
       if (response.ok) {
@@ -84,6 +97,8 @@ export default function SettingsPage() {
           name: data.user.name || '',
           email: data.user.email || '',
         })
+        // Cache the profile data
+        updateProfileCache(data.user, data.store)
       } else {
         const errorMsg = t.profile?.fetchError || 'Failed to load profile'
         setError(errorMsg)
@@ -99,11 +114,22 @@ export default function SettingsPage() {
   }, [t.profile?.fetchError])
 
   const fetchCountries = useCallback(async () => {
+    // Check cache first
+    const cachedCountries = getCachedCountries()
+    if (cachedCountries) {
+      setCountries(cachedCountries)
+      return
+    }
+
+    // Fetch from API if no cache
     try {
       const response = await fetch('/api/countries')
       if (response.ok) {
         const data = await response.json()
-        setCountries(data.countries || [])
+        const countries = data.countries || []
+        setCountries(countries)
+        // Cache the countries data
+        setCachedCountries(countries)
       }
     } catch (err) {
       console.error('Error fetching countries:', err)
@@ -183,6 +209,7 @@ export default function SettingsPage() {
 
       if (response.ok) {
         setUser(data.user)
+        updateProfileCache(data.user, data.store)
         const successMsg = t.profile?.updateSuccess || 'Profile updated successfully'
         setSuccess(successMsg)
         showAlert.success(successMsg)
@@ -289,6 +316,7 @@ export default function SettingsPage() {
 
       if (response.ok) {
         setUser(data.user)
+        updateProfileCache(data.user)
         const successMsg = t.profile?.imageUploadSuccess || 'Profile image updated successfully'
         setSuccess(successMsg)
         showAlert.success(successMsg)
@@ -330,6 +358,7 @@ export default function SettingsPage() {
 
       if (response.ok) {
         setUser(data.user)
+        updateProfileCache(data.user)
         const successMsg = t.profile?.imageDeleteSuccess || 'Profile image deleted successfully'
         setSuccess(successMsg)
         showAlert.success(successMsg)
