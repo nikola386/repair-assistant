@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
     path: request.nextUrl.pathname,
     requestId,
   }
-  console.log(JSON.stringify({ ...logData, type: 'request-start' }))
+  // console.log(JSON.stringify({ ...logData, type: 'request-start' }))
 
   // Redirect authenticated users away from login/register pages
   const authPages = ['/login', '/register']
@@ -93,12 +93,12 @@ export async function middleware(request: NextRequest) {
   response.headers.set('X-Request-ID', requestId)
   
   // Log response
-  console.log(JSON.stringify({
-    ...logData,
-    type: 'request-end',
-    status: response.status,
-    duration,
-  }))
+  // console.log(JSON.stringify({
+  //   ...logData,
+  //   type: 'request-end',
+  //   status: response.status,
+  //   duration,
+  // }))
 
   return response
 }
@@ -114,6 +114,7 @@ export const config = {
     '/settings/:path*',
     '/login',
     '/register',
+    '/verify-email',
     '/verify-email/:path*',
     '/api/:path*',
   ],

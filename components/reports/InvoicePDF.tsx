@@ -329,6 +329,12 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store, translations, la
                 <Text style={styles.gridValue}>{ticket.deviceModel}</Text>
               </View>
             )}
+            {ticket.deviceSerialNumber && (
+              <View style={styles.grid}>
+                <Text style={styles.gridLabel}>{translations.serialNumber}:</Text>
+                <Text style={styles.gridValue}>{ticket.deviceSerialNumber}</Text>
+              </View>
+            )}
             <View style={styles.grid}>
               <Text style={styles.gridLabel}>{translations.priority}:</Text>
               <Text style={styles.gridValue}>{formatPriority(ticket.priority)}</Text>

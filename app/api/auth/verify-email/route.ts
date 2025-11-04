@@ -55,21 +55,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('Attempting to verify email with token:', token.substring(0, 10) + '...')
+    
     const user = await userStorage.verifyEmail(token)
 
     if (!user) {
+      console.log('Verification failed: Invalid or expired token')
       return NextResponse.json(
         { error: 'Invalid or expired verification token' },
         { status: 400 }
       )
     }
 
+    console.log('Email verified successfully for user:', user.id, user.email)
     return NextResponse.json({
       message: 'Email verified successfully',
       verified: true,
     })
   } catch (error) {
     console.error('Email verification error:', error)
+    // If the error message suggests the user might already be verified, check the DB
+    if (error instanceof Error && error.message.includes('update did not persist')) {
+      return NextResponse.json(
+        { error: 'Verification failed. Please try again or contact support.' },
+        { status: 500 }
+      )
+    }
     return NextResponse.json(
       { error: 'An error occurred during verification' },
       { status: 500 }

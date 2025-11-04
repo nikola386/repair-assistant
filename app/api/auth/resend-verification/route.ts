@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { userStorage } from '@/lib/userStorage'
+import { userStorage, type User } from '@/lib/userStorage'
 import { emailService } from '@/lib/email'
 import { rateLimit } from '@/lib/rateLimit'
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if email is already verified
-    if (user.emailVerified) {
+    if ((user as User).emailVerified) {
       return NextResponse.json(
         { error: 'Email is already verified' },
         { status: 400 }
@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
       await emailService.sendVerificationEmail(
         user.email,
         verificationToken,
-        user.name
+        user.name,
+        (user as User).storeId
       )
 
       return NextResponse.json({

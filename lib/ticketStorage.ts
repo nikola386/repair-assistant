@@ -106,6 +106,7 @@ const mapPrismaTicket = (ticket: NonNullable<PrismaTicketWithCustomer>): RepairT
     deviceType: ticket.deviceType,
     deviceBrand: ticket.deviceBrand || undefined,
     deviceModel: ticket.deviceModel || undefined,
+    deviceSerialNumber: ticket.deviceSerialNumber || undefined,
     issueDescription: ticket.issueDescription,
     status: ticket.status as TicketStatus,
     priority: ticket.priority as TicketPriority,
@@ -173,6 +174,7 @@ export const ticketStorage = {
           { deviceType: { contains: searchTerm, mode: 'insensitive' } },
           { deviceBrand: { contains: searchTerm, mode: 'insensitive' } },
           { deviceModel: { contains: searchTerm, mode: 'insensitive' } },
+          { deviceSerialNumber: { contains: searchTerm, mode: 'insensitive' } },
           { issueDescription: { contains: searchTerm, mode: 'insensitive' } },
         ]
       }
@@ -303,6 +305,7 @@ export const ticketStorage = {
           deviceType: input.deviceType,
           deviceBrand: input.deviceBrand || null,
           deviceModel: input.deviceModel || null,
+          deviceSerialNumber: input.deviceSerialNumber || null,
           issueDescription: input.issueDescription,
           status: 'pending',
           priority: input.priority || 'medium',
@@ -345,7 +348,7 @@ export const ticketStorage = {
       // Build dynamic update object
       const updateData: any = {}
 
-      if (customerId) {
+      if (customerId !== undefined) {
         updateData.customerId = customerId
       }
       if (input.deviceType !== undefined) {
@@ -356,6 +359,9 @@ export const ticketStorage = {
       }
       if (input.deviceModel !== undefined) {
         updateData.deviceModel = input.deviceModel || null
+      }
+      if (input.deviceSerialNumber !== undefined) {
+        updateData.deviceSerialNumber = input.deviceSerialNumber || null
       }
       if (input.issueDescription !== undefined) {
         updateData.issueDescription = input.issueDescription

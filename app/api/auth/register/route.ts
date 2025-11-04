@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
       await emailService.sendVerificationEmail(
         user.email,
         verificationToken,
-        user.name
+        user.name,
+        user.storeId
       )
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError)

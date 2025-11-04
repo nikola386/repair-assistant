@@ -1,30 +1,63 @@
 import nodemailer from 'nodemailer'
 import crypto from 'crypto'
-import { EmailTemplate, EmailTemplateData, getEmailConfig } from './email/templates/base'
+import { EmailTemplate, EmailTemplateData, getEmailConfig, setEmailConfig, EmailConfig } from './email/templates/base'
 import { verificationEmailTemplate } from './email/templates/verification'
+import { settingsStorage } from './settingsStorage'
+import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from './constants'
 
 /**
  * Email service for sending emails with reusable templates
  */
 class EmailService {
   private transporter: nodemailer.Transporter | null = null
-  private config = getEmailConfig()
+  private defaultConfig = getEmailConfig()
+  private testAccount: nodemailer.TestAccount | null = null
+  private initializationPromise: Promise<void> | null = null
 
   constructor() {
+    // Start initialization but don't await it here
+    this.initializationPromise = this.initialize()
+  }
+
+  /**
+   * Initialize email transporter
+   */
+  private async initialize(): Promise<void> {
     // Initialize transporter based on environment variables
     const emailHost = process.env.SMTP_HOST || process.env.EMAIL_HOST
     const emailPort = process.env.SMTP_PORT || process.env.EMAIL_PORT || '587'
     const emailUser = process.env.SMTP_USER || process.env.EMAIL_USER
     const emailPassword = process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD
 
-    // If email configuration is not provided, log warning
+    // If email configuration is not provided, create a test account
     if (!emailHost || !emailUser || !emailPassword) {
-      console.warn('Email configuration not found. Email functionality will be limited.')
-      // For development, you can use Ethereal Email (https://ethereal.email)
-      // or configure SMTP settings in your .env file
+      console.warn('Email configuration not found. Creating Ethereal Email test account for development...')
+      try {
+        this.testAccount = await nodemailer.createTestAccount()
+        
+        this.transporter = nodemailer.createTransport({
+          host: 'smtp.ethereal.email',
+          port: 587,
+          secure: false,
+          auth: {
+            user: this.testAccount.user,
+            pass: this.testAccount.pass,
+          },
+        })
+
+        console.log('✅ Ethereal Email test account created successfully!')
+        console.log(`📧 Test account: ${this.testAccount.user}`)
+        console.log(`🔗 View emails at: https://ethereal.email`)
+        console.log(`📋 Credentials: user=${this.testAccount.user}, pass=${this.testAccount.pass}`)
+      } catch (error) {
+        console.error('❌ Failed to create test email account:', error)
+        console.warn('⚠️  Email functionality will be disabled. Configure SMTP settings in your .env file.')
+        this.transporter = null
+      }
       return
     }
 
+    // Use real SMTP configuration
     this.transporter = nodemailer.createTransport({
       host: emailHost,
       port: parseInt(emailPort, 10),
@@ -40,6 +73,41 @@ class EmailService {
   }
 
   /**
+   * Ensure transporter is initialized before use
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.initializationPromise) {
+      await this.initializationPromise
+      this.initializationPromise = null
+    }
+  }
+
+  /**
+   * Get email config with store-specific colors if storeId is provided
+   */
+  private async getEmailConfigForStore(storeId?: string): Promise<EmailConfig> {
+    if (!storeId) {
+      return this.defaultConfig
+    }
+
+    try {
+      const settings = await settingsStorage.findByStoreId(storeId)
+      if (settings) {
+        return {
+          ...this.defaultConfig,
+          primaryColor: settings.primaryColor || DEFAULT_PRIMARY_COLOR,
+          secondaryColor: settings.secondaryColor || DEFAULT_SECONDARY_COLOR,
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching store settings for email:', error)
+      // Fall back to default config if there's an error
+    }
+
+    return this.defaultConfig
+  }
+
+  /**
    * Generate a secure verification token
    */
   generateVerificationToken(): string {
@@ -52,23 +120,43 @@ class EmailService {
   async sendEmail(
     to: string,
     template: EmailTemplate,
-    data: EmailTemplateData
+    data: EmailTemplateData,
+    storeId?: string
   ): Promise<void> {
+    await this.ensureInitialized()
+
     if (!this.transporter) {
       throw new Error('Email service is not configured. Please set SMTP environment variables.')
     }
 
+    // Get store-specific config if storeId is provided
+    const config = await this.getEmailConfigForStore(storeId)
+    
+    // Set the config for templates to use
+    setEmailConfig(config)
+
     try {
-      await this.transporter.sendMail({
-        from: `"${this.config.appName}" <${this.config.emailFrom}>`,
+      const info = await this.transporter.sendMail({
+        from: `"${config.appName}" <${this.testAccount?.user || config.emailFrom}>`,
         to,
         subject: template.subject(data),
         html: template.html(data),
         text: template.text(data),
       })
+
+      // If using test account, log the preview URL
+      if (this.testAccount) {
+        const previewUrl = nodemailer.getTestMessageUrl(info)
+        if (previewUrl) {
+          console.log(`📧 Test email sent! Preview: ${previewUrl}`)
+        }
+      }
     } catch (error) {
       console.error('Error sending email:', error)
       throw new Error('Failed to send email')
+    } finally {
+      // Reset to default config after sending
+      setEmailConfig(this.defaultConfig)
     }
   }
 
@@ -78,21 +166,31 @@ class EmailService {
   async sendVerificationEmail(
     email: string,
     verificationToken: string,
-    userName?: string | null
+    userName?: string | null,
+    storeId?: string
   ): Promise<void> {
-    const verificationUrl = `${this.config.baseUrl}/verify-email?token=${verificationToken}`
+    const config = await this.getEmailConfigForStore(storeId)
+    const verificationUrl = `${config.baseUrl}/verify-email?token=${verificationToken}`
     
     await this.sendEmail(email, verificationEmailTemplate, {
       userName,
       verificationUrl,
-    })
+    }, storeId)
   }
 
   /**
    * Verify email transporter is configured
    */
-  isConfigured(): boolean {
+  async isConfigured(): Promise<boolean> {
+    await this.ensureInitialized()
     return this.transporter !== null
+  }
+
+  /**
+   * Get test account info (for development)
+   */
+  getTestAccount(): nodemailer.TestAccount | null {
+    return this.testAccount
   }
 }
 

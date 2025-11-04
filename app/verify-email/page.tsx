@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
@@ -18,24 +18,7 @@ function VerifyEmailForm() {
   const [resendLoading, setResendLoading] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(0)
 
-  // Auto-verify if token is present
-  useEffect(() => {
-    if (token && verificationStatus === 'idle') {
-      handleVerification(token)
-    }
-  }, [token])
-
-  // Handle resend cooldown countdown
-  useEffect(() => {
-    if (resendCooldown > 0) {
-      const timer = setTimeout(() => {
-        setResendCooldown(resendCooldown - 1)
-      }, 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [resendCooldown])
-
-  const handleVerification = async (verificationToken: string) => {
+  const handleVerification = useCallback(async (verificationToken: string) => {
     setVerificationStatus('verifying')
     setError('')
 
@@ -70,7 +53,24 @@ function VerifyEmailForm() {
       setError(errorMsg)
       showAlert.error(errorMsg)
     }
-  }
+  }, [t, router])
+
+  // Auto-verify if token is present
+  useEffect(() => {
+    if (token && verificationStatus === 'idle') {
+      handleVerification(token)
+    }
+  }, [token, verificationStatus, handleVerification])
+
+  // Handle resend cooldown countdown
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => {
+        setResendCooldown(resendCooldown - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [resendCooldown])
 
   const handleResend = async () => {
     if (!email) {

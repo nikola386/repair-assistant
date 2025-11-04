@@ -36,6 +36,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
     deviceType: ticket.deviceType,
     deviceBrand: ticket.deviceBrand || '',
     deviceModel: ticket.deviceModel || '',
+    deviceSerialNumber: ticket.deviceSerialNumber || '',
     issueDescription: ticket.issueDescription,
     priority: ticket.priority,
     estimatedCost: ticket.estimatedCost,
@@ -57,6 +58,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
       deviceType: ticket.deviceType,
       deviceBrand: ticket.deviceBrand || '',
       deviceModel: ticket.deviceModel || '',
+      deviceSerialNumber: ticket.deviceSerialNumber || '',
       issueDescription: ticket.issueDescription,
       priority: ticket.priority,
       estimatedCost: ticket.estimatedCost,
@@ -621,6 +623,19 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 <p>{currentTicket.deviceModel || '-'}</p>
               )}
             </div>
+            <div>
+              <label>{t.tickets.form.deviceSerialNumber || 'Device Serial Number'}</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editFormData.deviceSerialNumber || ''}
+                  onChange={(e) => setEditFormData({ ...editFormData, deviceSerialNumber: e.target.value })}
+                  className="ticket-detail__edit-input"
+                />
+              ) : (
+                <p>{currentTicket.deviceSerialNumber || '-'}</p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -983,6 +998,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                     deviceType: currentTicket.deviceType,
                     deviceBrand: currentTicket.deviceBrand || '',
                     deviceModel: currentTicket.deviceModel || '',
+                    deviceSerialNumber: currentTicket.deviceSerialNumber || '',
                     issueDescription: currentTicket.issueDescription,
                     priority: currentTicket.priority,
                     estimatedCost: currentTicket.estimatedCost,

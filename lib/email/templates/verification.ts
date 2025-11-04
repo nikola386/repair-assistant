@@ -1,5 +1,5 @@
 import { EmailTemplate, EmailTemplateData } from './base'
-import { getEmailConfig, createBaseEmailHTML, createCTAButton, createParagraph, createHeading } from './base'
+import { getCurrentEmailConfig, createBaseEmailHTML, createCTAButton, createParagraph, createHeading } from './base'
 
 /**
  * Email verification template data
@@ -13,12 +13,12 @@ export interface VerificationEmailData extends EmailTemplateData {
  */
 export const verificationEmailTemplate: EmailTemplate = {
   subject: (data: EmailTemplateData) => {
-    const config = getEmailConfig()
+    const config = getCurrentEmailConfig()
     return `Verify your email address - ${config.appName}`
   },
 
   html: (data: EmailTemplateData) => {
-    const config = getEmailConfig()
+    const config = getCurrentEmailConfig()
     const verificationData = data as VerificationEmailData
     
     const greeting = verificationData.userName 
@@ -61,7 +61,7 @@ export const verificationEmailTemplate: EmailTemplate = {
   },
 
   text: (data: EmailTemplateData) => {
-    const config = getEmailConfig()
+    const config = getCurrentEmailConfig()
     const verificationData = data as VerificationEmailData
     
     const greeting = verificationData.userName 

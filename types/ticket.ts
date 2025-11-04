@@ -27,6 +27,7 @@ export interface RepairTicket {
   deviceType: string
   deviceBrand?: string
   deviceModel?: string
+  deviceSerialNumber?: string
   issueDescription: string
   status: TicketStatus
   priority: TicketPriority
@@ -48,6 +49,7 @@ export interface CreateTicketInput {
   deviceType: string
   deviceBrand?: string
   deviceModel?: string
+  deviceSerialNumber?: string
   issueDescription: string
   priority?: TicketPriority
   estimatedCost?: number
@@ -62,6 +64,7 @@ export interface UpdateTicketInput {
   deviceType?: string
   deviceBrand?: string
   deviceModel?: string
+  deviceSerialNumber?: string
   issueDescription?: string
   status?: TicketStatus
   priority?: TicketPriority

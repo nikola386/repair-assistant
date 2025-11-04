@@ -36,6 +36,38 @@ export function getEmailConfig(): EmailConfig {
   }
 }
 
+// Store config instance for templates to use
+let currentEmailConfig: EmailConfig | null = null
+
+/**
+ * Set the email config for templates (used when sending store-specific emails)
+ */
+export function setEmailConfig(config: EmailConfig): void {
+  currentEmailConfig = config
+}
+
+/**
+ * Get the current email config (falls back to default if not set)
+ */
+export function getCurrentEmailConfig(): EmailConfig {
+  return currentEmailConfig || getEmailConfig()
+}
+
+/**
+ * Convert hex color to rgba with specified opacity
+ */
+function hexToRgba(hex: string, alpha: number): string {
+  // Remove # if present
+  const cleanHex = hex.replace('#', '')
+  
+  // Parse RGB values
+  const r = parseInt(cleanHex.substring(0, 2), 16)
+  const g = parseInt(cleanHex.substring(2, 4), 16)
+  const b = parseInt(cleanHex.substring(4, 6), 16)
+  
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 /**
  * Create base email HTML structure
  */
@@ -58,7 +90,7 @@ export function createBaseEmailHTML(
         <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); overflow: hidden;">
           <!-- Header with gradient background -->
           <tr>
-            <td style="background: linear-gradient(135deg, ${config.primaryColor} 0%, #ffd54f 100%); padding: 40px 30px; text-align: center;">
+            <td style="background: linear-gradient(135deg, ${config.primaryColor} 0%, ${config.primaryColor}CC 100%); padding: 40px 30px; text-align: center;">
               <h1 style="margin: 0; color: ${config.secondaryColor}; font-size: 28px; font-weight: 700;">
                 ${config.appName}
               </h1>
@@ -97,11 +129,12 @@ export function createCTAButton(
   text: string,
   config: EmailConfig
 ): string {
+  const shadowColor = hexToRgba(config.primaryColor, 0.3)
   return `
 <table role="presentation" style="width: 100%; margin: 30px 0;">
   <tr>
     <td align="center">
-      <a href="${url}" style="display: inline-block; padding: 14px 32px; background-color: ${config.primaryColor}; color: ${config.secondaryColor}; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);">
+      <a href="${url}" style="display: inline-block; padding: 14px 32px; background-color: ${config.primaryColor}; color: ${config.secondaryColor}; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px ${shadowColor};">
         ${text}
       </a>
     </td>

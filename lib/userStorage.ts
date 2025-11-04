@@ -55,7 +55,7 @@ export class UserStorage {
   async findByEmail(email: string): Promise<User | null> {
     return db.user.findUnique({
       where: { email },
-    })
+    }) as Promise<User | null>
   }
 
   async findById(id: string): Promise<User | null> {
@@ -126,28 +126,48 @@ export class UserStorage {
    * Verify email using token
    */
   async verifyEmail(token: string): Promise<User | null> {
-    const user = await db.user.findFirst({
-      where: {
-        verificationToken: token,
-        verificationTokenExpiry: {
-          gt: new Date(), // Token must not be expired
+    try {
+      // Find user with valid token
+      const user = await db.user.findFirst({
+        where: {
+          verificationToken: token,
+          verificationTokenExpiry: {
+            gt: new Date(), // Token must not be expired
+          },
         },
-      },
-    })
+      })
 
-    if (!user) {
-      return null
+      if (!user) {
+        console.log('No user found with valid token:', token.substring(0, 10) + '...')
+        return null
+      }
+
+      console.log('Found user for verification:', user.id, user.email, 'token expires at:', user.verificationTokenExpiry)
+
+      // Mark email as verified and clear verification token
+      const updatedUser = await db.user.update({
+        where: { id: user.id },
+        data: {
+          emailVerified: true,
+          verificationToken: null,
+          verificationTokenExpiry: null,
+        },
+      })
+
+      console.log('User updated successfully:', updatedUser.id, updatedUser.email, 'emailVerified:', updatedUser.emailVerified)
+      
+      // Double-check that the update succeeded
+      if (!updatedUser || !updatedUser.emailVerified) {
+        console.error('Update appeared to succeed but user is not verified!', updatedUser)
+        throw new Error('Failed to verify email - update did not persist')
+      }
+      
+      return updatedUser
+    } catch (error) {
+      console.error('Error in verifyEmail:', error)
+      // Re-throw to be handled by the API route
+      throw error
     }
-
-    // Mark email as verified and clear verification token
-    return db.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerified: true,
-        verificationToken: null,
-        verificationTokenExpiry: null,
-      },
-    })
   }
 
   /**

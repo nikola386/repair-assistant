@@ -47,6 +47,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
     deviceType: initialData?.deviceType || '',
     deviceBrand: initialData?.deviceBrand || '',
     deviceModel: initialData?.deviceModel || '',
+    deviceSerialNumber: initialData?.deviceSerialNumber || '',
     issueDescription: initialData?.issueDescription || '',
     priority: initialData?.priority || 'medium',
     estimatedCost: initialData?.estimatedCost,
@@ -161,6 +162,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
           deviceType: '',
           deviceBrand: '',
           deviceModel: '',
+          deviceSerialNumber: '',
           issueDescription: '',
           priority: 'medium',
           estimatedCost: undefined,
@@ -461,6 +463,19 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
             onChange={handleInputChange}
           />
         </div>
+        <div className="form-group">
+          <label htmlFor="deviceSerialNumber">{t.tickets.form.deviceSerialNumber}</label>
+          <input
+            type="text"
+            id="deviceSerialNumber"
+            name="deviceSerialNumber"
+            value={formData.deviceSerialNumber}
+            onChange={handleInputChange}
+          />
+        </div>
+      </div>
+
+      <div className="form-row">
         <div className="form-group">
           <label htmlFor="estimatedCost">{t.tickets.form.estimatedCost}</label>
           <input

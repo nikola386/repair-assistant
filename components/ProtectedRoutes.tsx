@@ -16,7 +16,7 @@ export default function ProtectedRoutes({ children }: { children: React.ReactNod
   const [checking, setChecking] = useState(true)
 
   // Routes that don't require onboarding check
-  const publicRoutes = ['/login', '/register', '/onboarding']
+  const publicRoutes = ['/login', '/register', '/onboarding', '/verify-email']
   const isPublicRoute = publicRoutes.includes(pathname)
 
   useEffect(() => {
