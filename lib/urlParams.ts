@@ -27,7 +27,7 @@ export const defaultTicketsFilters: TicketsFilters = {
 export const defaultClientsFilters: ClientsFilters = {
   search: '',
   page: 1,
-  limit: 100,
+  limit: 20,
 }
 
 // Utility to parse filters from URL search params

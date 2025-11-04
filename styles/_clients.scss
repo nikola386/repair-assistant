@@ -96,6 +96,101 @@
   &__list {
     // No overflow styling - handled by table-container
   }
+
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding: 1.5rem 0;
+
+    &-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 1px solid var(--border-gray);
+      border-radius: 4px;
+      background: var(--bg-white);
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover:not(:disabled) {
+        background: var(--primary-yellow);
+        border-color: var(--primary-yellow);
+        color: var(--text-dark);
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.95);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    &-numbers {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    &-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 0.5rem;
+      border: 1px solid var(--border-gray);
+      border-radius: 4px;
+      background: var(--bg-white);
+      color: var(--text-dark);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: var(--bg-gray);
+        border-color: var(--border-gray);
+      }
+
+      &.active {
+        background: var(--primary-yellow);
+        border-color: var(--primary-yellow);
+        color: var(--text-dark);
+        font-weight: 600;
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+      }
+    }
+
+    &-ellipsis {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      color: var(--text-gray);
+      font-size: 0.95rem;
+      user-select: none;
+    }
+  }
 }
 
 .clients-table {

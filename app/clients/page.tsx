@@ -52,8 +52,8 @@ export default function ClientsPage() {
   const [filters, setFiltersState] = useState<ClientsFilters>(getInitialFilters)
   const [clientsData, setClientsData] = useState<Customer[]>([])
   const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 100,
+    page: filters.page,
+    limit: filters.limit,
     total: 0,
     totalPages: 0,
   })
@@ -185,6 +185,52 @@ export default function ClientsPage() {
     setFilters({ search, page: 1 })
   }
 
+  const handlePageChange = (newPage: number) => {
+    setFilters({ page: newPage })
+  }
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const { page, totalPages } = pagination
+    const pages: (number | string)[] = []
+    const maxVisible = 7 // Maximum number of page buttons to show
+
+    if (totalPages <= maxVisible) {
+      // Show all pages if total is less than max visible
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      // Always show first page
+      pages.push(1)
+
+      if (page <= 4) {
+        // Show pages 1-5, then ellipsis, then last page
+        for (let i = 2; i <= 5; i++) {
+          pages.push(i)
+        }
+        pages.push('ellipsis-end')
+        pages.push(totalPages)
+      } else if (page >= totalPages - 3) {
+        // Show first page, ellipsis, then last 5 pages
+        pages.push('ellipsis-start')
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        // Show first page, ellipsis, current page and neighbors, ellipsis, last page
+        pages.push('ellipsis-start')
+        for (let i = page - 1; i <= page + 1; i++) {
+          pages.push(i)
+        }
+        pages.push('ellipsis-end')
+        pages.push(totalPages)
+      }
+    }
+
+    return pages
+  }
+
   return (
     <>
       <Navigation />
@@ -231,44 +277,107 @@ export default function ClientsPage() {
                 <p>{t.clients?.noClientsFound || 'No clients found'}</p>
               </div>
             ) : (
-              <div className="clients-page__list">
-                <div className="clients-table">
-                  <div className="clients-table__table-container">
-                    <table className="clients-table__table">
-                  <thead>
-                    <tr>
-                      <th>{t.clients?.name || 'Name'}</th>
-                      <th>{t.clients?.email || 'Email'}</th>
-                      <th>{t.clients?.phone || 'Phone'}</th>
-                      <th>{t.clients?.tickets || 'Tickets'}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {clientsData.map((customer) => (
-                      <tr 
-                        key={customer.id} 
-                        className="clients-table__row"
-                        onClick={() => router.push(`/clients/${customer.id}`)}
-                      >
-                        <td>{customer.name}</td>
-                        <td>
-                          <a href={`mailto:${customer.email}`} className="clients-table__link" onClick={(e) => e.stopPropagation()}>
-                            {customer.email}
-                          </a>
-                        </td>
-                        <td>
-                          <a href={`tel:${customer.phone}`} className="clients-table__link" onClick={(e) => e.stopPropagation()}>
-                            {customer.phone}
-                          </a>
-                        </td>
-                        <td>{customer.ticketCount}</td>
+              <>
+                <div className="clients-page__list">
+                  <div className="clients-table">
+                    <div className="clients-table__table-container">
+                      <table className="clients-table__table">
+                    <thead>
+                      <tr>
+                        <th>{t.clients?.name || 'Name'}</th>
+                        <th>{t.clients?.email || 'Email'}</th>
+                        <th>{t.clients?.phone || 'Phone'}</th>
+                        <th>{t.clients?.tickets || 'Tickets'}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                    </table>
+                    </thead>
+                    <tbody>
+                      {clientsData.map((customer) => (
+                        <tr 
+                          key={customer.id} 
+                          className="clients-table__row"
+                          onClick={() => router.push(`/clients/${customer.id}`)}
+                        >
+                          <td>{customer.name}</td>
+                          <td>
+                            <a href={`mailto:${customer.email}`} className="clients-table__link" onClick={(e) => e.stopPropagation()}>
+                              {customer.email}
+                            </a>
+                          </td>
+                          <td>
+                            <a href={`tel:${customer.phone}`} className="clients-table__link" onClick={(e) => e.stopPropagation()}>
+                              {customer.phone}
+                            </a>
+                          </td>
+                          <td>{customer.ticketCount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                {pagination.totalPages > 1 && (
+                  <div className="clients-page__pagination">
+                    <button
+                      className="clients-page__pagination-arrow"
+                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.page === 1}
+                      aria-label="Previous page"
+                      title="Previous page"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path
+                          fillRule="evenodd"
+                          d="M11.354 1.646a.5.5 0 010 .708L5.707 8l5.647 5.646a.5.5 0 01-.708.708l-6-6a.5.5 0 010-.708l6-6a.5.5 0 01.708 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+
+                    <div className="clients-page__pagination-numbers">
+                      {getPageNumbers().map((pageNum, index) => {
+                        if (pageNum === 'ellipsis-start' || pageNum === 'ellipsis-end') {
+                          return (
+                            <span key={`ellipsis-${index}`} className="clients-page__pagination-ellipsis">
+                              ...
+                            </span>
+                          )
+                        }
+                        return (
+                          <button
+                            key={pageNum}
+                            className={`clients-page__pagination-number ${
+                              pageNum === pagination.page ? 'active' : ''
+                            }`}
+                            onClick={() => handlePageChange(pageNum as number)}
+                            aria-label={`Go to page ${pageNum}`}
+                            aria-current={pageNum === pagination.page ? 'page' : undefined}
+                          >
+                            {pageNum}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    <button
+                      className="clients-page__pagination-arrow"
+                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.page >= pagination.totalPages}
+                      aria-label="Next page"
+                      title="Next page"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path
+                          fillRule="evenodd"
+                          d="M4.646 1.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L10.293 8 4.646 2.354a.5.5 0 010-.708z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
