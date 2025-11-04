@@ -12,6 +12,14 @@ const registerSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  // Check if registration is disabled via environment variable
+  if (process.env.DISABLE_REGISTER === 'true') {
+    return NextResponse.json(
+      { error: 'Registration is currently disabled' },
+      { status: 403 }
+    )
+  }
+
   // Rate limiting: 3 registrations per IP per hour
   const rateLimitResponse = rateLimit(request, 3, 60 * 60 * 1000)
   if (rateLimitResponse) {

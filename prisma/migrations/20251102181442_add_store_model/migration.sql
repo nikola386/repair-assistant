@@ -2,6 +2,7 @@
 CREATE TABLE "stores" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "onboarded" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -9,8 +10,8 @@ CREATE TABLE "stores" (
 );
 
 -- Create a default store for existing data
-INSERT INTO "stores" ("id", "name", "created_at", "updated_at")
-VALUES ('00000000-0000-0000-0000-000000000000', 'Default Store', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "stores" ("id", "name", "onboarded", "created_at", "updated_at")
+VALUES ('00000000-0000-0000-0000-000000000000', 'Default Store', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Add store_id column to users table (nullable first)
 ALTER TABLE "users" ADD COLUMN "store_id" TEXT;

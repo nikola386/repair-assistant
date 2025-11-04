@@ -7,12 +7,7 @@
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start -p 3001",
     "lint": "next lint",
-    "migrate": "npx tsx ../../scripts/migrate.ts",
-    "migrate:optional": "npx tsx ../../scripts/migrate.ts || echo 'Migration skipped (database may not be accessible during build)'",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio",
-    "prisma:deploy": "prisma migrate deploy"
+    "migrate": "npx tsx ../../scripts/migrate.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",

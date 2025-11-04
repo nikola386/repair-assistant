@@ -148,9 +148,6 @@ export default function Navigation() {
             <ProfileDropdown />
           ) : (
             <>
-              <Link href="/register" className="btn btn-secondary btn-sm" style={{ marginRight: '0.5rem' }}>
-                {t.auth.register || 'Sign Up'}
-              </Link>
               <Link href="/login" className="btn btn-primary btn-sm">
                 {t.auth.login}
               </Link>
