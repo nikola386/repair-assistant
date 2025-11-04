@@ -31,6 +31,30 @@ function LoginForm() {
       })
 
       if (result?.error) {
+        // Check if error is due to unverified email
+        // Also check server-side if user exists and email is not verified
+        try {
+          const checkResponse = await fetch('/api/auth/check-verification', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          })
+          
+          if (checkResponse.ok) {
+            const checkData = await checkResponse.json()
+            if (checkData.requiresVerification) {
+              const errorMsg = t.auth?.emailNotVerified || 'Please verify your email address before logging in.'
+              setError(errorMsg)
+              showAlert.error(errorMsg)
+              setLoading(false)
+              router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+              return
+            }
+          }
+        } catch (checkError) {
+          // If check fails, continue with normal error handling
+        }
+
         const errorMsg = t.auth?.loginError || 'Invalid email or password'
         setError(errorMsg)
         showAlert.error(errorMsg)
@@ -50,6 +74,15 @@ function LoginForm() {
         router.refresh()
       }
     } catch (err) {
+      // Handle EMAIL_NOT_VERIFIED error
+      if (err instanceof Error && err.message === 'EMAIL_NOT_VERIFIED') {
+        const errorMsg = t.auth?.emailNotVerified || 'Please verify your email address before logging in.'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
+        setLoading(false)
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+        return
+      }
       const errorMsg = t.auth?.loginError || 'An error occurred during login'
       setError(errorMsg)
       showAlert.error(errorMsg)

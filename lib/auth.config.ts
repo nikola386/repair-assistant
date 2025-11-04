@@ -25,6 +25,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return null
           }
 
+          // Check if email is verified
+          if (!user.emailVerified) {
+            logger.warn('Authentication failed: email not verified', { email: credentials.email, userId: user.id })
+            // Return a special error that can be caught in the login page
+            throw new Error('EMAIL_NOT_VERIFIED')
+          }
+
           const isValid = await userStorage.verifyPassword(user, credentials.password as string)
           if (!isValid) {
             logger.warn('Authentication failed: invalid password', { email: credentials.email, userId: user.id })
@@ -39,6 +46,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             image: user.profileImage || null,
           }
         } catch (error) {
+          // Re-throw EMAIL_NOT_VERIFIED error to be handled by login page
+          if (error instanceof Error && error.message === 'EMAIL_NOT_VERIFIED') {
+            throw error
+          }
           logger.error('Authentication error', error)
           return null
         }

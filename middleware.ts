@@ -55,6 +55,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.nextUrl.origin))
   }
 
+  // Allow access to verification page without authentication
+  const publicPages = ['/verify-email']
+  const isPublicPage = publicPages.some(path => request.nextUrl.pathname.startsWith(path))
+  
+  if (isPublicPage) {
+    // Allow access to verification page
+    return NextResponse.next()
+  }
+
   // Protect all application routes
   const protectedPaths = ['/dashboard', '/tickets', '/clients', '/reports', '/settings']
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
@@ -105,6 +114,7 @@ export const config = {
     '/settings/:path*',
     '/login',
     '/register',
+    '/verify-email/:path*',
     '/api/:path*',
   ],
 }

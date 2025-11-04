@@ -182,8 +182,61 @@ export async function initializeDatabase() {
       END $$;
     `)
 
+    // Add email verification columns if they don't exist (for existing databases)
+    await query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'email_verified'
+        ) THEN
+          ALTER TABLE users ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT false;
+        END IF;
+      END $$;
+    `)
+
+    await query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'verification_token'
+        ) THEN
+          ALTER TABLE users ADD COLUMN verification_token TEXT;
+        END IF;
+      END $$;
+    `)
+
+    await query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'verification_token_expiry'
+        ) THEN
+          ALTER TABLE users ADD COLUMN verification_token_expiry TIMESTAMP WITH TIME ZONE;
+        END IF;
+      END $$;
+    `)
+
+    await query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'last_verification_email_sent'
+        ) THEN
+          ALTER TABLE users ADD COLUMN last_verification_email_sent TIMESTAMP WITH TIME ZONE;
+        END IF;
+      END $$;
+    `)
+
     await query(`
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)
+    `)
+
+    await query(`
+      CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token)
     `)
 
     // Create NextAuth.js sessions and accounts tables

@@ -83,22 +83,27 @@ export default function RegisterPage() {
         return
       }
 
-      // Auto-login after registration
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      })
+      // Redirect to verification page instead of auto-login
+      if (data.requiresVerification) {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+        showAlert.success(t.auth?.emailVerificationSent || 'Verification email sent! Please check your inbox.')
+      } else {
+        // Fallback: try to login if verification is not required
+        const result = await signIn('credentials', {
+          email,
+          password,
+          redirect: false,
+        })
 
-      if (result?.error) {
-        const errorMsg = t.auth?.loginError || 'Registration successful but login failed. Please try logging in.'
-        setError(errorMsg)
-        showAlert.error(errorMsg)
-        setLoading(false)
-      } else if (result?.ok) {
-        // Redirect to onboarding
-        router.push('/onboarding')
-        router.refresh()
+        if (result?.error) {
+          const errorMsg = t.auth?.loginError || 'Registration successful but login failed. Please try logging in.'
+          setError(errorMsg)
+          showAlert.error(errorMsg)
+          setLoading(false)
+        } else if (result?.ok) {
+          router.push('/onboarding')
+          router.refresh()
+        }
       }
     } catch (err) {
       const errorMsg = t.auth?.registrationError || 'An error occurred during registration'

@@ -104,6 +104,78 @@ export class UserStorage {
       },
     })
   }
+
+  /**
+   * Generate and store verification token for email verification
+   */
+  async generateVerificationToken(userId: string, token: string): Promise<User> {
+    const expiryDate = new Date()
+    expiryDate.setHours(expiryDate.getHours() + 24) // Token expires in 24 hours
+
+    return db.user.update({
+      where: { id: userId },
+      data: {
+        verificationToken: token,
+        verificationTokenExpiry: expiryDate,
+        lastVerificationEmailSent: new Date(),
+      },
+    })
+  }
+
+  /**
+   * Verify email using token
+   */
+  async verifyEmail(token: string): Promise<User | null> {
+    const user = await db.user.findFirst({
+      where: {
+        verificationToken: token,
+        verificationTokenExpiry: {
+          gt: new Date(), // Token must not be expired
+        },
+      },
+    })
+
+    if (!user) {
+      return null
+    }
+
+    // Mark email as verified and clear verification token
+    return db.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        verificationToken: null,
+        verificationTokenExpiry: null,
+      },
+    })
+  }
+
+  /**
+   * Find user by verification token
+   */
+  async findByVerificationToken(token: string): Promise<User | null> {
+    return db.user.findFirst({
+      where: {
+        verificationToken: token,
+        verificationTokenExpiry: {
+          gt: new Date(),
+        },
+      },
+    })
+  }
+
+  /**
+   * Check if user can resend verification email (rate limit: 1 minute)
+   */
+  async canResendVerificationEmail(userId: string): Promise<boolean> {
+    const user = await this.findById(userId)
+    if (!user || !user.lastVerificationEmailSent) {
+      return true
+    }
+
+    const oneMinuteAgo = new Date(Date.now() - 60 * 1000)
+    return user.lastVerificationEmailSent < oneMinuteAgo
+  }
 }
 
 export const userStorage = new UserStorage()

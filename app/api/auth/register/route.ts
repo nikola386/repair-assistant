@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { userStorage } from '@/lib/userStorage'
+import { emailService } from '@/lib/email'
 import { z } from 'zod'
 import { rateLimit, getRateLimitHeaders } from '@/lib/rateLimit'
 import { passwordSchema } from '@/lib/validation'
@@ -49,15 +50,32 @@ export async function POST(request: NextRequest) {
       storeName: `${name.trim()}'s Store`, // Temporary store name
     })
 
+    // Generate verification token and send verification email
+    const verificationToken = emailService.generateVerificationToken()
+    await userStorage.generateVerificationToken(user.id, verificationToken)
+
+    try {
+      await emailService.sendVerificationEmail(
+        user.email,
+        verificationToken,
+        user.name
+      )
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError)
+      // Don't fail registration if email fails, but log the error
+      // User can request resend later
+    }
+
     const headers = getRateLimitHeaders(request, 3)
     return NextResponse.json(
       { 
-        message: 'User registered successfully',
+        message: 'User registered successfully. Please check your email to verify your account.',
         user: {
           id: user.id,
           email: user.email,
           name: user.name,
-        }
+        },
+        requiresVerification: true,
       },
       { 
         status: 201,
