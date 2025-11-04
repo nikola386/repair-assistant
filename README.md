@@ -104,25 +104,27 @@ npm install
 2. Create `.env.local` file:
 
 ```env
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/repair_tickets
+# Database Configuration
+DATABASE_URL=postgresql://user:password@localhost:5432/repair_tickets?schema=public
 
-# Or use individual variables:
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=repair_tickets
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_SSL=false
-
-# Authentication
+# Authentication (Required)
 NEXTAUTH_SECRET=your-secret-key-change-in-production
 NEXTAUTH_URL=http://localhost:3001
+AUTH_TRUST_HOST=http://localhost:3001
+NEXT_PUBLIC_APP_URL=http://localhost:3001
 
-# Vercel Blob Storage (for ticket images)
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your-email@example.com
+SMTP_PASSWORD=your-password
+EMAIL_FROM=noreply@repairassistant.com
+
+# Storage (Vercel Blob Storage)
 BLOB_READ_WRITE_TOKEN=your-token
 
-# Email configuration
+# Feature Flags
+DISABLE_REGISTER=false
 ```
 
 3. Run database migrations:
