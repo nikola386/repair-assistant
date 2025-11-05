@@ -274,7 +274,7 @@
     "title": "Berichte",
     "subtitle": "Generieren Sie druckbare PDF-Berichte für Ihr Reparaturgeschäft",
     "businessReport": {
-      "title": "Monats-/Perioden-Bericht",
+      "title": "Bericht",
       "description": "Umfassender Geschäftsleistungsbericht mit Statistiken, Umsatzaufschlüsselung und Kundenanalysen",
       "generateButton": "Geschäftsbericht generieren",
       "generating": "Wird generiert...",

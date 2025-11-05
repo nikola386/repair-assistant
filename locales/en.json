@@ -274,7 +274,7 @@
     "title": "Reports",
     "subtitle": "Generate printable PDF reports for your repair business",
     "businessReport": {
-      "title": "Monthly/Period Business Report",
+      "title": "Business Report",
       "description": "Comprehensive business performance report with statistics, revenue breakdown, and customer analytics",
       "generateButton": "Generate Business Report",
       "generating": "Generating...",
