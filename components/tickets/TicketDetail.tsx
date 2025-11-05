@@ -11,6 +11,8 @@ import Spinner from '../ui/Spinner'
 import QRCode from 'react-qr-code'
 import ExpenseTable from './ExpenseTable'
 import { showAlert } from '../../lib/alerts'
+import ConfirmationModal from '../ui/ConfirmationModal'
+import { useConfirmation } from '../../lib/useConfirmation'
 
 interface TicketDetailProps {
   ticket: RepairTicket
@@ -20,6 +22,7 @@ interface TicketDetailProps {
 export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailProps) {
   const { t } = useLanguage()
   const router = useRouter()
+  const confirmation = useConfirmation()
   const [isEditing, setIsEditing] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -261,7 +264,14 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   }
 
   const handleDeleteImage = async (imageId: string) => {
-    if (!confirm(t.tickets.detail.confirmDeleteImage)) return
+    const confirmed = await confirmation.confirm({
+      message: t.tickets.detail.confirmDeleteImage,
+      variant: 'danger',
+      confirmText: t.common.actions.delete,
+      cancelText: t.common.actions.cancel,
+    })
+
+    if (!confirmed) return
 
     try {
       const response = await fetch(`/api/tickets/images?imageId=${imageId}`, {
@@ -286,9 +296,14 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   }
 
   const handleDelete = async () => {
-    if (!confirm(t.common.messages.confirmDelete)) {
-      return
-    }
+    const confirmed = await confirmation.confirm({
+      message: t.common.messages.confirmDelete,
+      variant: 'danger',
+      confirmText: t.common.actions.delete,
+      cancelText: t.common.actions.cancel,
+    })
+
+    if (!confirmed) return
 
     setIsDeleting(true)
     try {
@@ -471,18 +486,17 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
           </div>
           <div className="ticket-detail__actions">
             <button
-              className="btn btn-secondary btn-sm"
+              className="btn btn-secondary btn-sm btn--invoice-download"
               onClick={handleDownloadInvoice}
               disabled={isDownloadingInvoice}
             >
-              {isDownloadingInvoice ? (
-                <>
-                  <Spinner size="small" />
-                  <span>{t.tickets.detail.generatingInvoice}</span>
-                </>
-              ) : (
-                t.tickets.detail.downloadInvoice
-              )}
+              <span className="btn__text btn__text--download">
+                {t.tickets.detail.downloadInvoice}
+              </span>
+              <span className="btn__text btn__text--generating">
+                <Spinner size="small" />
+                <span>{t.tickets.detail.generatingInvoice}</span>
+              </span>
             </button>
             <button
               className="btn btn-primary btn-sm"
@@ -492,7 +506,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
               {isEditing ? t.common.actions.cancel : t.common.actions.edit}
             </button>
             <button
-              className="btn btn-danger btn-sm"
+              className={`btn btn-danger btn-sm ${isDeleting ? 'btn--loading' : ''}`}
               onClick={handleDelete}
               disabled={isDeleting}
             >
@@ -1016,6 +1030,17 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
           </div>
         )}
       </div>
+
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        title={confirmation.title}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        onConfirm={confirmation.onConfirm}
+        onCancel={confirmation.onCancel}
+      />
     </div>
   )
 }

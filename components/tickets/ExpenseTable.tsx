@@ -5,6 +5,8 @@ import { Expense } from '../../types/ticket'
 import { InventoryItem } from '../../types/inventory'
 import { showAlert } from '../../lib/alerts'
 import { useLanguage } from '../../contexts/LanguageContext'
+import ConfirmationModal from '../ui/ConfirmationModal'
+import { useConfirmation } from '../../lib/useConfirmation'
 
 interface ExpenseTableProps {
   ticketId: string
@@ -18,6 +20,7 @@ interface ExpenseTableProps {
 
 export default function ExpenseTable({ ticketId, initialExpenses = [], onExpensesChange, editable = true, showHeader = true, triggerAdd = false, onAddTriggered }: ExpenseTableProps) {
   const { t } = useLanguage()
+  const confirmation = useConfirmation()
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses)
   const [isAdding, setIsAdding] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -274,9 +277,14 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
   }
 
   const handleDeleteExpense = async (expenseId: string) => {
-    if (!confirm(t.common.messages.confirmDelete)) {
-      return
-    }
+    const confirmed = await confirmation.confirm({
+      message: t.common.messages.confirmDelete,
+      variant: 'danger',
+      confirmText: t.common.actions.delete,
+      cancelText: t.common.actions.cancel,
+    })
+
+    if (!confirmed) return
 
     try {
       setIsLoading(true)
@@ -579,6 +587,17 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
             </table>
         )}
       </div>
+
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        title={confirmation.title}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        onConfirm={confirmation.onConfirm}
+        onCancel={confirmation.onCancel}
+      />
     </div>
   )
 }

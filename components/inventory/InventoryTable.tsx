@@ -5,6 +5,8 @@ import { InventoryItem } from '../../types/inventory'
 import { showAlert } from '../../lib/alerts'
 import InventoryForm from './InventoryForm'
 import { useLanguage } from '../../contexts/LanguageContext'
+import ConfirmationModal from '../ui/ConfirmationModal'
+import { useConfirmation } from '../../lib/useConfirmation'
 
 interface InventoryTableProps {
   items: InventoryItem[]
@@ -24,6 +26,7 @@ export default function InventoryTable({
   isLoading = false,
 }: InventoryTableProps) {
   const { t } = useLanguage()
+  const confirmation = useConfirmation()
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
   const [adjustingId, setAdjustingId] = useState<string | null>(null)
   const [adjustQuantity, setAdjustQuantity] = useState('')
@@ -64,9 +67,14 @@ export default function InventoryTable({
   const handleDelete = async (itemId: string) => {
     if (!onItemDelete) return
 
-    if (!confirm(t.common.messages.confirmDelete)) {
-      return
-    }
+    const confirmed = await confirmation.confirm({
+      message: t.common.messages.confirmDelete,
+      variant: 'danger',
+      confirmText: t.common.actions.delete,
+      cancelText: t.common.actions.cancel,
+    })
+
+    if (!confirmed) return
 
     try {
       const response = await fetch(`/api/inventory/${itemId}`, {
@@ -394,6 +402,17 @@ export default function InventoryTable({
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        title={confirmation.title}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        onConfirm={confirmation.onConfirm}
+        onCancel={confirmation.onCancel}
+      />
     </>
   )
 }

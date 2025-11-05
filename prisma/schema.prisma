@@ -23,23 +23,26 @@ model Country {
 }
 
 model Store {
-  id         String   @id @default(uuid())
-  name       String
-  address    String?
-  street     String?
-  city       String?
-  state      String?
-  postalCode String?  @map("postal_code")
-  country    String?
-  logo       String?
-  website    String?
-  phone      String?
-  email      String?
-  currency   String?  @default("USD")
-  vatNumber  String?  @map("vat_number")
-  onboarded  Boolean  @default(false)
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  name         String
+  address      String?
+  street       String?
+  city         String?
+  state        String?
+  postalCode   String?  @map("postal_code")
+  country      String?
+  logo         String?
+  website      String?
+  phone        String?
+  email        String?
+  currency     String?  @default("USD")
+  vatNumber    String?  @map("vat_number")
+  taxEnabled   Boolean  @default(false) @map("tax_enabled")
+  taxRate      Decimal? @map("tax_rate") @db.Decimal(5, 2)
+  taxInclusive Boolean  @default(false) @map("tax_inclusive")
+  onboarded    Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   users         User[]
   customers     Customer[]

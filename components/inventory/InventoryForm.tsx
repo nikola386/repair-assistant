@@ -10,9 +10,11 @@ interface InventoryFormProps {
   onCancel?: () => void
   initialData?: Partial<CreateInventoryItemInput>
   isEdit?: boolean
+  addAnother?: boolean
+  onAddAnotherChange?: (value: boolean) => void
 }
 
-export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit = false }: InventoryFormProps) {
+export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit = false, addAnother = false, onAddAnotherChange }: InventoryFormProps) {
   const { t } = useLanguage()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<CreateInventoryItemInput>({
@@ -265,23 +267,37 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
       </div>
 
       <div className="inventory-form__actions">
-        <button
-          type="submit"
-          className="btn btn-primary btn-sm"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (isEdit ? t.common.messages.updating : t.common.messages.creating) : (isEdit ? t.common.actions.update : t.common.actions.create)}
-        </button>
-        {onCancel && (
+        {!isEdit && onAddAnotherChange && (
+          <label className="inventory-form__add-another">
+            <input
+              type="checkbox"
+              checked={addAnother}
+              onChange={(e) => onAddAnotherChange(e.target.checked)}
+              disabled={isSubmitting}
+              className="inventory-form__add-another-checkbox"
+            />
+            <span>{t.inventory.form.addAnother}</span>
+          </label>
+        )}
+        <div className="inventory-form__action-buttons">
           <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={onCancel}
+            type="submit"
+            className="btn btn-primary btn-sm"
             disabled={isSubmitting}
           >
-            {t.common.actions.cancel}
+            {isSubmitting ? (isEdit ? t.common.messages.updating : t.common.messages.creating) : (isEdit ? t.common.actions.update : t.common.actions.create)}
           </button>
-        )}
+          {onCancel && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
+              {t.common.actions.cancel}
+            </button>
+          )}
+        </div>
       </div>
     </form>
   )

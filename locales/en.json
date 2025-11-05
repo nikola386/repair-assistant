@@ -240,13 +240,14 @@
       "currentQuantity": "Current Quantity",
       "minimumQuantity": "Minimum Quantity (Low Stock Threshold)",
       "minimumQuantityHint": "Item will be marked as low stock when quantity falls at or below this value",
-      "unitPriceLabel": "Unit Price (Selling Price)",
-      "costPriceLabel": "Cost Price (Purchase Price)",
+      "unitPriceLabel": "Selling Price",
+      "costPriceLabel": "Purchase Price",
       "optional": "Optional",
       "optionalDescription": "Optional description",
       "description": "Description",
       "categoryPlaceholder": "e.g., Screens, Batteries, Cables",
-      "locationPlaceholder": "e.g., Shelf A-1, Warehouse 2"
+      "locationPlaceholder": "e.g., Shelf A-1, Warehouse 2",
+      "addAnother": "Add another"
     },
     "table": {
       "noItems": "No inventory items found",
@@ -343,6 +344,8 @@
       "totalCost": "Total Cost",
       "originalEstimate": "Original Estimate",
       "amountDue": "Amount Due",
+      "subtotal": "Subtotal",
+      "tax": "Tax",
       "termsConditions": "Terms and Conditions",
       "terms1": "• All repairs are warranted for 90 days from the completion date unless otherwise stated.",
       "terms2": "• Payment is due upon completion of repair. Unpaid items may be subject to storage fees.",
@@ -467,7 +470,13 @@
     "store": "Store Information",
     "storeDescription": "Update your store information.",
     "storeUpdateSuccess": "Store information updated successfully",
-    "storeUpdateError": "Failed to update store information"
+    "storeUpdateError": "Failed to update store information",
+    "taxEnabled": "Enable Taxes",
+    "taxRate": "Tax Rate (%)",
+    "taxRatePlaceholder": "0.00",
+    "taxInclusive": "Tax Inclusive",
+    "taxExclusive": "Tax Exclusive (Add tax to prices)",
+    "taxInclusiveOption": "Tax Inclusive (Tax included in prices)"
   },
   "onboarding": {
     "title": "Welcome! Let's Set Up Your Store",

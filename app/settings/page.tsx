@@ -11,6 +11,8 @@ import { Language, getAllLanguages } from '@/lib/languages'
 import LogoUpload from '@/components/ui/LogoUpload'
 import { showAlert } from '@/lib/alerts'
 import { validatePasswordClient } from '@/lib/validation'
+import ConfirmationModal from '@/components/ui/ConfirmationModal'
+import { useConfirmation } from '@/lib/useConfirmation'
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR, CURRENCIES } from '@/lib/constants'
 import {
   getCachedProfileData,
@@ -28,6 +30,7 @@ export default function SettingsPage() {
   const { t, setLanguage } = useLanguage()
   const { data: session, update: updateSession } = useSession()
   const router = useRouter()
+  const confirmation = useConfirmation()
   const [activeTab, setActiveTab] = useState<Tab>('profile')
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -64,6 +67,9 @@ export default function SettingsPage() {
     phone: '',
     currency: 'USD',
     vatNumber: '',
+    taxEnabled: false,
+    taxRate: '',
+    taxInclusive: false,
   })
 
   const [logo, setLogo] = useState<File | null>(null)
@@ -162,6 +168,9 @@ export default function SettingsPage() {
             phone: data.store.phone || '',
             currency: data.store.currency || 'USD',
             vatNumber: data.store.vatNumber || '',
+            taxEnabled: data.store.taxEnabled || false,
+            taxRate: data.store.taxRate ? data.store.taxRate.toString() : '',
+            taxInclusive: data.store.taxInclusive || false,
           })
           if (data.store.logo) {
             setLogoPreview(data.store.logo)
@@ -341,9 +350,14 @@ export default function SettingsPage() {
   }
 
   const handleDeleteImage = async () => {
-    if (!confirm(t.profile?.deleteImageConfirm || 'Are you sure you want to delete your profile image?')) {
-      return
-    }
+    const confirmed = await confirmation.confirm({
+      message: t.profile?.deleteImageConfirm || 'Are you sure you want to delete your profile image?',
+      variant: 'danger',
+      confirmText: t.common.actions.delete,
+      cancelText: t.common.actions.cancel,
+    })
+
+    if (!confirmed) return
 
     setError('')
     setSuccess('')
@@ -518,6 +532,9 @@ export default function SettingsPage() {
       if (storeFormData.phone) formData.append('phone', storeFormData.phone)
       formData.append('currency', storeFormData.currency)
       if (storeFormData.vatNumber) formData.append('vatNumber', storeFormData.vatNumber)
+      formData.append('taxEnabled', storeFormData.taxEnabled ? 'true' : 'false')
+      if (storeFormData.taxRate) formData.append('taxRate', storeFormData.taxRate)
+      formData.append('taxInclusive', storeFormData.taxInclusive ? 'true' : 'false')
       formData.append('primaryColor', appearanceFormData.primaryColor)
       formData.append('secondaryColor', appearanceFormData.secondaryColor)
 
@@ -1033,6 +1050,68 @@ export default function SettingsPage() {
                           </div>
                         )}
 
+                        <div className="settings-page__section-divider"></div>
+
+                        <div className="settings-page__field">
+                          <div className="settings-page__checkbox-group">
+                            <input
+                              id="taxEnabled"
+                              type="checkbox"
+                              checked={storeFormData.taxEnabled}
+                              onChange={(e) =>
+                                setStoreFormData({ ...storeFormData, taxEnabled: e.target.checked })
+                              }
+                              disabled={storeLoading}
+                              className="settings-page__checkbox"
+                            />
+                            <label htmlFor="taxEnabled" className="settings-page__label">
+                              {t.settings?.taxEnabled || 'Enable Taxes'}
+                            </label>
+                          </div>
+                        </div>
+
+                        {storeFormData.taxEnabled && (
+                          <>
+                            <div className="settings-page__field">
+                              <label htmlFor="taxRate" className="settings-page__label">
+                                {t.settings?.taxRate || 'Tax Rate (%)'}
+                              </label>
+                              <input
+                                id="taxRate"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                value={storeFormData.taxRate}
+                                onChange={(e) =>
+                                  setStoreFormData({ ...storeFormData, taxRate: e.target.value })
+                                }
+                                disabled={storeLoading}
+                                className="settings-page__input"
+                                placeholder={t.settings?.taxRatePlaceholder || '0.00'}
+                              />
+                            </div>
+
+                            <div className="settings-page__field">
+                              <label htmlFor="taxInclusive" className="settings-page__label">
+                                {t.settings?.taxInclusive || 'Tax Inclusive'}
+                              </label>
+                              <select
+                                id="taxInclusive"
+                                value={storeFormData.taxInclusive ? 'inclusive' : 'exclusive'}
+                                onChange={(e) =>
+                                  setStoreFormData({ ...storeFormData, taxInclusive: e.target.value === 'inclusive' })
+                                }
+                                disabled={storeLoading}
+                                className="settings-page__input"
+                              >
+                                <option value="exclusive">{t.settings?.taxExclusive || 'Tax Exclusive (Add tax to prices)'}</option>
+                                <option value="inclusive">{t.settings?.taxInclusiveOption || 'Tax Inclusive (Tax included in prices)'}</option>
+                              </select>
+                            </div>
+                          </>
+                        )}
+
                         <div className="settings-page__form-actions">
                           <button
                             type="submit"
@@ -1201,6 +1280,17 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
+
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        title={confirmation.title}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        onConfirm={confirmation.onConfirm}
+        onCancel={confirmation.onCancel}
+      />
     </>
   )
 }

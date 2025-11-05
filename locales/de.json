@@ -240,13 +240,14 @@
       "currentQuantity": "Aktuelle Menge",
       "minimumQuantity": "Mindestmenge (Niedrigbestandsschwelle)",
       "minimumQuantityHint": "Artikel wird als niedriger Bestand markiert, wenn die Menge unter oder bei diesem Wert fällt",
-      "unitPriceLabel": "Einzelpreis (Verkaufspreis)",
-      "costPriceLabel": "Einkaufspreis (Kaufpreis)",
+      "unitPriceLabel": "Verkaufspreis",
+      "costPriceLabel": "Kaufpreis",
       "optional": "Optional",
       "optionalDescription": "Optionale Beschreibung",
       "description": "Beschreibung",
       "categoryPlaceholder": "z.B. Bildschirme, Batterien, Kabel",
-      "locationPlaceholder": "z.B. Regal A-1, Lager 2"
+      "locationPlaceholder": "z.B. Regal A-1, Lager 2",
+      "addAnother": "Weiteren hinzufügen"
     },
     "table": {
       "noItems": "Keine Artikel gefunden",
@@ -343,6 +344,8 @@
       "totalCost": "Gesamtkosten",
       "originalEstimate": "Ursprüngliche Schätzung",
       "amountDue": "Fälliger Betrag",
+      "subtotal": "Zwischensumme",
+      "tax": "Steuer",
       "termsConditions": "Allgemeine Geschäftsbedingungen",
       "terms1": "• Alle Reparaturen sind 90 Tage ab dem Fertigstellungsdatum garantiert, sofern nicht anders angegeben.",
       "terms2": "• Die Zahlung ist bei Abschluss der Reparatur fällig. Unbezahlte Artikel können Lagergebühren unterliegen.",
@@ -467,7 +470,13 @@
     "store": "Geschäftsinformationen",
     "storeDescription": "Aktualisieren Sie Ihre Geschäftsinformationen.",
     "storeUpdateSuccess": "Geschäftsinformationen erfolgreich aktualisiert",
-    "storeUpdateError": "Fehler beim Aktualisieren der Geschäftsinformationen"
+    "storeUpdateError": "Fehler beim Aktualisieren der Geschäftsinformationen",
+    "taxEnabled": "Steuern aktivieren",
+    "taxRate": "Steuersatz (%)",
+    "taxRatePlaceholder": "0.00",
+    "taxInclusive": "Steuer inklusive",
+    "taxExclusive": "Steuer exklusive (Steuer zu Preisen hinzufügen)",
+    "taxInclusiveOption": "Steuer inklusive (Steuer in Preisen enthalten)"
   },
   "onboarding": {
     "title": "Willkommen! Lassen Sie uns Ihr Geschäft einrichten",

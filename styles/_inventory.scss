@@ -245,9 +245,38 @@
   &__actions {
     display: flex;
     gap: 1rem;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     padding-top: 1rem;
     border-top: 1px solid var(--border-gray);
+    flex-wrap: wrap;
+  }
+
+  &__add-another {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    user-select: none;
+
+    &:hover {
+      color: var(--text-dark);
+    }
+  }
+
+  &__add-another-checkbox {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-yellow);
+  }
+
+  &__action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
   }
 }
 
@@ -440,7 +469,6 @@
   &__menu {
     position: relative;
     display: inline-block;
-    z-index: 10;
   }
 
   &__menu-button {
@@ -454,6 +482,8 @@
     border-radius: 4px;
     color: var(--text-gray);
     transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
 
     &:hover:not(:disabled) {
       background: var(--bg-gray);

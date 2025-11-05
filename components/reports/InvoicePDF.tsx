@@ -193,6 +193,9 @@ interface InvoicePDFProps {
     vatNumber?: string | null
     currency?: string | null
     logo?: string | null
+    taxEnabled?: boolean | null
+    taxRate?: number | null
+    taxInclusive?: boolean | null
   }
   translations: PdfTranslations
   language: Language
@@ -211,15 +214,19 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store, translations, la
   }
 
   const formatCurrency = (amount?: number) => {
-    if (amount === undefined || amount === null) return 'N/A'
+    if (amount === undefined || amount === null || isNaN(amount) || !isFinite(amount)) return 'N/A'
     const currency = store.currency || 'USD'
     const locale = language === 'bg' ? 'bg-BG' : language === 'de' ? 'de-DE' : 'en-US'
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount)
+    try {
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(amount)
+    } catch (error) {
+      return amount.toFixed(2)
+    }
   }
 
   const formatStatus = (status: string) => {
@@ -245,13 +252,55 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store, translations, la
 
   // Calculate expenses total
   const expensesTotal = ticket.expenses?.reduce(
-    (sum, expense) => sum + expense.quantity * expense.price,
+    (sum, expense) => {
+      const qty = typeof expense.quantity === 'number' ? expense.quantity : Number(expense.quantity) || 0
+      const price = typeof expense.price === 'number' ? expense.price : Number(expense.price) || 0
+      return sum + (qty * price)
+    },
     0
   ) || 0
 
   // Calculate labor cost (if actualCost includes labor, or estimate it)
   // For now, we'll show actualCost if available, otherwise estimatedCost
-  const totalCost = ticket.actualCost ?? ticket.estimatedCost ?? 0
+  const actualCostNum = typeof ticket.actualCost === 'number' ? ticket.actualCost : (ticket.actualCost ? Number(ticket.actualCost) : 0)
+  const estimatedCostNum = typeof ticket.estimatedCost === 'number' ? ticket.estimatedCost : (ticket.estimatedCost ? Number(ticket.estimatedCost) : 0)
+  const totalCost = actualCostNum || estimatedCostNum || 0
+
+  // Calculate subtotal (expenses + labor)
+  const subtotal = (expensesTotal || 0) + (totalCost || 0)
+
+  // Calculate tax
+  let taxAmount = 0
+  let subtotalBeforeTax = subtotal
+  let grandTotal = subtotal
+
+  if (store.taxEnabled && store.taxRate !== null && store.taxRate !== undefined) {
+    const taxRate = typeof store.taxRate === 'number' ? store.taxRate : Number(store.taxRate) || 0
+    
+    // Validate taxRate is a valid number
+    if (!isNaN(taxRate) && isFinite(taxRate) && taxRate >= 0 && taxRate <= 100) {
+      if (store.taxInclusive) {
+        // Tax is included in prices, so we need to extract it
+        // If tax is 20%, and price is 100 (inclusive), then:
+        // subtotal = 100
+        // tax = subtotal * (taxRate / (100 + taxRate))
+        // base = subtotal - tax
+        taxAmount = subtotal * (taxRate / (100 + taxRate))
+        subtotalBeforeTax = subtotal - taxAmount
+        grandTotal = subtotal // Total already includes tax
+      } else {
+        // Tax is added on top of prices
+        taxAmount = subtotal * (taxRate / 100)
+        subtotalBeforeTax = subtotal
+        grandTotal = subtotal + taxAmount
+      }
+      
+      // Ensure all calculated values are valid numbers
+      if (isNaN(taxAmount) || !isFinite(taxAmount)) taxAmount = 0
+      if (isNaN(subtotalBeforeTax) || !isFinite(subtotalBeforeTax)) subtotalBeforeTax = subtotal
+      if (isNaN(grandTotal) || !isFinite(grandTotal)) grandTotal = subtotal
+    }
+  }
 
   // Build company address
   const companyAddressParts = [
@@ -362,12 +411,14 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store, translations, la
                 <Text style={styles.tableCellTotal}>{translations.total}</Text>
               </View>
               {ticket.expenses.map((expense) => {
-                const lineTotal = expense.quantity * expense.price
+                const qty = typeof expense.quantity === 'number' ? expense.quantity : Number(expense.quantity) || 0
+                const price = typeof expense.price === 'number' ? expense.price : Number(expense.price) || 0
+                const lineTotal = qty * price
                 return (
                   <View key={expense.id} style={styles.tableRow}>
                     <Text style={styles.tableCellName}>{expense.name}</Text>
-                    <Text style={styles.tableCellQuantity}>{expense.quantity}</Text>
-                    <Text style={styles.tableCellPrice}>{formatCurrency(expense.price)}</Text>
+                    <Text style={styles.tableCellQuantity}>{qty}</Text>
+                    <Text style={styles.tableCellPrice}>{formatCurrency(price)}</Text>
                     <Text style={styles.tableCellTotal}>{formatCurrency(lineTotal)}</Text>
                   </View>
                 )
@@ -392,15 +443,23 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store, translations, la
               </Text>
               <Text style={styles.totalValue}>{formatCurrency(totalCost)}</Text>
             </View>
-            {ticket.estimatedCost && ticket.actualCost && (
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>{translations.originalEstimate}:</Text>
-                <Text style={styles.totalValue}>{formatCurrency(ticket.estimatedCost)}</Text>
-              </View>
+            {store.taxEnabled && store.taxRate !== null && store.taxRate !== undefined && (
+              <>
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>{translations.subtotal || 'Subtotal'}:</Text>
+                  <Text style={styles.totalValue}>{formatCurrency(subtotalBeforeTax)}</Text>
+                </View>
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>
+                    {translations.tax || 'Tax'} ({typeof store.taxRate === 'number' ? store.taxRate.toFixed(2) : Number(store.taxRate).toFixed(2)}%):
+                  </Text>
+                  <Text style={styles.totalValue}>{formatCurrency(taxAmount)}</Text>
+                </View>
+              </>
             )}
             <View style={[styles.totalRow, styles.grandTotal]}>
               <Text style={styles.totalLabel}>{translations.amountDue}:</Text>
-              <Text style={styles.totalValue}>{formatCurrency(totalCost)}</Text>
+              <Text style={styles.totalValue}>{formatCurrency(grandTotal)}</Text>
             </View>
           </View>
         </View>

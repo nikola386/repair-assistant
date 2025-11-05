@@ -10,6 +10,7 @@ import { ensurePdfFontsRegistered } from '@/lib/pdfFonts'
 import { settingsStorage } from '@/lib/settingsStorage'
 import { getPdfTranslations } from '@/lib/pdfTranslations'
 import { isValidLanguage } from '@/lib/languages'
+import { Decimal } from '@prisma/client/runtime/library'
 
 // Mark route as dynamic
 export const dynamic = 'force-dynamic'
@@ -60,6 +61,9 @@ export async function GET(
         vatNumber: true,
         currency: true,
         logo: true,
+        taxEnabled: true,
+        taxRate: true,
+        taxInclusive: true,
       },
     })
 
@@ -83,9 +87,15 @@ export async function GET(
     // Ensure fonts are registered before rendering
     await ensurePdfFontsRegistered()
 
+    // Convert taxRate from Decimal to number if it exists
+    const storeWithTaxRate = {
+      ...store,
+      taxRate: store.taxRate instanceof Decimal ? store.taxRate.toNumber() : store.taxRate ?? null,
+    }
+
     // Render PDF
     const pdfBuffer = await renderToBuffer(
-      React.createElement(InvoicePDF, { ticket, store, translations, language })
+      React.createElement(InvoicePDF, { ticket, store: storeWithTaxRate, translations, language })
     )
 
     // Convert Buffer to Uint8Array for NextResponse

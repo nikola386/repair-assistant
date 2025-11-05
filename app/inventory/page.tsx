@@ -25,6 +25,7 @@ function InventoryPageContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [addAnother, setAddAnother] = useState(false)
   const [categories, setCategories] = useState<string[]>([])
   const [locations, setLocations] = useState<string[]>([])
   
@@ -129,6 +130,27 @@ function InventoryPageContent() {
     }
   }, [items.length])
 
+  // Handle Escape key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showForm) {
+        setShowForm(false)
+        setAddAnother(false)
+      }
+    }
+
+    if (showForm) {
+      document.addEventListener('keydown', handleKeyDown)
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden'
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [showForm])
+
   const handleCreateItem = async (data: CreateInventoryItemInput | UpdateInventoryItemInput) => {
     // Ensure name is present for create operation
     if (!data.name) {
@@ -148,7 +170,10 @@ function InventoryPageContent() {
 
       if (response.ok) {
         showAlert.success(t.inventory.page.createSuccess)
-        setShowForm(false)
+        // Only close modal if "add another" is not checked
+        if (!addAnother) {
+          setShowForm(false)
+        }
         await fetchItems()
         await fetchFilters()
       } else {
@@ -221,20 +246,14 @@ function InventoryPageContent() {
             <button
               type="button"
               className="btn btn-primary btn-sm"
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => {
+                setShowForm(true)
+                setAddAnother(false)
+              }}
             >
-              {showForm ? t.inventory.page.cancel : t.inventory?.addItem || 'Add Item'}
+              {t.inventory?.addItem || 'Add Item'}
             </button>
           </div>
-
-          {showForm && (
-            <div className="inventory-page__form">
-               <InventoryForm
-                onSubmit={handleCreateItem}
-                onCancel={() => setShowForm(false)}
-              />
-            </div>
-          )}
 
           <div className="inventory-page__content">
             <div className="inventory-page__filters">
@@ -368,6 +387,47 @@ function InventoryPageContent() {
           </div>
         </div>
       </main>
+
+      {/* Add Item Modal */}
+      {showForm && (
+        <div 
+          className="inventory-modal" 
+          onClick={() => {
+            setShowForm(false)
+            setAddAnother(false)
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="add-item-modal-title"
+        >
+          <div className="inventory-modal__content" onClick={(e) => e.stopPropagation()}>
+            <div className="inventory-modal__header">
+              <h2 id="add-item-modal-title" className="inventory-modal__title">{t.inventory?.addItem || 'Add Item'}</h2>
+              <button
+                className="inventory-modal__close"
+                onClick={() => {
+                  setShowForm(false)
+                  setAddAnother(false)
+                }}
+                aria-label="Close modal"
+              >
+                ×
+              </button>
+            </div>
+            <div className="inventory-modal__body">
+              <InventoryForm
+                onSubmit={handleCreateItem}
+                onCancel={() => {
+                  setShowForm(false)
+                  setAddAnother(false)
+                }}
+                addAnother={addAnother}
+                onAddAnotherChange={setAddAnother}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

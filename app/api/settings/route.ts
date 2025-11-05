@@ -19,6 +19,7 @@ import {
 } from '@/lib/fileUtils'
 import { validateHexColor } from '@/lib/colorValidation'
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from '@/lib/constants'
+import { Decimal } from '@prisma/client/runtime/library'
 
 export async function GET(request: NextRequest) {
   const authResult = await withAuth(request, { action: 'settings access' })
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
     // Fetch store and settings
     const store = await db.store.findUnique({
       where: { id: storeId },
-    })
+    }) as any
 
     if (!store) {
       return NextResponse.json(
@@ -64,7 +65,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ store, settings }, { status: 200 })
+    // Convert taxRate from Decimal to number if it exists
+    const storeWithTaxRate = {
+      ...store,
+      taxRate: store.taxRate instanceof Decimal ? store.taxRate.toNumber() : store.taxRate ?? null,
+    }
+
+    return NextResponse.json({ store: storeWithTaxRate, settings }, { status: 200 })
   } catch (error) {
     console.error('Error fetching settings:', error)
     return NextResponse.json(
@@ -109,6 +116,9 @@ export async function PATCH(request: NextRequest) {
       const phone = formData.get('phone') as string | null
       const currency = formData.get('currency') as string | null
       const vatNumber = formData.get('vatNumber') as string | null
+      const taxEnabled = formData.get('taxEnabled') === 'true'
+      const taxRate = formData.get('taxRate') as string | null
+      const taxInclusive = formData.get('taxInclusive') === 'true'
       const logoFile = formData.get('logo') as File | null
       const removeLogo = formData.get('removeLogo') === 'true'
       
@@ -225,6 +235,18 @@ export async function PATCH(request: NextRequest) {
       if (phone !== null) storeUpdateData.phone = phone.trim() || null
       if (currency !== null) storeUpdateData.currency = currency.trim() || 'USD'
       if (vatNumber !== null) storeUpdateData.vatNumber = vatNumber.trim() || null
+      storeUpdateData.taxEnabled = taxEnabled
+      if (taxRate !== null && taxRate.trim() !== '') {
+        const taxRateNum = parseFloat(taxRate.trim())
+        if (!isNaN(taxRateNum) && taxRateNum >= 0 && taxRateNum <= 100) {
+          storeUpdateData.taxRate = taxRateNum
+        } else {
+          storeUpdateData.taxRate = null
+        }
+      } else {
+        storeUpdateData.taxRate = null
+      }
+      storeUpdateData.taxInclusive = taxInclusive
       if (logoFile && logoFile.size > 0) storeUpdateData.logo = logoUrl
       if (removeLogo) storeUpdateData.logo = null
 

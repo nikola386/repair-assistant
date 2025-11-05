@@ -1,0 +1,249 @@
+// Confirmation Modal
+.confirmation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  &__content {
+    background: var(--white);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+    position: relative;
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 32px;
+    border-bottom: 2px solid var(--border-gray);
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+  }
+
+  &__close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-gray);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    line-height: 1;
+    padding: 0;
+    flex-shrink: 0;
+
+    &:hover {
+      background: var(--bg-gray);
+      color: var(--text-dark);
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+
+    &--headerless {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+  }
+
+  &__body {
+    padding: 32px;
+  }
+
+  &__message {
+    font-size: 1rem;
+    color: var(--text-dark);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 24px 32px;
+    border-top: 2px solid var(--border-gray);
+    background: var(--bg-gray);
+  }
+
+  &__button {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    border: none;
+    min-width: 100px;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &--cancel {
+      background: var(--white);
+      color: var(--text-dark);
+      border: 2px solid var(--border-gray);
+
+      &:hover {
+        background: var(--bg-gray);
+        border-color: var(--text-gray);
+      }
+    }
+
+    &--confirm {
+      color: var(--white);
+      border: 2px solid transparent;
+
+      &--info {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+
+        &:hover {
+          background: var(--primary-color-dark);
+          border-color: var(--primary-color-dark);
+        }
+      }
+
+      &--warning {
+        background: #f59e0b;
+        border-color: #f59e0b;
+
+        &:hover {
+          background: #d97706;
+          border-color: #d97706;
+        }
+      }
+
+      &--danger {
+        background: #ef4444;
+        border-color: #ef4444;
+
+        &:hover {
+          background: #dc2626;
+          border-color: #dc2626;
+        }
+      }
+    }
+  }
+
+  // Fix for nested modifier classes
+  &__button--confirm--danger {
+    background: #ef4444;
+    border-color: #ef4444;
+
+    &:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+  }
+
+  &__button--confirm--warning {
+    background: #f59e0b;
+    border-color: #f59e0b;
+
+    &:hover {
+      background: #d97706;
+      border-color: #d97706;
+    }
+  }
+
+  &__button--confirm--info {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+
+    &:hover {
+      background: var(--primary-color-dark);
+      border-color: var(--primary-color-dark);
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .confirmation-modal {
+    padding: 10px;
+
+    &__content {
+      max-width: 100%;
+    }
+
+    &__header {
+      padding: 20px;
+    }
+
+    &__title {
+      font-size: 1.25rem;
+    }
+
+    &__body {
+      padding: 24px 20px;
+    }
+
+    &__close {
+      &--headerless {
+        top: 12px;
+        right: 12px;
+      }
+    }
+
+    &__footer {
+      padding: 20px;
+      flex-direction: column-reverse;
+
+      .confirmation-modal__button {
+        width: 100%;
+      }
+    }
+  }
+}
+
