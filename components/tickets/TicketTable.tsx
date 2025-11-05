@@ -4,7 +4,6 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  getPaginationRowModel,
   flexRender,
   ColumnDef,
   SortingState,
@@ -169,12 +168,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: {
-        pageSize: 20,
-      },
-    },
+    manualPagination: true,
   })
 
   const getColumnClass = (id: string): string => {
@@ -255,50 +249,6 @@ export default function TicketTable({ tickets }: TicketTableProps) {
           </tbody>
         </table>
       </div>
-      
-      {table.getPageCount() > 1 && (
-        <div className="ticket-list__table-pagination">
-          <div className="ticket-list__pagination-info">
-            {(t.tickets as any)?.showing || 'Showing'} {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}{' '}
-            {(t.tickets as any)?.to || 'to'}{' '}
-            {Math.min(
-              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-              table.getRowCount()
-            )}{' '}
-            {(t.tickets as any)?.of || 'of'} {table.getRowCount()}
-          </div>
-          <div className="ticket-list__pagination-controls">
-            <button
-              className="ticket-list__pagination-btn"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              {'«'}
-            </button>
-            <button
-              className="ticket-list__pagination-btn"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              {(t.tickets as any)?.previous || 'Previous'}
-            </button>
-            <button
-              className="ticket-list__pagination-btn"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              {(t.tickets as any)?.next || 'Next'}
-            </button>
-            <button
-              className="ticket-list__pagination-btn"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              {'»'}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
