@@ -476,7 +476,69 @@
     "taxRatePlaceholder": "0.00",
     "taxInclusive": "Steuer inklusive",
     "taxExclusive": "Steuer exklusive (Steuer zu Preisen hinzufügen)",
-    "taxInclusiveOption": "Steuer inklusive (Steuer in Preisen enthalten)"
+    "taxInclusiveOption": "Steuer inklusive (Steuer in Preisen enthalten)",
+    "team": "Team",
+    "teamDescription": "Verwalten Sie Teammitglieder und ihre Rollen.",
+    "teamMembers": "Teammitglieder",
+    "inviteUser": "Benutzer einladen"
+  },
+  "team": {
+    "title": "Team",
+    "inviteUser": "Benutzer einladen",
+    "inviteUserTitle": "Benutzer einladen",
+    "emailAddress": "E-Mail-Adresse",
+    "emailPlaceholder": "user@example.com",
+    "role": "Rolle",
+    "sending": "Wird gesendet...",
+    "sendInvitation": "Einladung senden",
+    "inviteError": "Fehler beim Senden der Einladung",
+    "roleDescriptions": {
+      "admin": "Vollzugriff, außer Benutzer können nicht gelöscht werden",
+      "manager": "Kann Tickets, Kunden, Inventar und Berichte verwalten",
+      "technician": "Kann Tickets anzeigen und bearbeiten, Kunden erstellen",
+      "viewer": "Nur-Lese-Zugriff auf Tickets, Kunden, Inventar und Berichte"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "manager": "Manager",
+      "technician": "Techniker",
+      "viewer": "Betrachter"
+    },
+    "table": {
+      "name": "Name",
+      "email": "E-Mail",
+      "role": "Rolle",
+      "status": "Status",
+      "joined": "Beigetreten",
+      "actions": "Aktionen",
+      "noUsersFound": "Keine Benutzer gefunden. Laden Sie Teammitglieder ein, um zu beginnen.",
+      "editRole": "Rolle bearbeiten",
+      "deactivate": "Deaktivieren",
+      "resendInvitation": "Einladung erneut senden",
+      "resending": "Wird erneut gesendet...",
+      "pending": "Ausstehend",
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
+    "editRole": {
+      "title": "Benutzerrolle bearbeiten",
+      "user": "Benutzer",
+      "saveChanges": "Änderungen speichern",
+      "saving": "Wird gespeichert...",
+      "updateSuccess": "Benutzerrolle erfolgreich aktualisiert",
+      "updateError": "Fehler beim Aktualisieren des Benutzers"
+    },
+    "deactivate": {
+      "confirmMessage": "Sind Sie sicher, dass Sie diesen Benutzer deaktivieren möchten?",
+      "confirmText": "Deaktivieren",
+      "cancelText": "Abbrechen",
+      "success": "Benutzer erfolgreich deaktiviert",
+      "error": "Fehler beim Deaktivieren des Benutzers"
+    },
+    "resendInvitation": {
+      "success": "Einladung erfolgreich erneut gesendet",
+      "error": "Fehler beim erneuten Senden der Einladung"
+    }
   },
   "onboarding": {
     "title": "Willkommen! Lassen Sie uns Ihr Geschäft einrichten",

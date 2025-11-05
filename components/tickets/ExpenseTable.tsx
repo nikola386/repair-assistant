@@ -343,7 +343,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
       <div className="expense-table__content">
         {isAdding && editable && (
           <div className="expense-table__add-form">
-            <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+            <div className="dropdown inventory-dropdown-wrapper">
               <input
                 ref={inventorySearchRef}
                 type="text"
@@ -355,49 +355,24 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                     setShowInventoryDropdown(true)
                   }
                 }}
-                className="expense-table__input"
-                style={{ width: '100%' }}
+                className="expense-table__input form-input--full-width"
               />
               {showInventoryDropdown && filteredInventoryItems.length > 0 && (
                 <div
                   ref={inventoryDropdownRef}
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    backgroundColor: 'white',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    zIndex: 1000,
-                    maxHeight: '300px',
-                    overflowY: 'auto',
-                    marginTop: '4px',
-                  }}
+                  className="inventory-dropdown"
                 >
                   {filteredInventoryItems.map((item) => (
                     <div
                       key={item.id}
                       onClick={() => handleInventoryItemSelect(item)}
-                      style={{
-                        padding: '10px 15px',
-                        cursor: 'pointer',
-                        borderBottom: '1px solid #f0f0f0',
-                        transition: 'background-color 0.2s',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f5f5f5'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'white'
-                      }}
+                      className="inventory-dropdown-item"
                     >
-                      <div style={{ fontWeight: '500', marginBottom: '4px' }}>
+                      <div className="inventory-dropdown-item-name">
                         {item.name}
-                        {item.sku && <span style={{ color: '#666', marginLeft: '8px' }}>({item.sku})</span>}
+                        {item.sku && <span className="inventory-dropdown-item-name-sku">({item.sku})</span>}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#666' }}>
+                      <div className="inventory-dropdown-item-details">
                         Qty: {item.currentQuantity}
                         {item.unitPrice && ` • Price: $${item.unitPrice.toFixed(2)}`}
                       </div>
@@ -406,21 +381,8 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                 </div>
               )}
               {inventorySearchQuery && filteredInventoryItems.length === 0 && !isLoadingInventory && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  backgroundColor: 'white',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  padding: '10px 15px',
-                  marginTop: '4px',
-                  fontSize: '14px',
-                  color: '#666',
-                  zIndex: 1000,
-                }}>
-                      {t.common.messages.noItemsFound}
+                <div className="inventory-dropdown-empty">
+                  {t.common.messages.noItemsFound}
                 </div>
               )}
             </div>

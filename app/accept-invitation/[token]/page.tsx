@@ -44,25 +44,19 @@ export default function AcceptInvitationPage() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: '500px', margin: '100px auto' }}>
-      <div style={{ background: '#fff', padding: '40px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-        <h1 style={{ marginBottom: '30px', textAlign: 'center' }}>Accept Invitation</h1>
+    <div className="container card-container">
+      <div className="card">
+        <h1 className="card-title">Accept Invitation</h1>
         
         {error && (
-          <div style={{ 
-            padding: '12px', 
-            background: '#fee', 
-            color: '#c33', 
-            borderRadius: '4px', 
-            marginBottom: '20px' 
-          }}>
+          <div className="form-error">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <label htmlFor="name" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+          <div className="form-field">
+            <label htmlFor="name" className="form-label">
               Your Name (optional)
             </label>
             <input
@@ -71,18 +65,12 @@ export default function AcceptInvitationPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px',
-              }}
+              className="form-input"
             />
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label htmlFor="password" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+          <div className="form-field">
+            <label htmlFor="password" className="form-label">
               Password
             </label>
             <input
@@ -93,30 +81,15 @@ export default function AcceptInvitationPage() {
               placeholder="Enter a password (min. 8 characters)"
               required
               minLength={8}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px',
-              }}
+              className="form-input"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '12px',
-              background: loading ? '#ccc' : '#007bff',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '16px',
-              fontWeight: '500',
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
+            className="btn btn-primary login-button btn-full-width"
+            style={{ opacity: loading ? 0.6 : 1 }}
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>

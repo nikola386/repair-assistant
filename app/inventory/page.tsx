@@ -439,7 +439,7 @@ export default function InventoryPage() {
         <Navigation />
         <main className="inventory-page">
           <div className="inventory-page__container">
-            <div style={{ padding: '40px', textAlign: 'center' }}>
+            <div className="loading-state">
               <Spinner />
             </div>
           </div>

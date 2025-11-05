@@ -1,0 +1,127 @@
+// Dropdown Styles - Reusable dropdown components
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: fixed;
+  min-width: 140px;
+  background: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem;
+  z-index: 1000;
+  animation: fadeInDown 0.2s ease-out;
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-dark);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+  display: block;
+
+  &:hover:not(:disabled) {
+    background: var(--bg-gray);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--danger {
+    color: #DC3545;
+
+    &:hover:not(:disabled) {
+      background: rgba(220, 53, 69, 0.1);
+      color: #DC3545;
+    }
+  }
+}
+
+// Inventory search dropdown
+.inventory-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 0.25rem;
+}
+
+.inventory-dropdown-wrapper {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.inventory-dropdown-item {
+  padding: 0.625rem 0.9375rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: var(--bg-gray);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.inventory-dropdown-item-name {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.inventory-dropdown-item-name-sku {
+  color: var(--text-gray);
+  margin-left: 0.5rem;
+}
+
+.inventory-dropdown-item-details {
+  font-size: 0.75rem;
+  color: var(--text-gray);
+}
+
+.inventory-dropdown-empty {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: 4px;
+  padding: 0.625rem 0.9375rem;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-gray);
+}
+

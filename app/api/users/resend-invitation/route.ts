@@ -3,12 +3,8 @@ import { requireAuthAndPermission } from '@/lib/api-middleware'
 import { Permission } from '@/lib/permissions'
 import { userStorage } from '@/lib/userStorage'
 import { emailService } from '@/lib/email'
-import { z } from 'zod'
-
-const inviteSchema = z.object({
-  email: z.string().email(),
-  role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']),
-})
+import { db } from '@/lib/db'
+import type { Session } from 'next-auth'
 
 export async function POST(request: NextRequest) {
   const authResult = await requireAuthAndPermission(
@@ -34,51 +30,53 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { email, role } = inviteSchema.parse(body)
+    const { invitationId } = body
 
-    // Check if user already exists
-    const existingUser = await userStorage.findByEmail(email)
-    if (existingUser && existingUser.storeId === user.storeId) {
+    if (!invitationId) {
       return NextResponse.json(
-        { error: 'User already exists in this store' },
-        { status: 409 }
+        { error: 'Invitation ID is required' },
+        { status: 400 }
       )
     }
 
-    // Create invitation
-    const invitation = await userStorage.createInvitation({
-      email,
-      storeId: user.storeId,
-      role,
-      invitedBy: session.user.id,
+    // Get the invitation
+    const invitation = await (db as any).userInvitation.findUnique({
+      where: { id: invitationId },
     })
+    
+    if (!invitation || invitation.storeId !== user.storeId) {
+      return NextResponse.json(
+        { error: 'Invitation not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check if invitation is still valid
+    if (invitation.acceptedAt || invitation.expiresAt < new Date()) {
+      return NextResponse.json(
+        { error: 'Invitation is no longer valid' },
+        { status: 400 }
+      )
+    }
+
+    // Resend invitation with new token
+    const updatedInvitation = await userStorage.resendInvitation(invitation.id)
 
     // Send invitation email
     await emailService.sendInvitationEmail(
-      email,
-      invitation.token,
+      invitation.email,
+      updatedInvitation.token,
       session.user.name || session.user.email,
       user.storeId
     )
 
     return NextResponse.json({
-      message: 'Invitation sent successfully',
-      invitation: {
-        id: invitation.id,
-        email: invitation.email,
-        role: invitation.role,
-      },
+      message: 'Invitation resent successfully',
     })
   } catch (error) {
-    console.error('Invitation error:', error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
-        { status: 400 }
-      )
-    }
+    console.error('Resend invitation error:', error)
     return NextResponse.json(
-      { error: 'Failed to send invitation' },
+      { error: 'Failed to resend invitation' },
       { status: 500 }
     )
   }

@@ -1,0 +1,63 @@
+// Badge/Tag Styles - Reusable badge components
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge--role {
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  &-admin {
+    background: #E2E3E5;
+    color: #383D41;
+  }
+
+  &-manager {
+    background: #D1ECF1;
+    color: #0C5460;
+  }
+
+  &-technician {
+    background: #D4EDDA;
+    color: #155724;
+  }
+
+  &-viewer {
+    background: #FFF3CD;
+    color: #856404;
+  }
+}
+
+.badge--status {
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  &-active {
+    background: #D4EDDA;
+    color: #155724;
+  }
+
+  &-inactive {
+    background: #F8D7DA;
+    color: #721C24;
+  }
+
+  &-pending {
+    background: #FFF3CD;
+    color: #856404;
+  }
+}
+

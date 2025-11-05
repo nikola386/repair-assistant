@@ -1,0 +1,100 @@
+// User Management Styles
+
+.users-table-wrapper {
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: 8px;
+  overflow: hidden;
+
+  thead {
+    tr {
+      background: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    th {
+      padding: 0.75rem;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    th:last-child {
+      text-align: right;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    td {
+      padding: 0.75rem;
+      color: var(--text-gray);
+    }
+
+    td:last-child {
+      text-align: right;
+    }
+  }
+}
+
+.user-actions {
+  position: relative;
+  display: inline-block;
+}
+
+.user-modal-content {
+  max-width: 450px;
+}
+
+.user-modal-header {
+  padding: 1rem 1.25rem;
+}
+
+.user-modal-title {
+  font-size: 1.25rem;
+}
+
+.user-modal-body {
+  padding: 1.25rem;
+}
+
+.user-info-section {
+  margin-bottom: 1rem;
+}
+
+.user-info-name {
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.user-info-email {
+  margin-bottom: 0;
+  color: var(--text-gray);
+  font-size: 0.8125rem;
+}
+
+.user-role-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-gray);
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.user-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+

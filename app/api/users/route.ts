@@ -16,11 +16,26 @@ export async function GET(request: NextRequest) {
   }
 
   const session = authResult.session
-  const users = await userStorage.findByStoreId(session.user.storeId)
   
-  // Don't return sensitive data
-  return NextResponse.json(
-    users.map(user => ({
+  // Get user's storeId from database
+  const user = await userStorage.findById(session.user.id)
+  if (!user || !user.storeId) {
+    return NextResponse.json(
+      { error: 'User store not found' },
+      { status: 404 }
+    )
+  }
+
+  // Get both users and pending invitations
+  const [users, pendingInvitations] = await Promise.all([
+    userStorage.findByStoreId(user.storeId),
+    userStorage.findPendingInvitationsByStoreId(user.storeId),
+  ])
+
+  // Combine users and pending invitations
+  const teamMembers = [
+    // Active users
+    ...users.map(user => ({
       id: user.id,
       email: user.email,
       name: user.name,
@@ -29,7 +44,25 @@ export async function GET(request: NextRequest) {
       profileImage: user.profileImage,
       createdAt: user.createdAt,
       invitedBy: (user as any).invitedBy,
-    }))
-  )
+      type: 'user' as const,
+    })),
+    // Pending invitations
+    ...pendingInvitations.map(invitation => ({
+      id: invitation.id,
+      email: invitation.email,
+      name: null,
+      role: invitation.role,
+      isActive: false,
+      profileImage: null,
+      createdAt: invitation.createdAt,
+      invitedBy: invitation.invitedBy,
+      type: 'invitation' as const,
+      invitationId: invitation.id,
+      invitationToken: invitation.token,
+      expiresAt: invitation.expiresAt,
+    })),
+  ]
+
+  return NextResponse.json(teamMembers)
 }
 

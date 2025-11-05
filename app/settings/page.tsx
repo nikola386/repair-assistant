@@ -708,7 +708,7 @@ export default function SettingsPage() {
                       setSuccess('')
                     }}
                   >
-                    Team
+                    {t.settings?.team || 'Team'}
                   </button>
                 )}
               </nav>
@@ -1353,19 +1353,19 @@ export default function SettingsPage() {
                 <div className="settings-page__section">
                   <div className="settings-page__card">
                     <div className="settings-page__card-header">
-                      <h3 className="settings-page__card-title">Team Members</h3>
+                      <h3 className="settings-page__card-title">{t.settings?.teamMembers || 'Team Members'}</h3>
                       {canInvite && (
                         <button
                           onClick={() => setShowInviteModal(true)}
                           className="btn btn-primary btn-sm"
                         >
-                          Invite User
+                          {t.settings?.inviteUser || 'Invite User'}
                         </button>
                       )}
                     </div>
                     <div className="settings-page__card-body">
                       {usersLoading ? (
-                        <div style={{ padding: '40px', textAlign: 'center' }}>
+                        <div className="loading-state">
                           <p>{t.common.messages.loading}</p>
                         </div>
                       ) : (

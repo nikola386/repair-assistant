@@ -2,9 +2,24 @@ import { db } from './db'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 // Prisma generates User type automatically from schema - use it directly
-import type { User, UserInvitation } from '@prisma/client'
+import type { User } from '@prisma/client'
 
-export type { User, UserInvitation }
+// Type for UserInvitation (will be available after Prisma client regeneration)
+interface UserInvitation {
+  id: string
+  email: string
+  storeId: string
+  role: string
+  invitedBy: string
+  token: string
+  expiresAt: Date
+  acceptedAt: Date | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type { User }
+export type { UserInvitation }
 
 export interface CreateUserInput {
   email: string
@@ -47,7 +62,7 @@ export class UserStorage {
         passwordHash,
         name: name || null,
         storeId: finalStoreId,
-        role: role || 'VIEWER',
+        role: (role || 'VIEWER') as any,
         invitedBy: invitedBy || null,
         invitedAt: invitedAt || null,
       },
@@ -204,7 +219,6 @@ export class UserStorage {
     return user.lastVerificationEmailSent < oneMinuteAgo
   }
 
-  // User invitation methods
   async createInvitation(input: {
     email: string
     storeId: string
@@ -215,7 +229,7 @@ export class UserStorage {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7) // 7 days expiry
 
-    return db.userInvitation.create({
+    return (db as any).userInvitation.create({
       data: {
         email: input.email,
         storeId: input.storeId,
@@ -228,7 +242,7 @@ export class UserStorage {
   }
 
   async findInvitationByToken(token: string): Promise<UserInvitation | null> {
-    return db.userInvitation.findUnique({
+    return (db as any).userInvitation.findUnique({
       where: { token },
       include: {
         store: true,
@@ -238,9 +252,46 @@ export class UserStorage {
   }
 
   async acceptInvitation(invitationId: string): Promise<void> {
-    await db.userInvitation.update({
+    await (db as any).userInvitation.update({
       where: { id: invitationId },
       data: { acceptedAt: new Date() },
+    })
+  }
+
+  async findPendingInvitationsByStoreId(storeId: string): Promise<UserInvitation[]> {
+    return (db as any).userInvitation.findMany({
+      where: {
+        storeId,
+        acceptedAt: null,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+      include: {
+        inviter: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
+  async resendInvitation(invitationId: string): Promise<UserInvitation> {
+    // Generate new token and extend expiry
+    const token = crypto.randomUUID()
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + 7) // 7 days expiry
+
+    return (db as any).userInvitation.update({
+      where: { id: invitationId },
+      data: {
+        token,
+        expiresAt,
+      },
     })
   }
 

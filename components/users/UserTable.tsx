@@ -1,8 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { showAlert } from '@/lib/alerts'
+import { useConfirmation } from '@/lib/useConfirmation'
+import ConfirmationModal from '@/components/ui/ConfirmationModal'
+import { useLanguage } from '@/contexts/LanguageContext'
 
-interface User {
+interface TeamMember {
   id: string
   email: string
   name: string | null
@@ -11,26 +15,34 @@ interface User {
   profileImage: string | null
   createdAt: Date
   invitedBy: string | null
+  type: 'user' | 'invitation'
+  invitationId?: string
+  invitationToken?: string
+  expiresAt?: Date
 }
 
 interface UserTableProps {
-  users: User[]
+  users: TeamMember[]
   canEdit: boolean
   currentUserId?: string
   onUpdate: () => void
 }
 
 export default function UserTable({ users, canEdit, currentUserId, onUpdate }: UserTableProps) {
-  const [editingUser, setEditingUser] = useState<User | null>(null)
+  const { t } = useLanguage()
+  const [editingUser, setEditingUser] = useState<TeamMember | null>(null)
   const [editingRole, setEditingRole] = useState<string>('')
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [resendingId, setResendingId] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | null>(null)
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
+  const confirmation = useConfirmation()
 
-  const handleEditRole = (user: User) => {
+  const handleEditRole = (user: TeamMember) => {
+    if (user.type === 'invitation') return // Can't edit invitation roles
     setEditingUser(user)
     setEditingRole(user.role)
   }
@@ -48,15 +60,16 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
 
       if (!res.ok) {
         const error = await res.json()
-        alert(error.error || 'Failed to update user')
+        showAlert.error(error.error || t.team.editRole.updateError)
         return
       }
 
       setEditingUser(null)
       setEditingRole('')
+      showAlert.success(t.team.editRole.updateSuccess)
       onUpdate()
     } catch (error) {
-      alert('Failed to update user')
+      showAlert.error(t.team.editRole.updateError)
     } finally {
       setSaving(false)
     }
@@ -68,9 +81,14 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
   }
 
   const handleDeactivate = async (userId: string) => {
-    if (!confirm('Are you sure you want to deactivate this user?')) {
-      return
-    }
+    const confirmed = await confirmation.confirm({
+      message: t.team.deactivate.confirmMessage,
+      variant: 'danger',
+      confirmText: t.team.deactivate.confirmText,
+      cancelText: t.team.deactivate.cancelText,
+    })
+
+    if (!confirmed) return
 
     try {
       const res = await fetch(`/api/users/${userId}`, {
@@ -79,14 +97,39 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
 
       if (!res.ok) {
         const error = await res.json()
-        alert(error.error || 'Failed to deactivate user')
+        showAlert.error(error.error || t.team.deactivate.error)
         return
       }
 
       setDeletingId(null)
+      showAlert.success(t.team.deactivate.success)
       onUpdate()
     } catch (error) {
-      alert('Failed to deactivate user')
+      showAlert.error(t.team.deactivate.error)
+    }
+  }
+
+  const handleResendInvitation = async (invitationId: string) => {
+    setResendingId(invitationId)
+    try {
+      const res = await fetch('/api/users/resend-invitation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invitationId }),
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        showAlert.error(error.error || t.team.resendInvitation.error)
+        return
+      }
+
+      showAlert.success(t.team.resendInvitation.success)
+      onUpdate()
+    } catch (error) {
+      showAlert.error(t.team.resendInvitation.error)
+    } finally {
+      setResendingId(null)
     }
   }
 
@@ -151,108 +194,93 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
     setOpenMenuId(userId)
   }
 
-  const handleMenuAction = (action: string, user: User) => {
+  const handleMenuAction = (action: string, member: TeamMember) => {
     setOpenMenuId(null)
     setMenuPosition(null)
     
     if (action === 'edit') {
-      handleEditRole(user)
+      handleEditRole(member)
     } else if (action === 'deactivate') {
-      handleDeactivate(user.id)
+      handleDeactivate(member.id)
+    } else if (action === 'resend') {
+      if (member.invitationId) {
+        handleResendInvitation(member.invitationId)
+      }
     }
   }
 
   const roleDisplay = {
-    ADMIN: 'Admin',
-    MANAGER: 'Manager',
-    TECHNICIAN: 'Technician',
-    VIEWER: 'Viewer',
-  }
-
-  const roleColors = {
-    ADMIN: '#dc3545',
-    MANAGER: '#007bff',
-    TECHNICIAN: '#28a745',
-    VIEWER: '#6c757d',
+    ADMIN: t.team.roles.admin,
+    MANAGER: t.team.roles.manager,
+    TECHNICIAN: t.team.roles.technician,
+    VIEWER: t.team.roles.viewer,
   }
 
   if (users.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-        No users found. Invite team members to get started.
+      <div className="empty-state">
+        {t.team.table.noUsersFound}
       </div>
     )
   }
 
   return (
     <>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '8px', overflow: 'hidden' }}>
+      <div className="users-table-wrapper">
+        <table className="users-table">
           <thead>
-            <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-              <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Name</th>
-              <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Email</th>
-              <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Role</th>
-              <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Status</th>
-              <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Joined</th>
-              {canEdit && <th style={{ padding: '12px', textAlign: 'right', fontWeight: '600' }}>Actions</th>}
+            <tr>
+              <th>{t.team.table.name}</th>
+              <th>{t.team.table.email}</th>
+              <th>{t.team.table.role}</th>
+              <th>{t.team.table.status}</th>
+              <th>{t.team.table.joined}</th>
+              {canEdit && <th>{t.team.table.actions}</th>}
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id} style={{ borderBottom: '1px solid #dee2e6' }}>
-                <td style={{ padding: '12px' }}>
-                  {user.name || '—'}
+            {users.map((member) => (
+              <tr key={member.id}>
+                <td>
+                  {member.name || '—'}
                 </td>
-                <td style={{ padding: '12px' }}>
-                  {user.email}
+                <td>
+                  {member.email}
                 </td>
-                <td style={{ padding: '12px' }}>
-                  <span
-                    style={{
-                      padding: '4px 12px',
-                      background: roleColors[user.role as keyof typeof roleColors] || '#6c757d',
-                      color: '#fff',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                    }}
-                  >
-                    {roleDisplay[user.role as keyof typeof roleDisplay] || user.role}
+                <td>
+                  <span className={`badge badge--role-${member.role.toLowerCase()}`}>
+                    {roleDisplay[member.role as keyof typeof roleDisplay] || member.role}
                   </span>
                 </td>
-                <td style={{ padding: '12px' }}>
-                  <span
-                    style={{
-                      padding: '4px 12px',
-                      background: user.isActive ? '#28a745' : '#dc3545',
-                      color: '#fff',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                    }}
-                  >
-                    {user.isActive ? 'Active' : 'Inactive'}
-                  </span>
+                <td>
+                  {member.type === 'invitation' ? (
+                    <span className="badge badge--status-pending">
+                      {t.team.table.pending}
+                    </span>
+                  ) : (
+                    <span className={`badge badge--status-${member.isActive ? 'active' : 'inactive'}`}>
+                      {member.isActive ? t.team.table.active : t.team.table.inactive}
+                    </span>
+                  )}
                 </td>
-                <td style={{ padding: '12px', color: '#666' }}>
-                  {new Date(user.createdAt).toLocaleDateString()}
+                <td>
+                  {new Date(member.createdAt).toLocaleDateString()}
                 </td>
                 {canEdit && (
-                  <td style={{ padding: '12px', textAlign: 'right' }}>
-                    {user.id !== currentUserId && (
-                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <td>
+                    {member.type === 'user' && member.id !== currentUserId && (
+                      <div className="user-actions">
                         <button
                           type="button"
                           className="inventory-table__menu-button"
-                          onClick={(e) => toggleMenu(user.id, e)}
-                          disabled={deletingId === user.id}
+                          onClick={(e) => toggleMenu(member.id, e)}
+                          disabled={deletingId === member.id}
                           aria-label="Actions"
                           ref={(el) => {
                             if (el) {
-                              buttonRefs.current.set(user.id, el)
+                              buttonRefs.current.set(member.id, el)
                             } else {
-                              buttonRefs.current.delete(user.id)
+                              buttonRefs.current.delete(member.id)
                             }
                           }}
                         >
@@ -262,14 +290,14 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
                             <circle cx="10" cy="16" r="2" />
                           </svg>
                         </button>
-                        {openMenuId === user.id && menuPosition && (
+                        {openMenuId === member.id && menuPosition && (
                           <div 
-                            className="inventory-table__menu-dropdown"
+                            className="dropdown-menu"
                             ref={(el) => {
                               if (el) {
-                                menuRefs.current.set(user.id, el)
+                                menuRefs.current.set(member.id, el)
                               } else {
-                                menuRefs.current.delete(user.id)
+                                menuRefs.current.delete(member.id)
                               }
                             }}
                             style={{
@@ -279,21 +307,70 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
                           >
                             <button
                               type="button"
-                              className="inventory-table__menu-item"
-                              onClick={() => handleMenuAction('edit', user)}
+                              className="dropdown-item"
+                              onClick={() => handleMenuAction('edit', member)}
                             >
-                              Edit Role
+                              {t.team.table.editRole}
                             </button>
-                            {user.isActive && (
+                            {member.isActive && (
                               <button
                                 type="button"
-                                className="inventory-table__menu-item inventory-table__menu-item--danger"
-                                onClick={() => handleMenuAction('deactivate', user)}
-                                disabled={deletingId === user.id}
+                                className="dropdown-item dropdown-item--danger"
+                                onClick={() => handleMenuAction('deactivate', member)}
+                                disabled={deletingId === member.id}
                               >
-                                Deactivate
+                                {t.team.table.deactivate}
                               </button>
                             )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {member.type === 'invitation' && (
+                      <div className="user-actions">
+                        <button
+                          type="button"
+                          className="inventory-table__menu-button"
+                          onClick={(e) => toggleMenu(member.id, e)}
+                          disabled={resendingId === member.invitationId}
+                          aria-label="Actions"
+                          ref={(el) => {
+                            if (el) {
+                              buttonRefs.current.set(member.id, el)
+                            } else {
+                              buttonRefs.current.delete(member.id)
+                            }
+                          }}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <circle cx="10" cy="4" r="2" />
+                            <circle cx="10" cy="10" r="2" />
+                            <circle cx="10" cy="16" r="2" />
+                          </svg>
+                        </button>
+                        {openMenuId === member.id && menuPosition && (
+                          <div 
+                            className="dropdown-menu"
+                            ref={(el) => {
+                              if (el) {
+                                menuRefs.current.set(member.id, el)
+                              } else {
+                                menuRefs.current.delete(member.id)
+                              }
+                            }}
+                            style={{
+                              top: `${menuPosition.top}px`,
+                              right: `${menuPosition.right}px`,
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className="dropdown-item"
+                              onClick={() => handleMenuAction('resend', member)}
+                              disabled={resendingId === member.invitationId}
+                            >
+                              {resendingId === member.invitationId ? t.team.table.resending : t.team.table.resendInvitation}
+                            </button>
                           </div>
                         )}
                       </div>
@@ -310,12 +387,11 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
       {editingUser && (
         <div className="inventory-modal" onClick={handleCancelEdit}>
           <div 
-            className="inventory-modal__content" 
+            className="inventory-modal__content user-modal-content modal-content--small" 
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '450px' }}
           >
-            <div className="inventory-modal__header" style={{ padding: '16px 20px' }}>
-              <h2 className="inventory-modal__title" style={{ fontSize: '1.25rem' }}>Edit User Role</h2>
+            <div className="inventory-modal__header user-modal-header">
+              <h2 className="inventory-modal__title user-modal-title">{t.team.editRole.title}</h2>
               <button
                 className="inventory-modal__close"
                 onClick={handleCancelEdit}
@@ -324,59 +400,46 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
                 ×
               </button>
             </div>
-            <div className="inventory-modal__body" style={{ padding: '20px' }}>
-              <div style={{ marginBottom: '16px' }}>
-                <p style={{ marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>
-                  <strong>User:</strong> {editingUser.name || editingUser.email}
+            <div className="inventory-modal__body user-modal-body">
+              <div className="user-info-section">
+                <p className="user-info-name">
+                  <strong>{t.team.editRole.user}:</strong> {editingUser.name || editingUser.email}
                 </p>
-                <p style={{ marginBottom: '0', color: '#666', fontSize: '13px' }}>
+                <p className="user-info-email">
                   {editingUser.email}
                 </p>
               </div>
-              <div style={{ marginBottom: '16px' }}>
-                <label htmlFor="role" style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-                  Role
+              <div className="form-field">
+                <label htmlFor="role" className="form-label">
+                  {t.team.role}
                 </label>
                 <select
                   id="role"
                   value={editingRole}
                   onChange={(e) => setEditingRole(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                  }}
+                  className="form-select user-role-select"
                   disabled={saving}
                 >
-                  <option value="VIEWER">Viewer</option>
-                  <option value="TECHNICIAN">Technician</option>
-                  <option value="MANAGER">Manager</option>
-                  <option value="ADMIN">Admin</option>
+                  <option value="VIEWER">{t.team.roles.viewer}</option>
+                  <option value="TECHNICIAN">{t.team.roles.technician}</option>
+                  <option value="MANAGER">{t.team.roles.manager}</option>
+                  <option value="ADMIN">{t.team.roles.admin}</option>
                 </select>
-                <p style={{ marginTop: '6px', fontSize: '12px', color: '#666' }}>
-                  {editingRole === 'ADMIN' && 'Full access except cannot delete users'}
-                  {editingRole === 'MANAGER' && 'Can manage tickets, customers, inventory, and reports'}
-                  {editingRole === 'TECHNICIAN' && 'Can view and edit tickets, create customers'}
-                  {editingRole === 'VIEWER' && 'Read-only access to tickets, customers, inventory, and reports'}
+                <p className="form-hint">
+                  {editingRole === 'ADMIN' && t.team.roleDescriptions.admin}
+                  {editingRole === 'MANAGER' && t.team.roleDescriptions.manager}
+                  {editingRole === 'TECHNICIAN' && t.team.roleDescriptions.technician}
+                  {editingRole === 'VIEWER' && t.team.roleDescriptions.viewer}
                 </p>
               </div>
-              <div style={{ 
-                display: 'flex', 
-                gap: '8px', 
-                justifyContent: 'flex-end', 
-                marginTop: '16px',
-                paddingTop: '16px',
-                borderTop: '1px solid #dee2e6'
-              }}>
+              <div className="form-actions user-modal-actions">
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
                   onClick={handleCancelEdit}
                   disabled={saving}
                 >
-                  Cancel
+                  {t.common.actions.cancel}
                 </button>
                 <button
                   type="button"
@@ -384,13 +447,24 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
                   onClick={handleSaveRole}
                   disabled={saving}
                 >
-                  {saving ? 'Saving...' : 'Save Changes'}
+                  {saving ? t.team.editRole.saving : t.team.editRole.saveChanges}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        title={confirmation.title}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        onConfirm={confirmation.onConfirm}
+        onCancel={confirmation.onCancel}
+      />
     </>
   )
 }

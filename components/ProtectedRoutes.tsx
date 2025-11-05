@@ -157,7 +157,7 @@ export default function ProtectedRoutes({
   // Show loading while checking
   if (status === 'loading' || checking) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div className="loading-container">
         <Spinner />
       </div>
     )

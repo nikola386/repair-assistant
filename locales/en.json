@@ -476,7 +476,69 @@
     "taxRatePlaceholder": "0.00",
     "taxInclusive": "Tax Inclusive",
     "taxExclusive": "Tax Exclusive (Add tax to prices)",
-    "taxInclusiveOption": "Tax Inclusive (Tax included in prices)"
+    "taxInclusiveOption": "Tax Inclusive (Tax included in prices)",
+    "team": "Team",
+    "teamDescription": "Manage team members and their roles.",
+    "teamMembers": "Team Members",
+    "inviteUser": "Invite User"
+  },
+  "team": {
+    "title": "Team",
+    "inviteUser": "Invite User",
+    "inviteUserTitle": "Invite User",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "user@example.com",
+    "role": "Role",
+    "sending": "Sending...",
+    "sendInvitation": "Send Invitation",
+    "inviteError": "Failed to send invitation",
+    "roleDescriptions": {
+      "admin": "Full access except cannot delete users",
+      "manager": "Can manage tickets, customers, inventory, and reports",
+      "technician": "Can view and edit tickets, create customers",
+      "viewer": "Read-only access to tickets, customers, inventory, and reports"
+    },
+    "roles": {
+      "admin": "Admin",
+      "manager": "Manager",
+      "technician": "Technician",
+      "viewer": "Viewer"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "joined": "Joined",
+      "actions": "Actions",
+      "noUsersFound": "No users found. Invite team members to get started.",
+      "editRole": "Edit Role",
+      "deactivate": "Deactivate",
+      "resendInvitation": "Resend Invitation",
+      "resending": "Resending...",
+      "pending": "Pending",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "editRole": {
+      "title": "Edit User Role",
+      "user": "User",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "updateSuccess": "User role updated successfully",
+      "updateError": "Failed to update user"
+    },
+    "deactivate": {
+      "confirmMessage": "Are you sure you want to deactivate this user?",
+      "confirmText": "Deactivate",
+      "cancelText": "Cancel",
+      "success": "User deactivated successfully",
+      "error": "Failed to deactivate user"
+    },
+    "resendInvitation": {
+      "success": "Invitation resent successfully",
+      "error": "Failed to resend invitation"
+    }
   },
   "onboarding": {
     "title": "Welcome! Let's Set Up Your Store",

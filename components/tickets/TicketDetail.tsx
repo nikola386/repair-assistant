@@ -532,7 +532,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                 <QRCode
                   value={ticketUrl}
                   size={120}
-                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  className="image-responsive"
                   viewBox={`0 0 120 120`}
                 />
               </div>
@@ -714,8 +714,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                         alt={image.fileName}
                         width={300}
                         height={300}
-                        className="ticket-detail__image"
-                        style={{ objectFit: 'cover' }}
+                        className="ticket-detail__image image-cover"
                       />
                     )}
                     <button
