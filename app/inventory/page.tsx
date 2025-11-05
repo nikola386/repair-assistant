@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense, useRef } from 'react'
 import { useSearchParams, usePathname } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -50,7 +50,8 @@ function InventoryPageContent() {
   const [categoryFilter, setCategoryFilter] = useState<string[]>(parseFilterArray(filters.category))
   const [locationFilter, setLocationFilter] = useState<string[]>(parseFilterArray(filters.location))
   
-  // Sync filters when URL changes
+  // Sync filters when URL changes - only update if values actually changed
+  const prevFiltersRef = useRef(filters)
   useEffect(() => {
     const urlFilters = {
       search: searchParams.get('search') || '',
@@ -58,13 +59,36 @@ function InventoryPageContent() {
       location: searchParams.get('location') || '',
       lowStock: searchParams.get('lowStock') === 'true',
     }
-    setFilters(urlFilters)
-    setCategoryFilter(parseFilterArray(urlFilters.category))
-    setLocationFilter(parseFilterArray(urlFilters.location))
+    
+    // Only update if values actually changed to prevent unnecessary re-renders
+    const hasChanged = 
+      urlFilters.search !== prevFiltersRef.current.search ||
+      urlFilters.category !== prevFiltersRef.current.category ||
+      urlFilters.location !== prevFiltersRef.current.location ||
+      urlFilters.lowStock !== prevFiltersRef.current.lowStock
+    
+    if (hasChanged) {
+      setFilters(urlFilters)
+      setCategoryFilter(parseFilterArray(urlFilters.category))
+      setLocationFilter(parseFilterArray(urlFilters.location))
+      prevFiltersRef.current = urlFilters
+    }
   }, [searchParams])
 
-  // Fetch inventory items
-  const fetchItems = async () => {
+  // Extract categories and locations from items (no separate API call needed)
+  const extractFiltersFromItems = useCallback((items: InventoryItem[]) => {
+    const uniqueCategories = Array.from(
+      new Set(items.map((item: InventoryItem) => item.category).filter(Boolean))
+    ).sort() as string[]
+    const uniqueLocations = Array.from(
+      new Set(items.map((item: InventoryItem) => item.location).filter(Boolean))
+    ).sort() as string[]
+    setCategories(uniqueCategories)
+    setLocations(uniqueLocations)
+  }, [])
+
+  // Fetch inventory items - memoized to prevent unnecessary re-creations
+  const fetchItems = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
@@ -88,6 +112,8 @@ function InventoryPageContent() {
           total: data.total,
           totalPages: data.totalPages,
         })
+        // Extract categories/locations from fetched items instead of making separate API call
+        extractFiltersFromItems(data.items)
       } else {
         throw new Error(t.inventory.page.fetchError)
       }
@@ -97,38 +123,25 @@ function InventoryPageContent() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [pagination.page, filters, categoryFilter, locationFilter, t, extractFiltersFromItems])
 
-  // Fetch categories and locations for filter dropdowns
-  const fetchFilters = async () => {
+  // Fetch categories and locations for filter dropdowns - now only used when explicitly needed
+  const fetchFilters = useCallback(async () => {
     try {
-      const response = await fetch('/api/inventory')
+      const response = await fetch('/api/inventory?limit=10000')
       if (response.ok) {
         const data = await response.json()
         // Extract unique categories and locations from items
-        const uniqueCategories = Array.from(
-          new Set(data.items.map((item: InventoryItem) => item.category).filter(Boolean))
-        ).sort() as string[]
-        const uniqueLocations = Array.from(
-          new Set(data.items.map((item: InventoryItem) => item.location).filter(Boolean))
-        ).sort() as string[]
-        setCategories(uniqueCategories)
-        setLocations(uniqueLocations)
+        extractFiltersFromItems(data.items)
       }
     } catch (error) {
       console.error('Error fetching filter options:', error)
     }
-  }
+  }, [extractFiltersFromItems])
 
   useEffect(() => {
     fetchItems()
-  }, [pagination.page, filters])
-
-  useEffect(() => {
-    if (items.length > 0) {
-      fetchFilters()
-    }
-  }, [items.length])
+  }, [fetchItems])
 
   // Handle Escape key to close modal
   useEffect(() => {
