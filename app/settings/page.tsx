@@ -24,6 +24,7 @@ import {
 
 import type { User } from '@/lib/userStorage'
 import { Permission } from '@/lib/permissions'
+import { checkPermission } from '@/lib/permissionsCache'
 import InviteUserModal from '@/components/users/InviteUserModal'
 import UserTable from '@/components/users/UserTable'
 
@@ -205,22 +206,19 @@ export default function SettingsPage() {
     
     setUsersLoading(true)
     try {
-      // Fetch permissions
-      const [inviteRes, editRes, viewRes, usersRes] = await Promise.all([
-        fetch(`/api/users/permissions?permission=${Permission.INVITE_USERS}`),
-        fetch(`/api/users/permissions?permission=${Permission.EDIT_USERS}`),
-        fetch(`/api/users/permissions?permission=${Permission.VIEW_USERS}`),
+      // Fetch permissions (with caching)
+      const [canInvite, canEdit, canView, usersRes] = await Promise.all([
+        checkPermission(session.user.id, Permission.INVITE_USERS),
+        checkPermission(session.user.id, Permission.EDIT_USERS),
+        checkPermission(session.user.id, Permission.VIEW_USERS),
         fetch('/api/users'),
       ])
 
-      const inviteData = await inviteRes.json()
-      const editData = await editRes.json()
-      const viewData = await viewRes.json()
       const usersData = await usersRes.json()
 
-      setCanInvite(inviteData.hasPermission || false)
-      setCanEdit(editData.hasPermission || false)
-      setCanViewUsers(viewData.hasPermission || false)
+      setCanInvite(canInvite)
+      setCanEdit(canEdit)
+      setCanViewUsers(canView)
       setUsers(usersData || [])
     } catch (err) {
       console.error('Error fetching users:', err)
@@ -237,11 +235,12 @@ export default function SettingsPage() {
     fetchProfile()
     fetchSettings()
     fetchCountries()
-    // Fetch user permissions for team tab visibility
-    fetch(`/api/users/permissions?permission=${Permission.VIEW_USERS}`)
-      .then(res => res.json())
-      .then(data => setCanViewUsers(data.hasPermission || false))
-      .catch(err => console.error('Error fetching view users permission:', err))
+    // Fetch user permissions for team tab visibility (with caching)
+    if (session?.user?.id) {
+      checkPermission(session.user.id, Permission.VIEW_USERS)
+        .then(hasPermission => setCanViewUsers(hasPermission))
+        .catch(err => console.error('Error fetching view users permission:', err))
+    }
   }, [session, router, fetchProfile, fetchSettings, fetchCountries])
 
   useEffect(() => {
@@ -1214,6 +1213,17 @@ export default function SettingsPage() {
                     <div className="settings-page__card-content">
                       <form onSubmit={handleAppearanceSubmit} className="settings-page__form">
                         <div className="settings-page__field">
+                          <LogoUpload
+                            preview={logoPreview}
+                            onChange={handleLogoChange}
+                            onRemove={handleRemoveLogo}
+                            disabled={settingsLoading}
+                            labelClassName="settings-page__label"
+                            inputClassName="settings-page__input"
+                          />
+                        </div>
+
+                        <div className="settings-page__field">
                           <label htmlFor="primaryColor" className="settings-page__label">
                             {t.settings?.primaryColor || 'Primary Color'}
                           </label>
@@ -1311,17 +1321,6 @@ export default function SettingsPage() {
                               </option>
                             ))}
                           </select>
-                        </div>
-
-                        <div className="settings-page__field">
-                          <LogoUpload
-                            preview={logoPreview}
-                            onChange={handleLogoChange}
-                            onRemove={handleRemoveLogo}
-                            disabled={settingsLoading}
-                            labelClassName="settings-page__label"
-                            inputClassName="settings-page__input"
-                          />
                         </div>
 
                         <div className="settings-page__form-actions">

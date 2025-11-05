@@ -456,48 +456,227 @@
     flex: 1;
   }
 
+  // Logo upload wrapper
+  &__logo-upload-wrapper {
+    margin-top: 0;
+  }
+
+  // Logo upload area
+  &__logo-upload-area {
+    position: relative;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    background: #fafafa;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+
+    &:hover:not(.disabled) {
+      border-color: var(--primary-yellow);
+      background: #fef9e7;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    &.dragging {
+      border-color: var(--primary-yellow);
+      background: #fef9e7;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transform: scale(1.01);
+    }
+
+    &.has-preview {
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: default;
+
+      &:hover:not(.disabled) {
+        background: transparent;
+        box-shadow: none;
+      }
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  // Logo upload label (for empty state)
+  &__logo-upload-label {
+    display: block;
+    padding: 3rem 2rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  // Logo upload content
+  &__logo-upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  // Logo upload icon
+  &__logo-upload-icon {
+    width: 48px;
+    height: 48px;
+    color: #9ca3af;
+    transition: all 0.3s ease;
+  }
+
+  &__logo-upload-area:hover &__logo-upload-icon {
+    color: var(--primary-yellow);
+    transform: translateY(-4px);
+  }
+
+  // Logo upload text
+  &__logo-upload-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__logo-upload-main-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--black);
+  }
+
+  &__logo-upload-sub-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  // Logo hidden input
+  &__logo-hidden-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
   // Logo preview container
   &__logo-preview-container {
-    margin-top: 0.75rem;
     position: relative;
     display: inline-block;
-    width: fit-content;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
   }
 
   // Logo preview image
   &__logo-preview {
-    max-width: 200px;
-    max-height: 200px;
-    width: auto;
+    width: 100%;
+    max-width: 300px;
+    max-height: 300px;
     height: auto;
     object-fit: contain;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
     display: block;
+    background: #fff;
+    transition: all 0.3s ease;
   }
 
-  // Logo remove button (X button)
+  &__logo-upload-area.has-preview:hover &__logo-preview {
+    border-color: var(--primary-yellow);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  // Logo overlay (shown on hover)
+  &__logo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 5;
+
+    &.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  // Logo overlay buttons
+  &__logo-overlay-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 50%;
+    color: var(--black);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-decoration: none;
+    width: 56px;
+    height: 56px;
+
+    &:hover {
+      background: #fff;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__logo-overlay-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  // Logo remove button (X button - fallback, shown when overlay is visible)
+  &__logo-preview-container:hover &__logo-remove-btn {
+    opacity: 1;
+    visibility: visible;
+  }
+
   &__logo-remove-btn {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.9);
     color: white;
     border: 2px solid white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     padding: 0;
     line-height: 1;
-    z-index: 10;
+    z-index: 15;
     transition: all 0.2s ease;
+    opacity: 0;
+    visibility: hidden;
 
     &:hover:not(:disabled) {
       background-color: #dc2626;
@@ -506,7 +685,7 @@
 
     &:disabled {
       cursor: not-allowed;
-      opacity: 0.6;
+      opacity: 0.4;
     }
   }
 

@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ProfileDropdown from '../ui/ProfileDropdown'
 import { Permission } from '@/lib/permissions'
+import { fetchPermissions, invalidatePermissionsCache } from '@/lib/permissionsCache'
 
 export default function Navigation() {
   const { t } = useLanguage()
@@ -107,21 +108,21 @@ export default function Navigation() {
     }
   }, [pathname])
 
-  // Fetch user permissions
+  // Fetch user permissions (with caching)
   useEffect(() => {
     if (session?.user?.id) {
-      fetch('/api/users/permissions')
-        .then(res => res.json())
-        .then(data => {
-          if (data.permissions) {
-            setPermissions(new Set(data.permissions))
-          }
+      fetchPermissions(session.user.id)
+        .then(perms => {
+          setPermissions(new Set(perms))
         })
         .catch(err => {
           console.error('Error fetching permissions:', err)
+          setPermissions(new Set())
         })
     } else {
       setPermissions(new Set())
+      // Clear cache when user logs out
+      invalidatePermissionsCache()
     }
   }, [session])
 

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Spinner from './ui/Spinner'
 import { Permission } from '@/lib/permissions'
+import { checkPermission } from '@/lib/permissionsCache'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -95,11 +96,10 @@ export default function ProtectedRoutes({
             setChecking(false)
           } else {
             // Check permission if provided
-            if (permission) {
-              fetch(`/api/users/permissions?permission=${permission}`)
-                .then(res => res.json())
-                .then(data => {
-                  if (!data.hasPermission) {
+            if (permission && session.user.id) {
+              checkPermission(session.user.id, permission)
+                .then(hasPermission => {
+                  if (!hasPermission) {
                     router.push('/dashboard?error=unauthorized')
                     setChecking(false)
                     return
@@ -126,12 +126,11 @@ export default function ProtectedRoutes({
         })
     } else if (status === 'authenticated' && session && onboardingComplete === true) {
       // If we've already checked and onboarding is complete
-      if (permission && !hasPermission) {
+      if (permission && !hasPermission && session.user.id) {
         // Re-check permission
-        fetch(`/api/users/permissions?permission=${permission}`)
-          .then(res => res.json())
-          .then(data => {
-            if (!data.hasPermission) {
+        checkPermission(session.user.id, permission)
+          .then(hasPermission => {
+            if (!hasPermission) {
               router.push('/dashboard?error=unauthorized')
               return
             }

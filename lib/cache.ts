@@ -1,4 +1,5 @@
 import type { User } from './userStorage'
+import { Permission } from './permissions'
 
 /**
  * Generic cache helper functions for localStorage
@@ -142,5 +143,74 @@ export function setCachedCountries(countries: Country[]): void {
  */
 export function clearCountriesCache(): void {
   removeCache(COUNTRIES_CACHE_KEY)
+}
+
+/**
+ * Permissions cache helper functions
+ */
+
+const PERMISSIONS_CACHE_KEY_PREFIX = 'cached_permissions_'
+const PERMISSIONS_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+interface CachedPermissionsData {
+  permissions: Permission[]
+  timestamp: number
+}
+
+/**
+ * Get the cache key for a specific user's permissions
+ */
+function getPermissionsCacheKey(userId: string): string {
+  return `${PERMISSIONS_CACHE_KEY_PREFIX}${userId}`
+}
+
+/**
+ * Get cached permissions for a user
+ * @param userId - The user ID
+ * @returns The cached permissions array or null if not found or expired
+ */
+export function getCachedPermissions(userId: string): Permission[] | null {
+  const cacheKey = getPermissionsCacheKey(userId)
+  const cached = getFromCache<CachedPermissionsData>(cacheKey)
+  
+  if (!cached) {
+    return null
+  }
+  
+  // Check if cache is expired
+  const now = Date.now()
+  if (now - cached.timestamp > PERMISSIONS_CACHE_TTL) {
+    removeCache(cacheKey)
+    return null
+  }
+  
+  return cached.permissions
+}
+
+/**
+ * Set cached permissions for a user
+ * @param userId - The user ID
+ * @param permissions - The permissions array to cache
+ */
+export function setCachedPermissions(userId: string, permissions: Permission[]): void {
+  const cacheKey = getPermissionsCacheKey(userId)
+  const data: CachedPermissionsData = {
+    permissions,
+    timestamp: Date.now(),
+  }
+  setCache(cacheKey, data)
+}
+
+/**
+ * Clear permissions cache for a specific user
+ * @param userId - The user ID
+ */
+export function clearPermissionsCache(userId?: string): void {
+  if (userId) {
+    removeCache(getPermissionsCacheKey(userId))
+  } else {
+    // Clear all permission caches
+    clearCacheByPrefix(PERMISSIONS_CACHE_KEY_PREFIX)
+  }
 }
 
