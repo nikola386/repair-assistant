@@ -2,8 +2,10 @@ import nodemailer from 'nodemailer'
 import crypto from 'crypto'
 import { EmailTemplate, EmailTemplateData, getEmailConfig, setEmailConfig, EmailConfig } from './email/templates/base'
 import { verificationEmailTemplate } from './email/templates/verification'
+import { invitationEmailTemplate } from './email/templates/invitation'
 import { settingsStorage } from './settingsStorage'
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from './constants'
+import { db } from './db'
 
 /**
  * Email service for sending emails with reusable templates
@@ -175,6 +177,36 @@ class EmailService {
     await this.sendEmail(email, verificationEmailTemplate, {
       userName,
       verificationUrl,
+    }, storeId)
+  }
+
+  /**
+   * Send invitation email (convenience method)
+   */
+  async sendInvitationEmail(
+    email: string,
+    token: string,
+    inviterName: string,
+    storeId: string
+  ): Promise<void> {
+    const config = await this.getEmailConfigForStore(storeId)
+    const acceptUrl = `${config.baseUrl}/accept-invitation/${token}`
+    
+    // Get store name
+    const store = await db.store.findUnique({ where: { id: storeId } })
+    const storeName = store?.name || 'the repair shop'
+    
+    // Get role from invitation
+    const invitation = await db.userInvitation.findUnique({
+      where: { token },
+    })
+    const role = invitation?.role || 'VIEWER'
+    
+    await this.sendEmail(email, invitationEmailTemplate, {
+      acceptUrl,
+      inviterName,
+      storeName,
+      role,
     }, storeId)
   }
 

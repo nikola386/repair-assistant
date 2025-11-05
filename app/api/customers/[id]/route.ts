@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAuth } from '@/lib/auth.middleware'
+import { requireAuthAndPermission } from '@/lib/api-middleware'
+import { Permission } from '@/lib/permissions'
 import { userStorage } from '@/lib/userStorage'
 import { db } from '@/lib/db'
 import { logger, generateRequestId } from '@/lib/logger'
@@ -13,11 +14,8 @@ export async function GET(
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
   
-  const authResult = await withAuth(request, { action: 'customer detail access' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_CUSTOMERS)
+  if (response) return response
 
   // Get user's storeId
   const user = await userStorage.findById(session.user.id)

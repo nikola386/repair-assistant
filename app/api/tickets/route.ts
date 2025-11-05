@@ -2,16 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ticketStorage } from '@/lib/ticketStorage'
 import { userStorage } from '@/lib/userStorage'
 import { CreateTicketInput, TicketPriority } from '@/types/ticket'
-import { withAuth } from '@/lib/auth.middleware'
+import { requireAuthAndPermission } from '@/lib/api-middleware'
+import { Permission } from '@/lib/permissions'
 import { logger, generateRequestId } from '@/lib/logger'
+import type { Session } from 'next-auth'
 
 export async function GET(request: NextRequest) {
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
   
-  const authResult = await withAuth(request, { action: 'ticket list access' })
-  if (authResult.response) {
-    return authResult.response
+  const authResult = await requireAuthAndPermission(request, Permission.VIEW_TICKETS)
+  if (authResult.response) return authResult.response
+  if (!authResult.session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const session = authResult.session
   
@@ -62,9 +65,10 @@ export async function POST(request: NextRequest) {
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
   
-  const authResult = await withAuth(request, { action: 'ticket creation' })
-  if (authResult.response) {
-    return authResult.response
+  const authResult = await requireAuthAndPermission(request, Permission.CREATE_TICKETS)
+  if (authResult.response) return authResult.response
+  if (!authResult.session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const session = authResult.session
 

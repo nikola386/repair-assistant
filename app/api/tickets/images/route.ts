@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ticketStorage } from '@/lib/ticketStorage'
 import { userStorage } from '@/lib/userStorage'
 import { put, del } from '@vercel/blob'
-import { withAuth } from '@/lib/auth.middleware'
+import { requireAuthAndPermission } from '@/lib/api-middleware'
+import { Permission } from '@/lib/permissions'
 import {
   validateFileContent,
   validateFileType,
@@ -17,11 +18,8 @@ import {
 } from '@/lib/fileUtils'
 
 export async function POST(request: NextRequest) {
-  const authResult = await withAuth(request, { action: 'ticket image upload' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.EDIT_TICKETS)
+  if (response) return response
 
   try {
     const formData = await request.formData()
@@ -122,11 +120,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const authResult = await withAuth(request, { action: 'ticket image deletion' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.EDIT_TICKETS)
+  if (response) return response
 
   try {
     const searchParams = request.nextUrl.searchParams

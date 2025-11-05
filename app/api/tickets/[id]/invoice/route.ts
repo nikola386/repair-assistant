@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAuth } from '@/lib/auth.middleware'
+import { requireAuthAndPermission } from '@/lib/api-middleware'
+import { Permission } from '@/lib/permissions'
 import { ticketStorage } from '@/lib/ticketStorage'
 import { userStorage } from '@/lib/userStorage'
 import { db } from '@/lib/db'
@@ -19,11 +20,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const authResult = await withAuth(request, { action: 'generate invoice' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_TICKETS)
+  if (response) return response
 
   try {
     // Get user and store info

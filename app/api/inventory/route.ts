@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAuth } from '@/lib/auth.middleware'
+import { requireAuthAndPermission } from '@/lib/api-middleware'
+import { Permission } from '@/lib/permissions'
 import { userStorage } from '@/lib/userStorage'
 import { inventoryStorage } from '@/lib/inventoryStorage'
 import { CreateInventoryItemInput } from '@/types/inventory'
@@ -9,11 +10,8 @@ export async function GET(request: NextRequest) {
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
 
-  const authResult = await withAuth(request, { action: 'inventory list access' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_INVENTORY)
+  if (response) return response
 
   // Get user's storeId
   const user = await userStorage.findById(session.user.id)
@@ -69,11 +67,8 @@ export async function POST(request: NextRequest) {
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
 
-  const authResult = await withAuth(request, { action: 'inventory creation' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.CREATE_INVENTORY)
+  if (response) return response
 
   // Get user's storeId
   const user = await userStorage.findById(session.user.id)

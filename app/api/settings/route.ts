@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { settingsStorage } from '@/lib/settingsStorage'
 import { userStorage } from '@/lib/userStorage'
-import { withAuth } from '@/lib/auth.middleware'
+import { requireAuthAndPermission } from '@/lib/api-middleware'
+import { Permission } from '@/lib/permissions'
 import { db } from '@/lib/db'
 import { put, del } from '@vercel/blob'
 import { isValidLanguage, SUPPORTED_LANGUAGES } from '@/lib/languages'
@@ -22,11 +23,8 @@ import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from '@/lib/constants'
 import { Decimal } from '@prisma/client/runtime/library'
 
 export async function GET(request: NextRequest) {
-  const authResult = await withAuth(request, { action: 'settings access' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_SETTINGS)
+  if (response) return response
 
   try {
     // Get user's storeId
@@ -82,11 +80,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const authResult = await withAuth(request, { action: 'settings update' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.EDIT_SETTINGS)
+  if (response) return response
 
   try {
     // Get user's storeId

@@ -1,9 +1,10 @@
 import { db } from './db'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 // Prisma generates User type automatically from schema - use it directly
-import type { User } from '@prisma/client'
+import type { User, UserInvitation } from '@prisma/client'
 
-export type { User }
+export type { User, UserInvitation }
 
 export interface CreateUserInput {
   email: string
@@ -11,11 +12,14 @@ export interface CreateUserInput {
   name?: string
   storeId?: string
   storeName?: string // If provided, create a new store with this name
+  role?: string
+  invitedBy?: string
+  invitedAt?: Date
 }
 
 export class UserStorage {
   async create(input: CreateUserInput): Promise<User> {
-    const { email, password, name, storeId, storeName } = input
+    const { email, password, name, storeId, storeName, role, invitedBy, invitedAt } = input
 
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10)
@@ -43,6 +47,9 @@ export class UserStorage {
         passwordHash,
         name: name || null,
         storeId: finalStoreId,
+        role: role || 'VIEWER',
+        invitedBy: invitedBy || null,
+        invitedAt: invitedAt || null,
       },
     })
   }
@@ -195,6 +202,65 @@ export class UserStorage {
 
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000)
     return user.lastVerificationEmailSent < oneMinuteAgo
+  }
+
+  // User invitation methods
+  async createInvitation(input: {
+    email: string
+    storeId: string
+    role: string
+    invitedBy: string
+  }): Promise<UserInvitation> {
+    const token = crypto.randomUUID()
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + 7) // 7 days expiry
+
+    return db.userInvitation.create({
+      data: {
+        email: input.email,
+        storeId: input.storeId,
+        role: input.role as any,
+        invitedBy: input.invitedBy,
+        token,
+        expiresAt,
+      },
+    })
+  }
+
+  async findInvitationByToken(token: string): Promise<UserInvitation | null> {
+    return db.userInvitation.findUnique({
+      where: { token },
+      include: {
+        store: true,
+        inviter: true,
+      },
+    })
+  }
+
+  async acceptInvitation(invitationId: string): Promise<void> {
+    await db.userInvitation.update({
+      where: { id: invitationId },
+      data: { acceptedAt: new Date() },
+    })
+  }
+
+  // User management methods
+  async findByStoreId(storeId: string): Promise<User[]> {
+    return db.user.findMany({
+      where: { storeId },
+      orderBy: { createdAt: 'asc' },
+    })
+  }
+
+  async update(userId: string, data: {
+    role?: string
+    isActive?: boolean
+    name?: string
+  }): Promise<User> {
+    return db.user.update({
+      where: { id: userId },
+      data,
+    })
   }
 }
 

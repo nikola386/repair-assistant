@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ticketStorage } from '@/lib/ticketStorage'
 import { userStorage } from '@/lib/userStorage'
 import { CreateExpenseInput, UpdateExpenseInput } from '@/types/ticket'
-import { withAuth } from '@/lib/auth.middleware'
+import { requireAuthAndPermission } from '@/lib/api-middleware'
+import { Permission } from '@/lib/permissions'
 import { logger, generateRequestId } from '@/lib/logger'
 
 export async function GET(
@@ -12,11 +13,8 @@ export async function GET(
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
   
-  const authResult = await withAuth(request, { ticketId: params.id, action: 'expense access' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_TICKETS)
+  if (response) return response
 
   // Get user's storeId and verify ticket belongs to store
   const user = await userStorage.findById(session.user.id)
@@ -63,11 +61,8 @@ export async function POST(
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
   
-  const authResult = await withAuth(request, { ticketId: params.id, action: 'expense creation' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.EDIT_TICKETS)
+  if (response) return response
 
   // Get user's storeId and verify ticket belongs to store
   const user = await userStorage.findById(session.user.id)

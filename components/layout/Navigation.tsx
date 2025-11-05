@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ProfileDropdown from '../ui/ProfileDropdown'
+import { Permission } from '@/lib/permissions'
 
 export default function Navigation() {
   const { t } = useLanguage()
@@ -14,6 +15,7 @@ export default function Navigation() {
   const pathname = usePathname()
   const router = useRouter()
   const { data: session, status } = useSession()
+  const [permissions, setPermissions] = useState<Set<Permission>>(new Set())
 
   // Navbar background on scroll
   useEffect(() => {
@@ -105,6 +107,24 @@ export default function Navigation() {
     }
   }, [pathname])
 
+  // Fetch user permissions
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/users/permissions')
+        .then(res => res.json())
+        .then(data => {
+          if (data.permissions) {
+            setPermissions(new Set(data.permissions))
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching permissions:', err)
+        })
+    } else {
+      setPermissions(new Set())
+    }
+  }, [session])
+
   return (
     <nav className="navbar" style={{ backgroundColor: navbarBg }}>
       <div className="container">
@@ -118,21 +138,31 @@ export default function Navigation() {
               <li>
                 <Link href="/dashboard">{t.nav.dashboard}</Link>
               </li>
-              <li>
-                <Link href="/tickets">{t.nav.tickets}</Link>
-              </li>
-              <li>
-                <Link href="/inventory">{t.nav.inventory}</Link>
-              </li>
-              <li>
-                <Link href="/clients">{t.nav.clients}</Link>
-              </li>
-              <li>
-                <Link href="/reports">{t.nav.reports}</Link>
-              </li>
-              <li>
-                <Link href="/settings">{t.nav.settings}</Link>
-              </li>
+              {permissions.has(Permission.VIEW_TICKETS) && (
+                <li>
+                  <Link href="/tickets">{t.nav.tickets}</Link>
+                </li>
+              )}
+              {permissions.has(Permission.VIEW_INVENTORY) && (
+                <li>
+                  <Link href="/inventory">{t.nav.inventory}</Link>
+                </li>
+              )}
+              {permissions.has(Permission.VIEW_CUSTOMERS) && (
+                <li>
+                  <Link href="/clients">{t.nav.clients}</Link>
+                </li>
+              )}
+              {permissions.has(Permission.VIEW_REPORTS) && (
+                <li>
+                  <Link href="/reports">{t.nav.reports}</Link>
+                </li>
+              )}
+              {permissions.has(Permission.VIEW_SETTINGS) && (
+                <li>
+                  <Link href="/settings">{t.nav.settings}</Link>
+                </li>
+              )}
             </>
           ) : status !== 'loading' ? (
             <>

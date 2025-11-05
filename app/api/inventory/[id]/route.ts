@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAuth } from '@/lib/auth.middleware'
+import { requireAuthAndPermission } from '@/lib/api-middleware'
+import { Permission } from '@/lib/permissions'
 import { userStorage } from '@/lib/userStorage'
 import { inventoryStorage } from '@/lib/inventoryStorage'
 import { UpdateInventoryItemInput } from '@/types/inventory'
@@ -12,11 +13,8 @@ export async function GET(
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
 
-  const authResult = await withAuth(request, { action: 'inventory item access' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_INVENTORY)
+  if (response) return response
 
   // Get user's storeId
   const user = await userStorage.findById(session.user.id)
@@ -58,11 +56,8 @@ export async function PATCH(
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
 
-  const authResult = await withAuth(request, { action: 'inventory item update' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.EDIT_INVENTORY)
+  if (response) return response
 
   // Get user's storeId
   const user = await userStorage.findById(session.user.id)
@@ -186,11 +181,8 @@ export async function DELETE(
   const requestId = request.headers.get('X-Request-ID') || generateRequestId()
   const startTime = Date.now()
 
-  const authResult = await withAuth(request, { action: 'inventory item deletion' })
-  if (authResult.response) {
-    return authResult.response
-  }
-  const session = authResult.session
+  const { session, response } = await requireAuthAndPermission(request, Permission.DELETE_INVENTORY)
+  if (response) return response
 
   // Get user's storeId
   const user = await userStorage.findById(session.user.id)

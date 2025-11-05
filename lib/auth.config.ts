@@ -20,8 +20,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           logger.info('Authentication attempt', { email: credentials.email })
           const user = await userStorage.findByEmail(credentials.email as string)
-          if (!user) {
-            logger.warn('Authentication failed: user not found', { email: credentials.email })
+          if (!user || !(user as any).isActive) {
+            logger.warn('Authentication failed: user not found or inactive', { email: credentials.email })
             return null
           }
 
@@ -44,6 +44,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: user.email,
             name: user.name || user.email,
             image: user.profileImage || null,
+            role: (user as any).role,
+            storeId: user.storeId,
           }
         } catch (error) {
           // Re-throw EMAIL_NOT_VERIFIED error to be handled by login page
@@ -62,6 +64,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id
         token.email = user.email
         token.image = user.image || null
+        token.role = (user as any).role
+        token.storeId = (user as any).storeId
       }
       // Update token when profile is updated
       if (trigger === 'update' && sessionData?.user) {
@@ -75,6 +79,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (sessionData.user.name !== undefined) {
           token.name = sessionData.user.name
         }
+        if ((sessionData.user as any).role !== undefined) {
+          token.role = (sessionData.user as any).role
+        }
       }
       return token
     },
@@ -82,6 +89,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string
         session.user.image = token.image as string | null
+        session.user.role = token.role as string
+        session.user.storeId = token.storeId as string
       }
       return session
     },

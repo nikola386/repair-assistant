@@ -22,6 +22,13 @@ model Country {
   @@map("countries")
 }
 
+enum UserRole {
+  ADMIN
+  MANAGER
+  TECHNICIAN
+  VIEWER
+}
+
 model Store {
   id           String   @id @default(uuid())
   name         String
@@ -44,11 +51,12 @@ model Store {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  users         User[]
-  customers     Customer[]
-  repairTickets RepairTicket[]
-  settings      Settings?
-  inventoryItems InventoryItem[]
+  users            User[]
+  userInvitations  UserInvitation[]
+  customers        Customer[]
+  repairTickets    RepairTicket[]
+  settings         Settings?
+  inventoryItems   InventoryItem[]
 
   @@map("stores")
 }
@@ -60,6 +68,10 @@ model User {
   name                       String?
   profileImage               String?   @map("profile_image")
   storeId                    String    @map("store_id")
+  role                       UserRole  @default(VIEWER) @map("role")
+  invitedBy                  String?   @map("invited_by")
+  invitedAt                  DateTime? @map("invited_at")
+  isActive                   Boolean   @default(true) @map("is_active")
   emailVerified              Boolean   @default(false) @map("email_verified")
   verificationToken          String?   @map("verification_token")
   verificationTokenExpiry    DateTime? @map("verification_token_expiry")
@@ -67,11 +79,16 @@ model User {
   createdAt                  DateTime  @default(now()) @map("created_at")
   updatedAt                  DateTime  @updatedAt @map("updated_at")
 
-  store    Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
-  sessions Session[]
-  accounts Account[]
+  store       Store            @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  sessions    Session[]
+  accounts    Account[]
+  inviter     User?            @relation("UserInvitations", fields: [invitedBy], references: [id])
+  invitees    User[]           @relation("UserInvitations")
+  invitations UserInvitation[] @relation("Inviter")
 
   @@index([storeId])
+  @@index([storeId, role])
+  @@index([isActive])
   @@index([verificationToken])
   @@map("users")
 }
@@ -236,4 +253,25 @@ model InventoryItem {
   @@index([sku])
   @@index([currentQuantity])
   @@map("inventory_items")
+}
+
+model UserInvitation {
+  id         String    @id @default(uuid())
+  email      String
+  storeId    String    @map("store_id")
+  role       UserRole
+  invitedBy  String    @map("invited_by")
+  token      String    @unique
+  expiresAt  DateTime  @map("expires_at")
+  acceptedAt DateTime? @map("accepted_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  store   Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  inviter User  @relation("Inviter", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, email])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("user_invitations")
 }

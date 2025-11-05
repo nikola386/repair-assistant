@@ -23,8 +23,11 @@ import {
 } from '@/lib/cache'
 
 import type { User } from '@/lib/userStorage'
+import { Permission } from '@/lib/permissions'
+import InviteUserModal from '@/components/users/InviteUserModal'
+import UserTable from '@/components/users/UserTable'
 
-type Tab = 'profile' | 'password' | 'store' | 'appearance'
+type Tab = 'profile' | 'password' | 'store' | 'appearance' | 'team'
 
 export default function SettingsPage() {
   const { t, setLanguage } = useLanguage()
@@ -79,6 +82,14 @@ export default function SettingsPage() {
   const [storeLoading, setStoreLoading] = useState(false)
 
   const [settingsLoading, setSettingsLoading] = useState(false)
+
+  // Team/Users management state
+  const [users, setUsers] = useState<any[]>([])
+  const [canInvite, setCanInvite] = useState(false)
+  const [canEdit, setCanEdit] = useState(false)
+  const [canViewUsers, setCanViewUsers] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [usersLoading, setUsersLoading] = useState(false)
 
   const fetchProfile = useCallback(async () => {
     // Check cache first
@@ -189,6 +200,35 @@ export default function SettingsPage() {
     }
   }
 
+  const fetchUsers = useCallback(async () => {
+    if (!session?.user?.id) return
+    
+    setUsersLoading(true)
+    try {
+      // Fetch permissions
+      const [inviteRes, editRes, viewRes, usersRes] = await Promise.all([
+        fetch(`/api/users/permissions?permission=${Permission.INVITE_USERS}`),
+        fetch(`/api/users/permissions?permission=${Permission.EDIT_USERS}`),
+        fetch(`/api/users/permissions?permission=${Permission.VIEW_USERS}`),
+        fetch('/api/users'),
+      ])
+
+      const inviteData = await inviteRes.json()
+      const editData = await editRes.json()
+      const viewData = await viewRes.json()
+      const usersData = await usersRes.json()
+
+      setCanInvite(inviteData.hasPermission || false)
+      setCanEdit(editData.hasPermission || false)
+      setCanViewUsers(viewData.hasPermission || false)
+      setUsers(usersData || [])
+    } catch (err) {
+      console.error('Error fetching users:', err)
+    } finally {
+      setUsersLoading(false)
+    }
+  }, [session])
+
   useEffect(() => {
     if (!session) {
       router.push('/login')
@@ -197,7 +237,27 @@ export default function SettingsPage() {
     fetchProfile()
     fetchSettings()
     fetchCountries()
+    // Fetch user permissions for team tab visibility
+    fetch(`/api/users/permissions?permission=${Permission.VIEW_USERS}`)
+      .then(res => res.json())
+      .then(data => setCanViewUsers(data.hasPermission || false))
+      .catch(err => console.error('Error fetching view users permission:', err))
   }, [session, router, fetchProfile, fetchSettings, fetchCountries])
+
+  useEffect(() => {
+    if (activeTab === 'team' && session?.user?.id) {
+      fetchUsers()
+    }
+  }, [activeTab, session, fetchUsers])
+
+  const handleInviteSuccess = () => {
+    fetchUsers()
+    setShowInviteModal(false)
+  }
+
+  const handleUserUpdate = () => {
+    fetchUsers()
+  }
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -639,6 +699,18 @@ export default function SettingsPage() {
                 >
                   {t.settings?.appearance || 'Appearance'}
                 </button>
+                {canViewUsers && (
+                  <button
+                    className={`settings-page__nav-item ${activeTab === 'team' ? 'active' : ''}`}
+                    onClick={() => {
+                      setActiveTab('team')
+                      setError('')
+                      setSuccess('')
+                    }}
+                  >
+                    Team
+                  </button>
+                )}
               </nav>
             </aside>
 
@@ -1276,10 +1348,49 @@ export default function SettingsPage() {
                   </div>
                 </div>
               )}
+
+              {activeTab === 'team' && (
+                <div className="settings-page__section">
+                  <div className="settings-page__card">
+                    <div className="settings-page__card-header">
+                      <h3 className="settings-page__card-title">Team Members</h3>
+                      {canInvite && (
+                        <button
+                          onClick={() => setShowInviteModal(true)}
+                          className="btn btn-primary btn-sm"
+                        >
+                          Invite User
+                        </button>
+                      )}
+                    </div>
+                    <div className="settings-page__card-body">
+                      {usersLoading ? (
+                        <div style={{ padding: '40px', textAlign: 'center' }}>
+                          <p>{t.common.messages.loading}</p>
+                        </div>
+                      ) : (
+                        <UserTable
+                          users={users}
+                          canEdit={canEdit}
+                          currentUserId={session?.user?.id}
+                          onUpdate={handleUserUpdate}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </main>
+
+      {showInviteModal && (
+        <InviteUserModal
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={handleInviteSuccess}
+        />
+      )}
 
       <ConfirmationModal
         isOpen={confirmation.isOpen}
