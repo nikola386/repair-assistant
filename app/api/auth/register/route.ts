@@ -12,7 +12,6 @@ const registerSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
-  // Check if registration is disabled via environment variable
   if (process.env.DISABLE_REGISTER === 'true') {
     return NextResponse.json(
       { error: 'Registration is currently disabled' },
@@ -20,7 +19,6 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Rate limiting: 3 registrations per IP per hour
   const rateLimitResponse = rateLimit(request, 3, 60 * 60 * 1000)
   if (rateLimitResponse) {
     return rateLimitResponse
@@ -29,7 +27,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    // Validate input
     const validationResult = registerSchema.safeParse(body)
     if (!validationResult.success) {
       return NextResponse.json(
@@ -40,7 +37,6 @@ export async function POST(request: NextRequest) {
 
     const { email, password, name } = validationResult.data
 
-    // Check if user already exists
     const existingUser = await userStorage.findByEmail(email)
     if (existingUser) {
       return NextResponse.json(
@@ -49,16 +45,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create user with a temporary store (will be updated during onboarding)
-    // For now, we'll create the store during registration, but onboarding will allow customization
     const user = await userStorage.create({
       email,
       password,
       name: name.trim(),
-      storeName: `${name.trim()}'s Store`, // Temporary store name
+      storeName: `${name.trim()}'s Store`,
     })
 
-    // Generate verification token and send verification email
     const verificationToken = emailService.generateVerificationToken()
     await userStorage.generateVerificationToken(user.id, verificationToken)
 
@@ -71,8 +64,6 @@ export async function POST(request: NextRequest) {
       )
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError)
-      // Don't fail registration if email fails, but log the error
-      // User can request resend later
     }
 
     const headers = getRateLimitHeaders(request, 3)

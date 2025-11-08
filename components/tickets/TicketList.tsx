@@ -34,7 +34,6 @@ const generateCacheKey = (filters: TicketsFilters): string => {
   return `${filters.page}-${filters.limit}-${filters.search || ''}-${filters.status || ''}-${filters.priority || ''}`
 }
 
-// Convert comma-separated string to array for multi-select
 const parseFilterArray = (value: string | undefined): string[] => {
   if (!value) return []
   return value.split(',').map(v => v.trim()).filter(Boolean)
@@ -52,7 +51,6 @@ export default function TicketList({
   const searchParams = useSearchParams()
   const pathname = usePathname()
   
-  // Initialize filters from URL params on first render (synchronously)
   const getInitialFilters = (): TicketsFilters => {
     if (typeof window === 'undefined') return { ...defaultTicketsFilters }
     const urlFilters = parseTicketsFiltersFromUrl(searchParams)
@@ -61,7 +59,6 @@ export default function TicketList({
       : { ...defaultTicketsFilters }
   }
   
-  // Local state - initialized from URL params
   const [filters, setFiltersState] = useState<TicketsFilters>(getInitialFilters)
   const [ticketsData, setTicketsData] = useState<RepairTicket[]>([])
   const [pagination, setPagination] = useState({
@@ -73,15 +70,12 @@ export default function TicketList({
   const [isLoadingData, setIsLoadingData] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // Simple cache using useRef (component-level, cleared on unmount)
   const cacheRef = useRef<Map<string, PaginatedTicketsResponse>>(new Map())
   
-  // Local state for UI (search query before debounce/search action) - initialized from URL
   const [searchQuery, setSearchQuery] = useState(filters.search || '')
   const [statusFilter, setStatusFilter] = useState<string[]>(parseFilterArray(filters.status))
   const [priorityFilter, setPriorityFilter] = useState<string[]>(parseFilterArray(filters.priority))
   
-  // Sync filters from URL and update state
   const syncFiltersFromUrl = useCallback(() => {
     const urlFilters = parseTicketsFiltersFromUrl(searchParams)
     
@@ -95,16 +89,13 @@ export default function TicketList({
     setPriorityFilter(parseFilterArray(updatedFilters.priority))
   }, [searchParams])
   
-  // Set filters and optionally update URL
   const setFilters = useCallback((newFilters: Partial<TicketsFilters>, updateUrl: boolean = true) => {
     setFiltersState((prev) => {
       const updatedFilters = { ...prev, ...newFilters }
-      // Reset to page 1 when filters change (except when page itself is being set)
       if (!newFilters.page && (newFilters.search !== undefined || newFilters.status !== undefined || newFilters.priority !== undefined || newFilters.limit !== undefined)) {
         updatedFilters.page = 1
       }
       
-      // Sync to URL
       if (updateUrl && typeof window !== 'undefined') {
         syncTicketsFiltersToUrl(updatedFilters, window.location.pathname)
       }
@@ -113,12 +104,10 @@ export default function TicketList({
     })
   }, [])
   
-  // Clear cache
   const clearCache = useCallback(() => {
     cacheRef.current.clear()
   }, [])
-  
-  // Handle initial filters prop (for backward compatibility)
+
   useEffect(() => {
     if (Object.keys(initialFilters).length > 0) {
       setFilters({
@@ -127,19 +116,17 @@ export default function TicketList({
         search: initialFilters.search || '',
         status: initialFilters.status || '',
         priority: initialFilters.priority || '',
-      }, false) // Don't update URL since we're initializing
+      }, false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  
-  // Sync local UI state with filters (when URL changes or filters are updated externally)
+
   useEffect(() => {
     setSearchQuery(filters.search || '')
     setStatusFilter(parseFilterArray(filters.status))
     setPriorityFilter(parseFilterArray(filters.priority))
   }, [filters.search, filters.status, filters.priority])
   
-  // Listen to URL changes (browser back/forward and Next.js navigation)
   useEffect(() => {
     const handlePopState = () => {
       syncFiltersFromUrl()
@@ -147,17 +134,14 @@ export default function TicketList({
     
     window.addEventListener('popstate', handlePopState)
     
-    // Sync when searchParams change (Next.js navigation)
     syncFiltersFromUrl()
     
     return () => window.removeEventListener('popstate', handlePopState)
   }, [syncFiltersFromUrl])
   
-  // Fetch tickets when filters change (using filters directly to avoid stale closures)
   useEffect(() => {
     const cacheKey = generateCacheKey(filters)
     
-    // Check cache first
     const cachedData = cacheRef.current.get(cacheKey)
     if (cachedData) {
       setTicketsData(cachedData.tickets)
@@ -172,7 +156,6 @@ export default function TicketList({
       return
     }
     
-    // Fetch from API
     setIsLoadingData(true)
     setError(null)
     
@@ -188,7 +171,6 @@ export default function TicketList({
         if (response.ok) {
           const data: PaginatedTicketsResponse = await response.json()
           
-          // Store in cache
           cacheRef.current.set(cacheKey, data)
           
           setTicketsData(data.tickets)
@@ -211,18 +193,14 @@ export default function TicketList({
       })
   }, [filters.page, filters.limit, filters.search, filters.status, filters.priority])
   
-  // Clear cache and refetch when refreshTrigger changes (e.g., after creating/updating a ticket)
   useEffect(() => {
     if (refreshTrigger !== undefined) {
       clearCache()
-      // Force refetch by triggering the filters effect
-      // We'll just set filters to current values to trigger the fetch
       setFiltersState((prev) => ({ ...prev }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshTrigger])
 
-  // Function to trigger search manually (on Enter or button click)
   const triggerSearch = () => {
     const statusValue = statusFilter.length > 0 ? statusFilter.join(',') : ''
     const priorityValue = priorityFilter.length > 0 ? priorityFilter.join(',') : ''
@@ -241,7 +219,6 @@ export default function TicketList({
     }
   }
 
-  // Handle Enter key press
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
@@ -250,7 +227,6 @@ export default function TicketList({
   }
 
   const handleSearchChange = (value: string) => {
-    // Only update the search query state, don't trigger search automatically
     setSearchQuery(value)
   }
 
@@ -307,7 +283,6 @@ export default function TicketList({
       await onRefresh()
     }
     clearCache()
-    // Force refetch by updating filters
     setFiltersState((prev) => ({ ...prev }))
   }
 

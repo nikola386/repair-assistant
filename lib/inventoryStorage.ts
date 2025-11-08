@@ -3,7 +3,6 @@ import { db } from './db'
 import { Decimal } from '@prisma/client/runtime/library'
 import type { InventoryItem as PrismaInventoryItem } from '@prisma/client'
 
-// Map Prisma InventoryItem to domain InventoryItem
 const mapPrismaInventoryItem = (item: PrismaInventoryItem): InventoryItem => {
   return {
     id: item.id,
@@ -49,12 +48,10 @@ export const inventoryStorage = {
       const limit = filters?.limit ?? 50
       const offset = (page - 1) * limit
 
-      // Build where clause
       const where: any = {
         storeId,
       }
 
-      // Search filter
       if (filters?.search && filters.search.trim()) {
         const searchTerm = filters.search.trim()
         where.OR = [
@@ -64,7 +61,6 @@ export const inventoryStorage = {
         ]
       }
 
-      // Category filter - support comma-separated values (e.g., "Electronics,Accessories")
       if (filters?.category) {
         const categories = filters.category.split(',').map(c => c.trim()).filter(Boolean)
         if (categories.length === 1) {
@@ -74,7 +70,6 @@ export const inventoryStorage = {
         }
       }
 
-      // Location filter - support comma-separated values (e.g., "Warehouse A,Warehouse B")
       if (filters?.location) {
         const locations = filters.location.split(',').map(l => l.trim()).filter(Boolean)
         if (locations.length === 1) {
@@ -84,7 +79,6 @@ export const inventoryStorage = {
         }
       }
 
-      // Get all items matching the base filters (for low stock, we need to get all then filter)
       const allItems = await db.inventoryItem.findMany({
         where,
         orderBy: {
@@ -92,7 +86,6 @@ export const inventoryStorage = {
         },
       })
 
-      // Filter low stock items if needed (must be done in application code)
       let filteredItems = allItems
       if (filters?.lowStock) {
         filteredItems = allItems.filter(
@@ -100,7 +93,6 @@ export const inventoryStorage = {
         )
       }
 
-      // Apply pagination to filtered items
       const total = filteredItems.length
       const paginatedItems = filteredItems.slice(offset, offset + limit)
       const totalPages = Math.ceil(total / limit)
@@ -161,7 +153,6 @@ export const inventoryStorage = {
       return mapPrismaInventoryItem(item)
     } catch (error) {
       console.error('Error creating inventory item:', error)
-      // Handle unique constraint violation for SKU
       if (error instanceof Error && error.message.includes('Unique constraint')) {
         throw new Error('SKU must be unique within this store')
       }
@@ -175,7 +166,6 @@ export const inventoryStorage = {
     input: UpdateInventoryItemInput
   ): Promise<InventoryItem> => {
     try {
-      // Verify item belongs to store
       const existing = await db.inventoryItem.findFirst({
         where: {
           id,
@@ -225,7 +215,6 @@ export const inventoryStorage = {
       return mapPrismaInventoryItem(item)
     } catch (error) {
       console.error('Error updating inventory item:', error)
-      // Handle unique constraint violation for SKU
       if (error instanceof Error && error.message.includes('Unique constraint')) {
         throw new Error('SKU must be unique within this store')
       }
@@ -239,7 +228,6 @@ export const inventoryStorage = {
     quantityChange: number
   ): Promise<InventoryItem> => {
     try {
-      // Verify item belongs to store
       const existing = await db.inventoryItem.findFirst({
         where: {
           id,
@@ -273,7 +261,6 @@ export const inventoryStorage = {
 
   delete: async (id: string, storeId: string): Promise<boolean> => {
     try {
-      // Verify item belongs to store
       const existing = await db.inventoryItem.findFirst({
         where: {
           id,
@@ -298,7 +285,6 @@ export const inventoryStorage = {
 
   getLowStockItems: async (storeId: string): Promise<InventoryItem[]> => {
     try {
-      // Get all items for the store
       const items = await db.inventoryItem.findMany({
         where: {
           storeId,
@@ -308,7 +294,6 @@ export const inventoryStorage = {
         },
       })
 
-      // Filter items where currentQuantity <= minQuantity
       const lowStockItems = items.filter(
         (item) => item.currentQuantity.toNumber() <= item.minQuantity.toNumber()
       )

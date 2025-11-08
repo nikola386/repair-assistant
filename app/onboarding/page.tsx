@@ -24,7 +24,6 @@ export default function OnboardingPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
 
-  // Step 1: Store name and address
   const [storeName, setStoreName] = useState('')
   const [street, setStreet] = useState('')
   const [city, setCity] = useState('')
@@ -32,20 +31,17 @@ export default function OnboardingPage() {
   const [postalCode, setPostalCode] = useState('')
   const [country, setCountry] = useState('')
 
-  // Step 2: Additional details
   const [website, setWebsite] = useState('')
   const [phone, setPhone] = useState('')
   const [currency, setCurrency] = useState('USD')
   const [vatNumber, setVatNumber] = useState('')
 
-  // Step 3: Appearance
   const [logo, setLogo] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string>('')
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY_COLOR)
   const [secondaryColor, setSecondaryColor] = useState(DEFAULT_SECONDARY_COLOR)
   const [language, setLocalLanguage] = useState<Language>('en')
 
-  // Country dropdown state
   const [countries, setCountries] = useState<Country[]>([])
 
   const [currentStep, setCurrentStep] = useState(1)
@@ -77,15 +73,12 @@ export default function OnboardingPage() {
     if (status === 'authenticated' && session) {
       fetchCountries()
       
-      // Check if onboarding is already complete
       fetch('/api/onboarding')
         .then((res) => res.json())
         .then((data) => {
           if (data.isComplete) {
-            // Redirect to dashboard if onboarding is complete
             router.push('/dashboard')
           } else {
-            // Pre-fill form with existing data if available
             if (data.store) {
               setStoreName(data.store.name || '')
               setStreet(data.store.street || '')
@@ -149,7 +142,6 @@ export default function OnboardingPage() {
     }
     
     if (step === 2) {
-      // Step 2 has no required fields, but validate VAT if EU country
       if (isEUCountry && vatNumber && vatNumber.trim().length < 2) {
         const errorMsg = t.onboarding?.invalidVatNumber || 'Invalid VAT number'
         setError(errorMsg)
@@ -159,7 +151,6 @@ export default function OnboardingPage() {
     }
     
     if (step === 3) {
-      // Step 3 has no required fields
     }
     
     return true
@@ -228,12 +219,10 @@ export default function OnboardingPage() {
         return
       }
 
-      // Update language context if language was set
       if (data.settings?.language) {
         setLanguage(data.settings.language as Language)
       }
 
-      // Redirect to dashboard
       router.push('/dashboard')
       router.refresh()
     } catch (err) {
@@ -244,7 +233,6 @@ export default function OnboardingPage() {
     }
   }
 
-  // Show loading state while checking session or onboarding status
   if (status === 'loading' || fetching) {
     return (
       <div className="login-page onboarding-page">
@@ -262,7 +250,6 @@ export default function OnboardingPage() {
     )
   }
 
-  // Don't show onboarding if not authenticated (will redirect)
   if (status === 'unauthenticated') {
     return null
   }
@@ -443,7 +430,6 @@ export default function OnboardingPage() {
                       onChange={(selectedCode) => {
                         const selectedCountry = countries.find(c => c.code === selectedCode)
                         setCountry(selectedCode)
-                        // Clear VAT number if country doesn't require VAT
                         if (!selectedCountry?.requiresVat) {
                           setVatNumber('')
                         }

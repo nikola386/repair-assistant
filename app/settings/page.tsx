@@ -86,7 +86,6 @@ export default function SettingsPage() {
 
   const [settingsLoading, setSettingsLoading] = useState(false)
 
-  // Team/Users management state
   const [users, setUsers] = useState<any[]>([])
   const [canInvite, setCanInvite] = useState(false)
   const [canEdit, setCanEdit] = useState(false)
@@ -95,7 +94,6 @@ export default function SettingsPage() {
   const [usersLoading, setUsersLoading] = useState(false)
 
   const fetchProfile = useCallback(async () => {
-    // Check cache first
     const cachedData = getCachedProfileData()
     if (cachedData) {
       setUser(cachedData.user)
@@ -107,7 +105,6 @@ export default function SettingsPage() {
       return
     }
 
-    // Fetch from API if no cache
     try {
       const response = await fetch('/api/profile')
       if (response.ok) {
@@ -117,7 +114,6 @@ export default function SettingsPage() {
           name: data.user.name || '',
           email: data.user.email || '',
         })
-        // Cache the profile data
         updateProfileCache(data.user, data.store)
       } else {
         const errorMsg = t.profile?.fetchError || 'Failed to load profile'
@@ -134,21 +130,18 @@ export default function SettingsPage() {
   }, [t.profile?.fetchError])
 
   const fetchCountries = useCallback(async () => {
-    // Check cache first
     const cachedCountries = getCachedCountries()
     if (cachedCountries) {
       setCountries(cachedCountries)
       return
     }
 
-    // Fetch from API if no cache
     try {
       const response = await fetch('/api/countries')
       if (response.ok) {
         const data = await response.json()
         const countries = data.countries || []
         setCountries(countries)
-        // Cache the countries data
         setCachedCountries(countries)
       }
     } catch (err) {
@@ -167,7 +160,6 @@ export default function SettingsPage() {
             secondaryColor: data.settings.secondaryColor || DEFAULT_SECONDARY_COLOR,
             language: (data.settings.language as Language) || 'en',
           })
-          // Apply colors immediately
           applyColors(data.settings.primaryColor || DEFAULT_PRIMARY_COLOR, data.settings.secondaryColor || DEFAULT_SECONDARY_COLOR)
         }
         if (data.store) {
@@ -209,7 +201,6 @@ export default function SettingsPage() {
     
     setUsersLoading(true)
     try {
-      // Fetch permissions (with caching)
       const [canInvite, canEdit, canView, usersRes] = await Promise.all([
         checkPermission(session.user.id, Permission.INVITE_USERS),
         checkPermission(session.user.id, Permission.EDIT_USERS),
@@ -238,7 +229,6 @@ export default function SettingsPage() {
     fetchProfile()
     fetchSettings()
     fetchCountries()
-    // Fetch user permissions for team tab visibility (with caching)
     if (session?.user?.id) {
       checkPermission(session.user.id, Permission.VIEW_USERS)
         .then(hasPermission => setCanViewUsers(hasPermission))
@@ -318,7 +308,6 @@ export default function SettingsPage() {
       return
     }
 
-    // Validate password strength
     const passwordValidation = validatePasswordClient(passwordFormData.newPassword)
     if (!passwordValidation.valid) {
       const errorMsg = passwordValidation.error || t.profile?.passwordTooShort || 'Password validation failed'
@@ -465,7 +454,6 @@ export default function SettingsPage() {
     setSettingsLoading(true)
 
     try {
-      // Use FormData if logo is being uploaded or removed, otherwise use JSON
       if (logo || removeLogo) {
         const formData = new FormData()
         formData.append('primaryColor', appearanceFormData.primaryColor)
@@ -486,22 +474,18 @@ export default function SettingsPage() {
         const data = await response.json()
 
         if (response.ok) {
-          const successMsg = t.settings?.appearanceUpdateSuccess || 'Appearance updated successfully'
-          setSuccess(successMsg)
-          showAlert.success(successMsg)
-          // Apply colors immediately
-          applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
-          // Update language context if language changed
-          if (data.settings?.language) {
-            setLanguage(data.settings.language as Language)
-          }
-          // Update logo preview if logo was uploaded
-          if (data.store?.logo) {
-            setLogoPreview(data.store.logo)
-            setLogo(null)
-          } else if (removeLogo && data.store?.logo === null) {
-            // Logo was removed
-            setLogoPreview('')
+        const successMsg = t.settings?.appearanceUpdateSuccess || 'Appearance updated successfully'
+        setSuccess(successMsg)
+        showAlert.success(successMsg)
+        applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
+        if (data.settings?.language) {
+          setLanguage(data.settings.language as Language)
+        }
+        if (data.store?.logo) {
+          setLogoPreview(data.store.logo)
+          setLogo(null)
+        } else if (removeLogo && data.store?.logo === null) {
+          setLogoPreview('')
             setLogo(null)
             setRemoveLogo(false)
           }
@@ -511,7 +495,6 @@ export default function SettingsPage() {
           showAlert.error(errorMsg)
         }
       } else {
-        // No logo changes, just update colors and language with JSON
         const response = await fetch('/api/settings', {
           method: 'PATCH',
           headers: {
@@ -530,9 +513,7 @@ export default function SettingsPage() {
           const successMsg = t.settings?.appearanceUpdateSuccess || 'Appearance updated successfully'
           setSuccess(successMsg)
           showAlert.success(successMsg)
-          // Apply colors immediately
           applyColors(appearanceFormData.primaryColor, appearanceFormData.secondaryColor)
-          // Update language context if language changed
           if (data.settings?.language) {
             setLanguage(data.settings.language as Language)
           }
@@ -1035,7 +1016,6 @@ export default function SettingsPage() {
                               onChange={(selectedCode) => {
                                 const selectedCountry = countries.find(c => c.code === selectedCode)
                                 setStoreFormData({ ...storeFormData, country: selectedCode })
-                                // Clear VAT number if country doesn't require VAT
                                 if (!selectedCountry?.requiresVat) {
                                   setStoreFormData(prev => ({ ...prev, vatNumber: '' }))
                                 }

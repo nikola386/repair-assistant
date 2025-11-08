@@ -29,7 +29,6 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
     costPrice: initialData?.costPrice,
   })
 
-  // Update form data when initialData changes (for edit mode)
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -77,7 +76,6 @@ export default function InventoryForm({ onSubmit, onCancel, initialData, isEdit 
     setIsSubmitting(true)
     try {
       await onSubmit(formData)
-      // Reset form on success only for create mode
       if (!isEdit) {
         setFormData({
           name: '',

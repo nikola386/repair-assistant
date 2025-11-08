@@ -23,7 +23,6 @@ export async function requireAuthAndPermission(
     }
   }
 
-  // Check if user is active
   const user = await userStorage.findById(session.user.id)
   if (!user || !(user as any).isActive) {
     return {
@@ -35,7 +34,6 @@ export async function requireAuthAndPermission(
     }
   }
 
-  // Check permission
   if (!hasPermission((user as any).role as UserRole, permission)) {
     return {
       session: null,
@@ -49,7 +47,6 @@ export async function requireAuthAndPermission(
   return { session: session as Session, response: null }
 }
 
-// Helper to ensure user belongs to the store
 export async function requireStoreAccess(
   userId: string,
   storeId: string

@@ -62,7 +62,6 @@ interface DashboardStats {
   averageRepairTime: number
   completionRate: number
   chartData: ChartDataPoint[]
-  // New high-priority stats
   overdueTickets: number
   highPriorityTickets: number
   totalClients: number
@@ -108,7 +107,6 @@ export default function DashboardPage() {
     try {
       const response = await fetch(`/api/dashboard/stats?period=${selectedPeriod}`)
       if (!response.ok) {
-        // On error, set default zero values instead of showing error
         setStats({
           totalRepairs: 0,
           inProgressRepairs: 0,
@@ -130,7 +128,6 @@ export default function DashboardPage() {
         return
       }
       const data = await response.json()
-      // Ensure all values are numbers, default to 0 if missing
       setStats({
         totalRepairs: data.totalRepairs ?? 0,
         inProgressRepairs: data.inProgressRepairs ?? 0,
@@ -150,7 +147,6 @@ export default function DashboardPage() {
         statusDistribution: data.statusDistribution ?? [],
       })
     } catch (err) {
-      // On error, set default zero values instead of showing error
       setStats({
         totalRepairs: 0,
         inProgressRepairs: 0,
@@ -294,7 +290,6 @@ export default function DashboardPage() {
     return t.common?.status?.[status as keyof typeof t.common.status] || status
   }
 
-  // Navigation handlers for stat cards
   const handleStatCardClick = (path: string) => {
     router.push(path)
   }

@@ -1,6 +1,5 @@
 import { db } from './db'
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR } from './constants'
-// Prisma generates Settings type automatically from schema
 import type { Settings } from '@prisma/client'
 
 export type { Settings }

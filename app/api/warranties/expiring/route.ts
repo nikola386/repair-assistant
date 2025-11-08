@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
   const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_TICKETS)
   if (response) return response
 
-  // Get user's storeId
   const user = await userStorage.findById(session.user.id)
   if (!user || !user.storeId) {
     logger.error('User or store not found', { userId: session.user.id }, requestId)

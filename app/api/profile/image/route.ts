@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate file type
     if (!validateFileType(file, ALLOWED_IMAGE_TYPES)) {
       return NextResponse.json(
         { error: 'Invalid file type. Only images are allowed.' },
@@ -41,7 +40,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate file size
     if (!validateFileSize(file, MAX_FILE_SIZE)) {
       return NextResponse.json(
         { error: 'File size too large. Maximum size is 2MB.' },
@@ -49,7 +47,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate file content using magic bytes
     const isValidContent = await validateFileContent(file, file.type)
     if (!isValidContent) {
       return NextResponse.json(
@@ -58,7 +55,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get current user to delete old image if exists
     const user = await userStorage.findById(session.user.id)
     if (!user) {
       return NextResponse.json(
@@ -67,7 +63,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get user's storeId for organizing files
     const storeId = await userStorage.getStoreId(session.user.id)
     if (!storeId) {
       return NextResponse.json(
@@ -76,20 +71,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Delete old profile image if exists
     if (user.profileImage) {
       try {
         await deleteFile(user.profileImage)
       } catch (error) {
         console.error('Error deleting old profile image:', error)
-        // Continue even if deletion fails
       }
     }
 
-    // Compress and convert image to JPG
     const processedFile = await compressAndConvertToJpg(file)
 
-    // Generate unique filename using secure random (use processed file name for correct extension)
     let fileName: string
     try {
       fileName = generateUniqueFileName('profiles', session.user.id, processedFile.name, ALLOWED_IMAGE_EXTENSIONS, storeId)
@@ -100,16 +91,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload file to storage (blob or local)
     const fileUrl = await uploadFile(fileName, processedFile, {
       access: 'public',
       contentType: processedFile.type,
     })
 
-    // Update user profile image (store the file URL)
     const updatedUser = await userStorage.updateProfileImage(session.user.id, fileUrl)
 
-    // Don't return password hash
     const { passwordHash, ...userWithoutPassword } = updatedUser
 
     return NextResponse.json(
@@ -141,20 +129,16 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Delete profile image if exists
     if (user.profileImage) {
       try {
         await deleteFile(user.profileImage)
       } catch (error) {
         console.error('Error deleting profile image file:', error)
-        // Continue even if deletion fails
       }
     }
 
-    // Update user to remove profile image reference
     const updatedUser = await userStorage.updateProfileImage(session.user.id, null)
 
-    // Don't return password hash
     const { passwordHash, ...userWithoutPassword } = updatedUser
 
     return NextResponse.json(

@@ -30,13 +30,11 @@ function InventoryPageContent() {
   const [categories, setCategories] = useState<string[]>([])
   const [locations, setLocations] = useState<string[]>([])
   
-  // Convert comma-separated string to array for multi-select
   const parseFilterArray = (value: string | undefined): string[] => {
     if (!value) return []
     return value.split(',').map(v => v.trim()).filter(Boolean)
   }
 
-  // Initialize filters from URL params
   const getFiltersFromUrl = () => {
     return {
       search: searchParams.get('search') || '',
@@ -47,11 +45,9 @@ function InventoryPageContent() {
   }
   
   const [filters, setFilters] = useState(getFiltersFromUrl)
-  // Local state for UI (arrays for multi-select)
   const [categoryFilter, setCategoryFilter] = useState<string[]>(parseFilterArray(filters.category))
   const [locationFilter, setLocationFilter] = useState<string[]>(parseFilterArray(filters.location))
   
-  // Sync filters when URL changes - only update if values actually changed
   const prevFiltersRef = useRef(filters)
   useEffect(() => {
     const urlFilters = {
@@ -61,7 +57,6 @@ function InventoryPageContent() {
       lowStock: searchParams.get('lowStock') === 'true',
     }
     
-    // Only update if values actually changed to prevent unnecessary re-renders
     const hasChanged = 
       urlFilters.search !== prevFiltersRef.current.search ||
       urlFilters.category !== prevFiltersRef.current.category ||
@@ -76,7 +71,6 @@ function InventoryPageContent() {
     }
   }, [searchParams])
 
-  // Extract categories and locations from items (no separate API call needed)
   const extractFiltersFromItems = useCallback((items: InventoryItem[]) => {
     const uniqueCategories = Array.from(
       new Set(items.map((item: InventoryItem) => item.category).filter(Boolean))
@@ -88,7 +82,6 @@ function InventoryPageContent() {
     setLocations(uniqueLocations)
   }, [])
 
-  // Fetch inventory items - memoized to prevent unnecessary re-creations
   const fetchItems = useCallback(async () => {
     setIsLoading(true)
     setError(null)
@@ -113,7 +106,6 @@ function InventoryPageContent() {
           total: data.total,
           totalPages: data.totalPages,
         })
-        // Extract categories/locations from fetched items instead of making separate API call
         extractFiltersFromItems(data.items)
       } else {
         throw new Error(t.inventory.page.fetchError)
@@ -126,13 +118,11 @@ function InventoryPageContent() {
     }
   }, [pagination.page, filters, categoryFilter, locationFilter, t, extractFiltersFromItems])
 
-  // Fetch categories and locations for filter dropdowns - now only used when explicitly needed
   const fetchFilters = useCallback(async () => {
     try {
       const response = await fetch('/api/inventory?limit=10000')
       if (response.ok) {
         const data = await response.json()
-        // Extract unique categories and locations from items
         extractFiltersFromItems(data.items)
       }
     } catch (error) {
@@ -144,7 +134,6 @@ function InventoryPageContent() {
     fetchItems()
   }, [fetchItems])
 
-  // Handle Escape key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && showForm) {
@@ -155,7 +144,6 @@ function InventoryPageContent() {
 
     if (showForm) {
       document.addEventListener('keydown', handleKeyDown)
-      // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden'
     }
 
@@ -166,13 +154,11 @@ function InventoryPageContent() {
   }, [showForm])
 
   const handleCreateItem = async (data: CreateInventoryItemInput | UpdateInventoryItemInput) => {
-    // Ensure name is present for create operation
     if (!data.name) {
       showAlert.error(t.inventory.form.nameRequired)
       return
     }
     
-    // Type assertion: when creating, name is required
     const createData = data as CreateInventoryItemInput
     
     try {
@@ -184,7 +170,6 @@ function InventoryPageContent() {
 
       if (response.ok) {
         showAlert.success(t.inventory.page.createSuccess)
-        // Only close modal if "add another" is not checked
         if (!addAnother) {
           setShowForm(false)
         }
@@ -215,7 +200,6 @@ function InventoryPageContent() {
     await fetchItems()
   }
 
-  // Sync filters to URL
   const syncFiltersToUrl = useCallback((newFilters: typeof filters, newPagination = pagination, newCategoryFilter = categoryFilter, newLocationFilter = locationFilter) => {
     if (typeof window === 'undefined') return
     

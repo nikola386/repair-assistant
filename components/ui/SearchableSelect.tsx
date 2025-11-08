@@ -34,16 +34,13 @@ export default function SearchableSelect({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Filter options based on search query
   const filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  // Get selected option label
   const selectedOption = options.find((opt) => opt.value === value)
   const displayText = selectedOption ? selectedOption.label : placeholder
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -66,7 +63,6 @@ export default function SearchableSelect({
     }
   }, [isOpen])
 
-  // Focus search input when dropdown opens
   useEffect(() => {
     if (isOpen && searchInputRef.current) {
       searchInputRef.current.focus()

@@ -25,7 +25,6 @@ export default function WarrantyStatusBadge({ status, expiryDate }: WarrantyStat
     return labels[status]
   }
 
-  // Check if warranty is expiring soon (within 7 days)
   const isExpiringSoon = () => {
     if (!expiryDate || status !== 'active') return false
     const expiry = new Date(expiryDate)

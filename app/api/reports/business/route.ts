@@ -12,7 +12,6 @@ import { settingsStorage } from '@/lib/settingsStorage'
 import { getPdfTranslations } from '@/lib/pdfTranslations'
 import { isValidLanguage } from '@/lib/languages'
 
-// Mark route as dynamic
 export const dynamic = 'force-dynamic'
 
 function getDateRange(startDate: string, endDate: string) {
@@ -28,7 +27,6 @@ export async function GET(request: NextRequest) {
   if (response) return response
 
   try {
-    // Get user's store ID
     const storeId = await userStorage.getStoreId(session.user.id)
     if (!storeId) {
       return NextResponse.json(
@@ -37,7 +35,6 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get date range from query params
     const searchParams = request.nextUrl.searchParams
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
@@ -51,7 +48,6 @@ export async function GET(request: NextRequest) {
 
     const { start, end } = getDateRange(startDate, endDate)
 
-    // Get store information
     const store = await (db as any).store.findUnique({
       where: { id: storeId },
       select: {
@@ -78,7 +74,6 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get all tickets in the date range
     const tickets = await (db as any).repairTicket.findMany({
       where: {
         storeId: storeId,
@@ -107,14 +102,12 @@ export async function GET(request: NextRequest) {
       expenses: Array<{ quantity: Prisma.Decimal; price: Prisma.Decimal }>
     }>
 
-    // Calculate summary statistics
     const totalRepairs = tickets.length
     const completedRepairs = tickets.filter(t => t.status === 'completed').length
     const inProgressRepairs = tickets.filter(t => t.status === 'in_progress').length
     const waitingRepairs = tickets.filter(t => t.status === 'pending' || t.status === 'waiting_parts').length
     const cancelledRepairs = tickets.filter(t => t.status === 'cancelled').length
 
-    // Calculate income (from completed tickets)
     const completedTickets = tickets.filter(t => t.status === 'completed')
     let income = 0
     for (const ticket of completedTickets) {
@@ -122,7 +115,6 @@ export async function GET(request: NextRequest) {
       income += cost
     }
 
-    // Calculate expenses
     let totalExpenses = 0
     for (const ticket of completedTickets) {
       for (const expense of ticket.expenses) {
@@ -134,7 +126,6 @@ export async function GET(request: NextRequest) {
     const grossProfit = income - totalExpenses
     const grossProfitPercentage = income > 0 ? (grossProfit / income) * 100 : 0
 
-    // Calculate average repair time
     let totalRepairTime = 0
     let completedCount = 0
     for (const ticket of completedTickets) {
@@ -149,10 +140,8 @@ export async function GET(request: NextRequest) {
     }
     const averageRepairTime = completedCount > 0 ? totalRepairTime / completedCount : 0
 
-    // Calculate completion rate
     const completionRate = totalRepairs > 0 ? (completedRepairs / totalRepairs) * 100 : 0
 
-    // Group by device type
     const deviceTypeMap = new Map<string, { count: number; revenue: number; expenses: number }>()
     
     for (const ticket of completedTickets) {
@@ -182,9 +171,8 @@ export async function GET(request: NextRequest) {
         expenses: data.expenses,
         profit: data.revenue - data.expenses,
       }))
-      .sort((a, b) => b.count - a.count) // Sort by count descending
+      .sort((a, b) => b.count - a.count)
 
-    // Calculate top customers
     const customerMap = new Map<string, { name: string; email: string; ticketCount: number; totalSpent: number }>()
     
     for (const ticket of completedTickets) {
@@ -208,14 +196,12 @@ export async function GET(request: NextRequest) {
 
     const topCustomers = Array.from(customerMap.values())
       .sort((a, b) => b.totalSpent - a.totalSpent)
-      .slice(0, 10) // Top 10 customers
+      .slice(0, 10)
 
-    // Format period label
     const periodLabel = startDate === endDate 
       ? formatDate(startDate)
       : `${formatDate(startDate)} to ${formatDate(endDate)}`
 
-    // Prepare report data
     const reportData = {
       period: {
         startDate,
@@ -239,23 +225,18 @@ export async function GET(request: NextRequest) {
       topCustomers,
     }
 
-    // Get language from settings
     const settings = await settingsStorage.findByStoreId(storeId)
     const language = (settings?.language && isValidLanguage(settings.language)) ? settings.language : 'en'
     const translations = getPdfTranslations(language)
 
-    // Ensure fonts are registered before rendering
     await ensurePdfFontsRegistered()
 
-    // Render PDF
     const pdfBuffer = await renderToBuffer(
       React.createElement(BusinessReportPDF, { store, reportData, translations, language }) as React.ReactElement
     )
 
-    // Convert Buffer to Uint8Array for NextResponse
     const pdfArray = new Uint8Array(pdfBuffer)
 
-    // Return PDF as response
     const filename = `business-report-${startDate}-to-${endDate}.pdf`
     return new NextResponse(pdfArray, {
       status: 200,

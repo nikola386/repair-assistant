@@ -1,10 +1,8 @@
 import { db } from './db'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
-// Prisma generates User type automatically from schema - use it directly
 import type { User, UserRole } from '@prisma/client'
 
-// Type for UserInvitation (will be available after Prisma client regeneration)
 interface UserInvitation {
   id: string
   email: string
@@ -36,12 +34,10 @@ export class UserStorage {
   async create(input: CreateUserInput): Promise<User> {
     const { email, password, name, storeId, storeName, role, invitedBy, invitedAt } = input
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, 10)
 
     let finalStoreId = storeId
 
-    // If storeName is provided, create a new store
     if (storeName && !storeId) {
       const store = await db.store.create({
         data: {
@@ -51,7 +47,6 @@ export class UserStorage {
       finalStoreId = store.id
     }
 
-    // If neither storeId nor storeName provided, throw error (store is required)
     if (!finalStoreId) {
       throw new Error('Either storeId or storeName must be provided when creating a user')
     }
@@ -149,12 +144,11 @@ export class UserStorage {
    */
   async verifyEmail(token: string): Promise<User | null> {
     try {
-      // Find user with valid token
       const user = await db.user.findFirst({
         where: {
           verificationToken: token,
           verificationTokenExpiry: {
-            gt: new Date(), // Token must not be expired
+            gt: new Date(),
           },
         },
       })
@@ -166,7 +160,6 @@ export class UserStorage {
 
       console.log('Found user for verification:', user.id, user.email, 'token expires at:', user.verificationTokenExpiry)
 
-      // Mark email as verified and clear verification token
       const updatedUser = await db.user.update({
         where: { id: user.id },
         data: {
@@ -178,7 +171,6 @@ export class UserStorage {
 
       console.log('User updated successfully:', updatedUser.id, updatedUser.email, 'emailVerified:', updatedUser.emailVerified)
       
-      // Double-check that the update succeeded
       if (!updatedUser || !updatedUser.emailVerified) {
         console.error('Update appeared to succeed but user is not verified!', updatedUser)
         throw new Error('Failed to verify email - update did not persist')
@@ -187,7 +179,6 @@ export class UserStorage {
       return updatedUser
     } catch (error) {
       console.error('Error in verifyEmail:', error)
-      // Re-throw to be handled by the API route
       throw error
     }
   }
@@ -281,10 +272,9 @@ export class UserStorage {
   }
 
   async resendInvitation(invitationId: string): Promise<UserInvitation> {
-    // Generate new token and extend expiry
     const token = crypto.randomUUID()
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 7) // 7 days expiry
+    expiresAt.setDate(expiresAt.getDate() + 7)
 
     return (db as any).userInvitation.update({
       where: { id: invitationId },
@@ -295,7 +285,6 @@ export class UserStorage {
     })
   }
 
-  // User management methods
   async findByStoreId(storeId: string): Promise<User[]> {
     return db.user.findMany({
       where: { storeId },

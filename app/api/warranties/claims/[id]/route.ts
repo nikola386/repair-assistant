@@ -16,7 +16,6 @@ export async function GET(
   const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_TICKETS)
   if (response) return response
 
-  // Get user's storeId
   const user = await userStorage.findById(session.user.id)
   if (!user || !user.storeId) {
     logger.error('User or store not found', { userId: session.user.id }, requestId)
@@ -61,7 +60,6 @@ export async function PATCH(
   const { session, response } = await requireAuthAndPermission(request, Permission.EDIT_TICKETS)
   if (response) return response
 
-  // Get user's storeId
   const user = await userStorage.findById(session.user.id)
   if (!user || !user.storeId) {
     logger.error('User or store not found', { userId: session.user.id }, requestId)
@@ -81,7 +79,6 @@ export async function PATCH(
       relatedTicketId,
     } = body
 
-    // Validate status if provided
     const validStatuses: WarrantyClaimStatus[] = ['pending', 'approved', 'rejected', 'completed']
     const validatedStatus: WarrantyClaimStatus | undefined = status && validStatuses.includes(status as WarrantyClaimStatus) 
       ? (status as WarrantyClaimStatus) 

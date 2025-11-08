@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
   const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_TICKETS)
   if (response) return response
 
-  // Get user's storeId
   const user = await userStorage.findById(session.user.id)
   if (!user || !user.storeId) {
     logger.error('User or store not found', { userId: session.user.id }, requestId)
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest) {
   const { session, response } = await requireAuthAndPermission(request, Permission.EDIT_TICKETS)
   if (response) return response
 
-  // Get user's storeId
   const user = await userStorage.findById(session.user.id)
   if (!user || !user.storeId) {
     logger.error('User or store not found', { userId: session.user.id }, requestId)
@@ -85,7 +83,6 @@ export async function POST(request: NextRequest) {
       notes,
     } = body
 
-    // Validate required fields
     if (!ticketId) {
       logger.warn('Warranty creation validation failed: missing ticketId', {}, requestId)
       return NextResponse.json(
@@ -94,7 +91,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate warranty type if provided
     const validTypes: WarrantyType[] = ['parts', 'labor', 'both']
     const validatedType: WarrantyType | undefined = warrantyType && validTypes.includes(warrantyType as WarrantyType)
       ? (warrantyType as WarrantyType)

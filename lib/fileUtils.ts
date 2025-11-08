@@ -30,18 +30,13 @@ export function generateUniqueFileName(
   crypto.getRandomValues(bytes)
   const random = Array.from(bytes, byte => byte.toString(36)).join('').substring(0, 9)
   
-  // Sanitize and extract extension
   const sanitizedFileName = sanitizeFileName(originalFileName)
   const fileExtension = sanitizedFileName.split('.').pop()?.toLowerCase() || 'bin'
   
-  // Validate extension
   if (!allowedExtensions.includes(fileExtension as any)) {
     throw new Error(`Invalid file extension: ${fileExtension}`)
   }
   
-  // If storeId is provided, organize files in store-specific directories
-  // Format: {storeId}/{prefix}/{identifier}-{timestamp}-{random}.{ext}
-  // Otherwise, use the old format for backward compatibility
   if (storeId) {
     return `${storeId}/${prefix}/${identifier}-${timestamp}-${random}.${fileExtension}`
   }
@@ -66,7 +61,6 @@ export function getFileExtension(fileName: string): string {
  * @returns Promise resolving to a compressed JPG File, or the original file if not an image
  */
 export async function compressAndConvertToJpg(file: File): Promise<File> {
-  // Only process image files, skip PDFs and other non-image files
   const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
   if (!imageTypes.includes(file.type)) {
     return file
@@ -77,9 +71,6 @@ export async function compressAndConvertToJpg(file: File): Promise<File> {
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    // Compress and convert to JPG
-    // Quality: 80 (good balance between size and quality)
-    // Max width/height: 1920px (reasonable for most use cases)
     const compressedBuffer = await sharp(buffer)
       .resize(1920, 1920, {
         fit: 'inside',
@@ -87,14 +78,13 @@ export async function compressAndConvertToJpg(file: File): Promise<File> {
       })
       .jpeg({
         quality: 80,
-        mozjpeg: true, // Better compression
+        mozjpeg: true,
       })
       .toBuffer()
 
-    // Create a new File object with the compressed image
     const compressedFile = new File(
       [new Uint8Array(compressedBuffer)],
-      file.name.replace(/\.[^/.]+$/, '.jpg'), // Replace extension with .jpg
+      file.name.replace(/\.[^/.]+$/, '.jpg'),
       {
         type: 'image/jpeg',
         lastModified: Date.now(),
@@ -104,7 +94,6 @@ export async function compressAndConvertToJpg(file: File): Promise<File> {
     return compressedFile
   } catch (error) {
     console.error('Error compressing image:', error)
-    // If compression fails, return original file
     return file
   }
 }

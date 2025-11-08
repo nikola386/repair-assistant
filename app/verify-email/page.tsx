@@ -43,7 +43,6 @@ function VerifyEmailForm() {
       setVerificationStatus('success')
       showAlert.success(t.auth?.emailVerified || 'Email verified successfully!')
       
-      // Redirect to login after 2 seconds
       setTimeout(() => {
         router.push('/login')
       }, 2000)
@@ -55,14 +54,12 @@ function VerifyEmailForm() {
     }
   }, [t, router])
 
-  // Auto-verify if token is present
   useEffect(() => {
     if (token && verificationStatus === 'idle') {
       handleVerification(token)
     }
   }, [token, verificationStatus, handleVerification])
 
-  // Handle resend cooldown countdown
   useEffect(() => {
     if (resendCooldown > 0) {
       const timer = setTimeout(() => {
@@ -101,7 +98,6 @@ function VerifyEmailForm() {
         showAlert.error(data.error || t.auth?.resendError || 'Failed to resend verification email')
         setResendLoading(false)
         
-        // If rate limited, set cooldown to 60 seconds
         if (response.status === 429) {
           setResendCooldown(60)
         }
@@ -109,7 +105,7 @@ function VerifyEmailForm() {
       }
 
       showAlert.success(t.auth?.emailVerificationSent || 'Verification email sent! Please check your inbox.')
-      setResendCooldown(60) // 1 minute cooldown
+      setResendCooldown(60)
       setResendLoading(false)
     } catch (err) {
       setError(t.auth?.resendError || 'Failed to resend verification email')

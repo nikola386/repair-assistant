@@ -25,13 +25,11 @@ export default function WarrantyList({ refreshTrigger }: WarrantyListProps) {
   const fetchWarranties = async () => {
     setIsLoading(true)
     try {
-      // Fetch all warranties and filter client-side
       const response = await fetch('/api/warranties')
       if (response.ok) {
         const data = await response.json()
         let filteredWarranties = data.warranties || []
         
-        // Filter by selected statuses
         if (statusFilter.length > 0) {
           filteredWarranties = filteredWarranties.filter((w: Warranty) => 
             statusFilter.includes(w.status)

@@ -22,7 +22,6 @@ export default function WarrantyForm({ onSubmit, onCancel, initialData, isEdit =
     notes: initialData?.notes || '',
   })
 
-  // Update form data when initialData changes (for edit mode)
   useEffect(() => {
     if (initialData) {
       setFormData({

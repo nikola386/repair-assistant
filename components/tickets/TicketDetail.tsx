@@ -56,7 +56,6 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   const fileInputRef = useRef<HTMLInputElement>(null)
   const qrCodeRef = useRef<HTMLDivElement>(null)
 
-  // Update local state when ticket prop changes
   useEffect(() => {
     setUpdatedTicket(ticket)
     setEditFormData({
@@ -94,13 +93,11 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
     }
   }, [ticket.id])
 
-  // Fetch warranty when ticket status becomes completed (watch both prop and local state)
   useEffect(() => {
     const currentStatus = updatedTicket?.status || ticket.status
     if (currentStatus === 'completed') {
       fetchWarranty()
     } else {
-      // Clear warranty if status is no longer completed
       setWarranty(null)
     }
   }, [ticket.status, updatedTicket?.status, fetchWarranty])
@@ -129,7 +126,6 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
         setUpdatedTicket(updatedTicketData)
         
         if (newStatus === 'completed') {
-          // Auto-set completion date if not set
           const completionResponse = await fetch(`/api/tickets/${ticket.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -142,17 +138,14 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
             const finalTicket = completionData.ticket
             setUpdatedTicket(finalTicket)
             
-            // Notify parent component of the update
             if (onTicketUpdate) {
               onTicketUpdate(finalTicket)
             }
             
-            // Fetch warranty reactively - wait a bit for warranty to be created on backend
             setTimeout(() => {
               fetchWarranty()
             }, 500)
           } else {
-            // Even if completion date update fails, still notify parent and fetch warranty
             if (onTicketUpdate) {
               onTicketUpdate(updatedTicketData)
             }
@@ -161,7 +154,6 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
             }, 500)
           }
         } else {
-          // Notify parent component of the update for non-completed status changes
           if (onTicketUpdate) {
             onTicketUpdate(updatedTicketData)
           }
@@ -204,14 +196,12 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validate required fields
     if (!editFormData.customerName || !editFormData.customerEmail || !editFormData.customerPhone || 
         !editFormData.deviceType || !editFormData.issueDescription) {
       showAlert.error(t.common.messages.required)
       return
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(editFormData.customerEmail || '')) {
       showAlert.error(t.common.messages.invalidEmail)
@@ -224,11 +214,9 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return
 
-    // Store files for preview first (so user can see and remove them)
     const newFiles = Array.from(files)
     setPendingFiles((prev) => [...prev, ...newFiles])
 
-    // Upload files immediately (since ticket already exists)
     setUploadingImages(true)
     try {
       const uploadPromises = newFiles.map(async (file) => {
@@ -251,11 +239,9 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
 
       const results = await Promise.all(uploadPromises)
       
-      // Remove successfully uploaded files from pending list
       const uploadedFiles = results.map((r) => r.file)
       setPendingFiles((prev) => prev.filter((file) => !uploadedFiles.includes(file)))
       
-      // Refresh ticket to get updated images
       const ticketResponse = await fetch(`/api/tickets/${ticket.id}`)
       if (ticketResponse.ok) {
         const ticketData = await ticketResponse.json()
@@ -267,7 +253,6 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
     } catch (error) {
       console.error('Error uploading images:', error)
       showAlert.error('Failed to upload some images')
-      // Remove failed files from pending
       setPendingFiles((prev) => prev.filter((file) => !newFiles.includes(file)))
     } finally {
       setUploadingImages(false)
@@ -338,7 +323,6 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
       })
 
       if (response.ok) {
-        // Refresh ticket to get updated images
         const ticketResponse = await fetch(`/api/tickets/${ticket.id}`)
         if (ticketResponse.ok) {
           const ticketData = await ticketResponse.json()
@@ -385,7 +369,6 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
 
   const currentTicket = updatedTicket || ticket
   
-  // Generate the full URL for the ticket details page
   const [ticketUrl, setTicketUrl] = useState<string>('')
   
   useEffect(() => {
@@ -398,17 +381,14 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   const handlePrintQR = () => {
     if (!ticketUrl || !qrCodeRef.current) return
     
-    // Create a new window with only the QR code
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
 
-    // Get the QR code SVG
     const qrSvg = qrCodeRef.current.querySelector('svg')
     if (!qrSvg) return
 
     const qrSvgContent = qrSvg.outerHTML
 
-    // Create print-friendly HTML
     const printContent = `
       <!DOCTYPE html>
       <html>
@@ -477,11 +457,9 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
     printWindow.document.write(printContent)
     printWindow.document.close()
 
-    // Wait for content to load, then print
     printWindow.onload = () => {
       setTimeout(() => {
         printWindow.print()
-        // Close window after printing (with delay to allow print dialog to open)
         setTimeout(() => {
           printWindow.close()
         }, 250)
@@ -497,10 +475,8 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
         throw new Error('Failed to generate invoice')
       }
 
-      // Create blob from response
       const blob = await response.blob()
       
-      // Create download link
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
@@ -508,7 +484,6 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
       document.body.appendChild(link)
       link.click()
       
-      // Cleanup
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       

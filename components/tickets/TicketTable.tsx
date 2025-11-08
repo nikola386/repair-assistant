@@ -22,7 +22,6 @@ interface TicketTableProps {
 export default function TicketTable({ tickets }: TicketTableProps) {
   const { t } = useLanguage()
   
-  // Load persisted sorting state
   const [sorting, setSorting] = useState<SortingState>(() => {
     if (typeof window !== 'undefined') {
       const saved = filterPersistence.loadTicketsSorting()
@@ -32,7 +31,6 @@ export default function TicketTable({ tickets }: TicketTableProps) {
   })
   const [columnFilters] = useState<ColumnFiltersState>([])
   
-  // Persist sorting state when it changes
   useEffect(() => {
     filterPersistence.saveTicketsSorting(sorting)
   }, [sorting])

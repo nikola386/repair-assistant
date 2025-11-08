@@ -16,7 +16,6 @@ export async function GET(
   const { session, response } = await requireAuthAndPermission(request, Permission.VIEW_TICKETS)
   if (response) return response
 
-  // Get user's storeId
   const user = await userStorage.findById(session.user.id)
   if (!user || !user.storeId) {
     logger.error('User or store not found', { userId: session.user.id }, requestId)
@@ -61,7 +60,6 @@ export async function PATCH(
   const { session, response } = await requireAuthAndPermission(request, Permission.EDIT_TICKETS)
   if (response) return response
 
-  // Get user's storeId
   const user = await userStorage.findById(session.user.id)
   if (!user || !user.storeId) {
     logger.error('User or store not found', { userId: session.user.id }, requestId)
@@ -82,13 +80,11 @@ export async function PATCH(
       notes,
     } = body
 
-    // Validate status if provided
     const validStatuses: WarrantyStatus[] = ['active', 'expired', 'voided', 'claimed']
     const validatedStatus: WarrantyStatus | undefined = status && validStatuses.includes(status as WarrantyStatus) 
       ? (status as WarrantyStatus) 
       : undefined
 
-    // Validate warranty type if provided
     const validTypes: WarrantyType[] = ['parts', 'labor', 'both']
     const validatedType: WarrantyType | undefined = warrantyType && validTypes.includes(warrantyType as WarrantyType)
       ? (warrantyType as WarrantyType)
@@ -138,7 +134,6 @@ export async function DELETE(
   const { session, response } = await requireAuthAndPermission(request, Permission.EDIT_TICKETS)
   if (response) return response
 
-  // Get user's storeId
   const user = await userStorage.findById(session.user.id)
   if (!user || !user.storeId) {
     logger.error('User or store not found', { userId: session.user.id }, requestId)

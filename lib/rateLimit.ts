@@ -14,7 +14,6 @@ class RateLimiter {
   private readonly cleanupInterval: NodeJS.Timeout
 
   constructor() {
-    // Clean up expired entries every 5 minutes
     this.cleanupInterval = setInterval(() => {
       this.cleanup()
     }, 5 * 60 * 1000)
@@ -41,7 +40,6 @@ class RateLimiter {
     const entry = this.store.get(identifier)
 
     if (!entry || entry.resetTime < now) {
-      // Create new entry or reset expired entry
       this.store.set(identifier, {
         count: 1,
         resetTime: now + windowMs,
@@ -85,14 +83,9 @@ class RateLimiter {
   }
 }
 
-// Singleton instance
 const rateLimiter = new RateLimiter()
 
-/**
- * Get client identifier from request (IP address)
- */
 function getClientIdentifier(request: NextRequest): string {
-  // Try to get IP from headers (handles proxies)
   const forwarded = request.headers.get('x-forwarded-for')
   const realIp = request.headers.get('x-real-ip')
   const ip = forwarded?.split(',')[0]?.trim() || realIp || 'unknown'
@@ -132,11 +125,9 @@ export function rateLimit(
     )
   }
 
-  // Add rate limit headers to successful requests
   const remaining = rateLimiter.getRemaining(identifier, limit)
   const resetTime = rateLimiter.getResetTime(identifier)
   
-  // Note: Headers are added in the route handler response, not here
   return null
 }
 

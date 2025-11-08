@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
   const session = authResult.session
 
   try {
-    // Get user's storeId from database
     const user = await userStorage.findById(session.user.id)
     if (!user || !user.storeId) {
       return NextResponse.json(
@@ -36,7 +35,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, role } = inviteSchema.parse(body)
 
-    // Check if user already exists
     const existingUser = await userStorage.findByEmail(email)
     if (existingUser && existingUser.storeId === user.storeId) {
       return NextResponse.json(
@@ -45,7 +43,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create invitation
     const invitation = await userStorage.createInvitation({
       email,
       storeId: user.storeId,
@@ -53,7 +50,6 @@ export async function POST(request: NextRequest) {
       invitedBy: session.user.id,
     })
 
-    // Send invitation email
     await emailService.sendInvitationEmail(
       email,
       invitation.token,

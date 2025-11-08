@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
   if (response) return response
 
   try {
-    // Get user's storeId
     const storeId = await userStorage.getStoreId(session.user.id)
     if (!storeId) {
       return NextResponse.json(
@@ -36,7 +35,6 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Fetch store and settings
     const store = await db.store.findUnique({
       where: { id: storeId },
     }) as any
@@ -50,7 +48,6 @@ export async function GET(request: NextRequest) {
 
     let settings = await settingsStorage.findByStoreId(storeId)
     
-    // If settings don't exist, return defaults
     if (!settings) {
       settings = {
         id: '',
@@ -64,7 +61,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Convert taxRate from Decimal to number if it exists
     const storeWithTaxRate = {
       ...store,
       taxRate: store.taxRate instanceof Decimal ? store.taxRate.toNumber() : store.taxRate ?? null,
@@ -85,7 +81,6 @@ export async function PATCH(request: NextRequest) {
   if (response) return response
 
   try {
-    // Get user's storeId
     const storeId = await userStorage.getStoreId(session.user.id)
     if (!storeId) {
       return NextResponse.json(
@@ -97,11 +92,9 @@ export async function PATCH(request: NextRequest) {
     const contentType = request.headers.get('content-type') || ''
     const isFormData = contentType.includes('multipart/form-data')
     
-    // Handle FormData (store updates with logo)
     if (isFormData) {
       const formData = await request.formData()
       
-      // Store fields
       const storeName = formData.get('storeName') as string | null
       const street = formData.get('street') as string | null
       const city = formData.get('city') as string | null
@@ -118,13 +111,11 @@ export async function PATCH(request: NextRequest) {
       const logoFile = formData.get('logo') as File | null
       const removeLogo = formData.get('removeLogo') === 'true'
       
-      // Settings fields
       const primaryColor = formData.get('primaryColor') as string | null
       const secondaryColor = formData.get('secondaryColor') as string | null
       const language = formData.get('language') as string | null
       const defaultWarrantyPeriodDays = formData.get('defaultWarrantyPeriodDays') as string | null
 
-      // Get existing store
       const existingStore = await db.store.findUnique({
         where: { id: storeId },
       })
@@ -138,22 +129,17 @@ export async function PATCH(request: NextRequest) {
 
       let logoUrl: string | null = existingStore.logo
 
-      // Handle logo removal if requested
       if (removeLogo) {
-        // Delete old logo if exists
         if (existingStore.logo) {
           try {
             await deleteFile(existingStore.logo)
           } catch (error) {
             console.error('Error deleting logo:', error)
-            // Continue even if deletion fails
           }
         }
         logoUrl = null
       }
-      // Handle logo upload if provided
       else if (logoFile && logoFile.size > 0) {
-        // Validate file type
         if (!validateFileType(logoFile, ALLOWED_IMAGE_TYPES)) {
           return NextResponse.json(
             { error: 'Invalid file type. Only images are allowed.' },
@@ -161,7 +147,6 @@ export async function PATCH(request: NextRequest) {
           )
         }
 
-        // Validate file size
         if (!validateFileSize(logoFile, MAX_FILE_SIZE)) {
           return NextResponse.json(
             { error: 'File size too large. Maximum size is 2MB.' },
@@ -169,7 +154,6 @@ export async function PATCH(request: NextRequest) {
           )
         }
 
-        // Validate file content using magic bytes
         const isValidContent = await validateFileContent(logoFile, logoFile.type)
         if (!isValidContent) {
           return NextResponse.json(
@@ -178,20 +162,16 @@ export async function PATCH(request: NextRequest) {
           )
         }
 
-        // Delete old logo if exists
         if (existingStore.logo) {
           try {
             await deleteFile(existingStore.logo)
           } catch (error) {
             console.error('Error deleting old logo:', error)
-            // Continue even if deletion fails
           }
         }
 
-        // Compress and convert image to JPG
         const processedFile = await compressAndConvertToJpg(logoFile)
 
-        // Generate unique filename using secure random (use processed file name for correct extension)
         let fileName: string
         try {
           fileName = generateUniqueFileName('stores', storeId, processedFile.name, ALLOWED_IMAGE_EXTENSIONS, storeId)
@@ -202,18 +182,15 @@ export async function PATCH(request: NextRequest) {
           )
         }
 
-        // Upload file to storage (blob or local)
         logoUrl = await uploadFile(fileName, processedFile, {
           access: 'public',
           contentType: processedFile.type,
         })
       }
 
-      // Build address string from components if available
       const addressParts = [street, city, state, postalCode, country].filter(Boolean)
       const address = addressParts.length > 0 ? addressParts.join(', ') : null
 
-      // Update store
       const storeUpdateData: any = {}
       if (storeName !== null) storeUpdateData.name = storeName.trim()
       if (address !== null) storeUpdateData.address = address
@@ -249,7 +226,6 @@ export async function PATCH(request: NextRequest) {
         })
       }
 
-      // Update settings if provided
       const updateSettings: { primaryColor?: string; secondaryColor?: string; language?: string; defaultWarrantyPeriodDays?: number } = {}
       
       if (primaryColor || secondaryColor || language || defaultWarrantyPeriodDays !== null) {
@@ -302,11 +278,9 @@ export async function PATCH(request: NextRequest) {
       )
     }
     
-    // Handle JSON (colors and language for backward compatibility)
     const body = await request.json()
     const { primaryColor, secondaryColor, language, defaultWarrantyPeriodDays } = body
 
-    // Validate color format
     if (primaryColor) {
       const colorError = validateHexColor(primaryColor, 'Primary color')
       if (colorError) {

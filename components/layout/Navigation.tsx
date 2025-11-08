@@ -18,7 +18,6 @@ export default function Navigation() {
   const { data: session, status } = useSession()
   const [permissions, setPermissions] = useState<Set<Permission>>(new Set())
 
-  // Navbar background on scroll
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 100) {
@@ -34,7 +33,6 @@ export default function Navigation() {
     }
   }, [])
 
-  // Handle navigation links with smooth scrolling
   useEffect(() => {
     const handleNavClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -44,12 +42,9 @@ export default function Navigation() {
         e.preventDefault()
         const targetId = anchor.getAttribute('href')
         if (targetId) {
-          // If we're not on the home page, navigate there first
           if (pathname !== '/') {
             router.push(`/${targetId}`)
-            // The scroll will be handled by the hash navigation handler in Home component
           } else {
-            // We're on home page, just scroll
             const element = document.querySelector(targetId)
             if (element) {
               const headerOffset = 80
@@ -60,7 +55,6 @@ export default function Navigation() {
                 top: offsetPosition,
                 behavior: 'smooth'
               })
-              // Close mobile menu if open
               setNavMenuActive(false)
             }
           }
@@ -68,7 +62,6 @@ export default function Navigation() {
       }
     }
 
-    // Use event delegation on document
     document.addEventListener('click', handleNavClick)
 
     return () => {
@@ -76,7 +69,6 @@ export default function Navigation() {
     }
   }, [pathname, router])
 
-  // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const hamburger = document.querySelector('.hamburger')
@@ -92,7 +84,6 @@ export default function Navigation() {
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
-  // Handle hash links when page loads (for direct navigation)
   useEffect(() => {
     if (pathname === '/' && window.location.hash) {
       const hash = window.location.hash
@@ -108,7 +99,6 @@ export default function Navigation() {
     }
   }, [pathname])
 
-  // Fetch user permissions (with caching)
   useEffect(() => {
     if (session?.user?.id) {
       fetchPermissions(session.user.id)
@@ -121,7 +111,6 @@ export default function Navigation() {
         })
     } else {
       setPermissions(new Set())
-      // Clear cache when user logs out
       invalidatePermissionsCache()
     }
   }, [session])

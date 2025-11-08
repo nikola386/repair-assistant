@@ -28,11 +28,10 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadedImages, setUploadedImages] = useState<string[]>([])
   const [uploadingImages, setUploadingImages] = useState(false)
-  const [pendingFiles, setPendingFiles] = useState<File[]>([]) // Files selected before ticket creation
+  const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   
-  // Customer autocomplete state
   const [customerSearchResults, setCustomerSearchResults] = useState<Customer[]>([])
   const [isSearchingCustomers, setIsSearchingCustomers] = useState(false)
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false)
@@ -60,9 +59,7 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
 
     const currentTicketId = targetTicketId || ticketId
     
-    // If ticketId is not provided (new ticket), store files to upload after ticket creation
     if (!currentTicketId) {
-      // Store files for later upload after ticket creation
       setPendingFiles((prev) => [...prev, ...Array.from(files)])
       return
     }
@@ -145,15 +142,12 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
 
     setIsSubmitting(true)
     try {
-      // Create ticket first and get the ticket ID
       const newTicketId = await onSubmit(formData)
       
-      // If there are pending files and we got a ticket ID, upload them
       if (newTicketId && pendingFiles.length > 0) {
         await uploadPendingImages(newTicketId)
       }
       
-      // Reset form after successful submission
       if (!initialData) {
         setFormData({
           customerName: '',
@@ -171,7 +165,6 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
         })
         setUploadedImages([])
         setPendingFiles([])
-        // Clear file input
         if (fileInputRef.current) {
           fileInputRef.current.value = ''
         }
@@ -184,7 +177,6 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
     }
   }
 
-  // Debounced customer search
   useEffect(() => {
     const searchQuery = formData.customerPhone.trim() || formData.customerName.trim()
     
@@ -195,7 +187,6 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
     }
 
     if (selectedCustomerId) {
-      // Don't search if a customer is already selected
       return
     }
 
@@ -215,12 +206,11 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
       } finally {
         setIsSearchingCustomers(false)
       }
-    }, 300) // 300ms debounce
+    }, 300)
 
     return () => clearTimeout(timeoutId)
   }, [formData.customerPhone, formData.customerName, selectedCustomerId])
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -254,7 +244,6 @@ export default function TicketForm({ onSubmit, onCancel, initialData, ticketId }
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     
-    // Reset selected customer if user manually changes phone or name
     if (name === 'customerPhone' || name === 'customerName') {
       setSelectedCustomerId(null)
     }

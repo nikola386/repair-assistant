@@ -5,17 +5,14 @@ import { del } from '@vercel/blob'
 import { Decimal } from '@prisma/client/runtime/library'
 import { inventoryStorage } from './inventoryStorage'
 import { warrantyStorage } from './warrantyStorage'
-// Prisma generates TicketImage type automatically - use it directly
 import type { TicketImage as PrismaTicketImage, Expense as PrismaExpense } from '@prisma/client'
 
-// Re-export as TicketImage for domain usage (convert Date to string)
 export type TicketImage = Omit<PrismaTicketImage, 'createdAt'> & {
   createdAt: string
   fileSize?: number
   mimeType?: string
 }
 
-// Map Prisma Expense to domain Expense
 const mapPrismaExpense = (expense: PrismaExpense): Expense => {
   return {
     id: expense.id,
@@ -29,17 +26,14 @@ const mapPrismaExpense = (expense: PrismaExpense): Expense => {
   }
 }
 
-// Generate unique ticket number
 const generateTicketNumber = (): string => {
   const timestamp = Date.now().toString(36).toUpperCase()
-  // Use secure random bytes instead of Math.random()
   const bytes = new Uint8Array(3)
   crypto.getRandomValues(bytes)
   const random = Array.from(bytes, byte => byte.toString(36)).join('').substring(0, 4).toUpperCase()
   return `TK-${timestamp}-${random}`
 }
 
-// Map Prisma TicketImage to domain TicketImage (minimal conversion)
 const mapPrismaImage = (image: PrismaTicketImage): TicketImage => {
   return {
     ...image,
@@ -49,14 +43,12 @@ const mapPrismaImage = (image: PrismaTicketImage): TicketImage => {
   } as TicketImage
 }
 
-// Helper function to get or create a customer
 const getOrCreateCustomer = async (
   name: string,
   email: string,
   phone: string,
   storeId: string
 ): Promise<string> => {
-  // Try to find existing customer by email and storeId (case-insensitive)
   const existing = await db.customer.findFirst({
     where: {
       storeId,
@@ -68,7 +60,6 @@ const getOrCreateCustomer = async (
   })
 
   if (existing) {
-    // Update customer info if it has changed
     await db.customer.update({
       where: { id: existing.id },
       data: {
@@ -80,7 +71,6 @@ const getOrCreateCustomer = async (
     return existing.id
   }
 
-  // Create new customer
   const newCustomer = await db.customer.create({
     data: {
       name,
@@ -93,8 +83,6 @@ const getOrCreateCustomer = async (
   return newCustomer.id
 }
 
-// Map Prisma RepairTicket with customer relation to domain RepairTicket
-// Uses Prisma generated types with include - no manual type definitions
 type PrismaTicketWithCustomer = Awaited<ReturnType<typeof db.repairTicket.findFirst<{ include: { customer: true } }>>>
 
 const mapPrismaTicket = (ticket: NonNullable<PrismaTicketWithCustomer>): RepairTicket => {
@@ -138,7 +126,6 @@ export const ticketStorage = {
       })
 
       const tickets = result.map(mapPrismaTicket)
-      // Load images and expenses for all tickets
       for (const ticket of tickets) {
         ticket.images = await ticketStorage.getImagesByTicketId(ticket.id)
         ticket.expenses = await ticketStorage.getExpensesByTicketId(ticket.id)
@@ -161,12 +148,10 @@ export const ticketStorage = {
     try {
       const offset = (page - 1) * limit
 
-      // Build where clause
       const where: any = {
-        storeId, // Always filter by store
+        storeId,
       }
 
-      // Build search condition
       if (search && search.trim()) {
         const searchTerm = search.trim()
         where.OR = [
@@ -181,7 +166,6 @@ export const ticketStorage = {
         ]
       }
 
-      // Build status filter - support comma-separated values (e.g., "pending,in_progress")
       if (status) {
         const statuses = status.split(',').map(s => s.trim()).filter(Boolean)
         if (statuses.length === 1) {
@@ -191,7 +175,6 @@ export const ticketStorage = {
         }
       }
 
-      // Build priority filter - support comma-separated values (e.g., "high,urgent")
       if (priority) {
         const priorities = priority.split(',').map(p => p.trim()).filter(Boolean)
         if (priorities.length === 1) {
@@ -201,7 +184,6 @@ export const ticketStorage = {
         }
       }
 
-      // Get total count and paginated results
       const [total, result] = await Promise.all([
         db.repairTicket.count({ where }),
         db.repairTicket.findMany({
@@ -218,7 +200,6 @@ export const ticketStorage = {
       ])
 
       const tickets = result.map(mapPrismaTicket)
-      // Load images and expenses for all tickets
       for (const ticket of tickets) {
         ticket.images = await ticketStorage.getImagesByTicketId(ticket.id)
         ticket.expenses = await ticketStorage.getExpensesByTicketId(ticket.id)
@@ -244,7 +225,7 @@ export const ticketStorage = {
       const result = await db.repairTicket.findFirst({
         where: {
           id,
-          storeId, // Ensure ticket belongs to the store
+          storeId,
         },
         include: {
           customer: true,
@@ -269,7 +250,7 @@ export const ticketStorage = {
       const result = await db.repairTicket.findFirst({
         where: {
           ticketNumber,
-          storeId, // Ensure ticket belongs to the store
+          storeId,
         },
         include: {
           customer: true,
@@ -288,7 +269,6 @@ export const ticketStorage = {
 
   create: async (input: CreateTicketInput, storeId: string): Promise<RepairTicket> => {
     try {
-      // Get or create customer
       const customerId = await getOrCreateCustomer(
         input.customerName,
         input.customerEmail,
@@ -298,7 +278,6 @@ export const ticketStorage = {
 
       const ticketNumber = generateTicketNumber()
 
-      // Create ticket
       await db.repairTicket.create({
         data: {
           ticketNumber,
@@ -317,7 +296,6 @@ export const ticketStorage = {
         },
       })
 
-      // Fetch the ticket with customer data
       const ticket = await ticketStorage.getByTicketNumber(ticketNumber, storeId)
       if (!ticket) {
         throw new Error('Failed to retrieve created ticket')
@@ -331,13 +309,11 @@ export const ticketStorage = {
 
   update: async (id: string, input: UpdateTicketInput, storeId: string): Promise<RepairTicket | null> => {
     try {
-      // Verify ticket belongs to store first
       const currentTicket = await ticketStorage.getById(id, storeId)
       if (!currentTicket) {
         return null
       }
 
-      // Handle customer updates - get or create customer if any customer fields changed
       let customerId: string | undefined
       if (input.customerName !== undefined || input.customerEmail !== undefined || input.customerPhone !== undefined) {
         const newCustomerName = input.customerName ?? currentTicket.customerName
@@ -347,7 +323,6 @@ export const ticketStorage = {
         customerId = await getOrCreateCustomer(newCustomerName, newCustomerEmail, newCustomerPhone, storeId)
       }
 
-      // Build dynamic update object
       const updateData: any = {}
 
       if (customerId !== undefined) {
@@ -391,7 +366,6 @@ export const ticketStorage = {
       }
 
       if (Object.keys(updateData).length === 0) {
-        // No updates, just return the existing ticket
         return currentTicket
       }
 
@@ -400,37 +374,29 @@ export const ticketStorage = {
         data: updateData,
       })
 
-      // Fetch the ticket with customer data joined
       const ticket = await ticketStorage.getById(id, storeId)
       if (!ticket) {
         return null
       }
 
-      // Auto-create warranty if ticket is completed and has actualCompletionDate
-      // Check if ticket is now completed (either was just set to completed, or was already completed)
       const isCompleted = input.status === 'completed' || ticket.status === 'completed'
-      // Check if we have a completion date (either in input or already on ticket)
       const hasCompletionDate = input.actualCompletionDate || ticket.actualCompletionDate
       
       if (isCompleted && hasCompletionDate) {
         try {
-          // Check if warranty already exists
           const existingWarranty = await warrantyStorage.getByTicketId(id, storeId)
           if (!existingWarranty) {
-            // Get settings for default warranty period
             const settings = await db.settings.findUnique({
               where: { storeId },
             })
             const warrantyPeriodDays = settings?.defaultWarrantyPeriodDays ?? 30
 
-            // Use the completion date from input if provided, otherwise use the ticket's completion date
             const completionDate = input.actualCompletionDate || ticket.actualCompletionDate
             if (!completionDate) {
               console.warn('Cannot create warranty: no completion date available')
               return ticket
             }
 
-            // Create warranty
             await warrantyStorage.create(
               {
                 ticketId: id,
@@ -442,7 +408,6 @@ export const ticketStorage = {
             )
           }
         } catch (warrantyError) {
-          // Log error but don't fail the ticket update
           console.error('Error auto-creating warranty:', warrantyError)
         }
       }
@@ -456,36 +421,29 @@ export const ticketStorage = {
 
   delete: async (id: string, storeId: string): Promise<boolean> => {
     try {
-      // Verify ticket belongs to store first
       const ticket = await ticketStorage.getById(id, storeId)
       if (!ticket) {
         return false
       }
 
-      // Get all images associated with the ticket before deleting
       const images = await ticketStorage.getImagesByTicketId(id)
 
-      // Delete all images from Vercel Blob
       for (const image of images) {
         if (image.filePath) {
-          // Check if it's a Vercel Blob URL (starts with https://)
           if (image.filePath.startsWith('https://')) {
             try {
               await del(image.filePath)
             } catch (fileError) {
               console.error(`Error deleting blob for image ${image.id}:`, fileError)
-              // Continue with deletion even if blob deletion fails
             }
           }
         }
       }
 
-      // Delete image records from database (they might be deleted by foreign key cascade, but be explicit)
       await db.ticketImage.deleteMany({
         where: { ticketId: id },
       })
 
-      // Delete the ticket
       const result = await db.repairTicket.delete({
         where: { id },
       })
@@ -497,7 +455,6 @@ export const ticketStorage = {
     }
   },
 
-  // Image-related methods
   getImagesByTicketId: async (ticketId: string): Promise<TicketImage[]> => {
     try {
       const result = await db.ticketImage.findMany({
@@ -558,24 +515,20 @@ export const ticketStorage = {
 
   deleteImage: async (imageId: string): Promise<boolean> => {
     try {
-      // Get image info before deleting
       const image = await ticketStorage.getImageById(imageId)
 
       if (!image) {
         return false
       }
 
-      // Delete from storage (blob or local)
       if (image.filePath) {
         try {
           await deleteFile(image.filePath)
         } catch (fileError) {
           console.error('Error deleting file:', fileError)
-          // Continue with database deletion even if file deletion fails
         }
       }
 
-      // Delete database record
       await db.ticketImage.delete({
         where: { id: imageId },
       })
@@ -587,7 +540,6 @@ export const ticketStorage = {
     }
   },
 
-  // Expense-related methods
   getExpensesByTicketId: async (ticketId: string): Promise<Expense[]> => {
     try {
       const result = await db.expense.findMany({
@@ -623,9 +575,7 @@ export const ticketStorage = {
 
   createExpense: async (input: CreateExpenseInput): Promise<Expense> => {
     try {
-      // If expense is linked to an inventory item, deduct quantity
       if (input.inventoryItemId) {
-        // Get the ticket to find the storeId
         const ticket = await db.repairTicket.findUnique({
           where: { id: input.ticketId },
         })
@@ -634,18 +584,15 @@ export const ticketStorage = {
           throw new Error('Ticket not found')
         }
 
-        // Verify inventory item belongs to the same store
         const inventoryItem = await inventoryStorage.getById(input.inventoryItemId, ticket.storeId)
         if (!inventoryItem) {
           throw new Error('Inventory item not found or does not belong to this store')
         }
 
-        // Check if enough quantity is available
         if (inventoryItem.currentQuantity < input.quantity) {
           throw new Error(`Insufficient inventory. Available: ${inventoryItem.currentQuantity}, Required: ${input.quantity}`)
         }
 
-        // Deduct quantity from inventory
         await inventoryStorage.adjustQuantity(input.inventoryItemId, ticket.storeId, -input.quantity)
       }
 
@@ -668,13 +615,11 @@ export const ticketStorage = {
 
   updateExpense: async (expenseId: string, input: UpdateExpenseInput): Promise<Expense | null> => {
     try {
-      // Get existing expense to check if it's linked to inventory
       const existingExpense = await ticketStorage.getExpenseById(expenseId)
       if (!existingExpense) {
         throw new Error('Expense not found')
       }
 
-      // If expense is linked to inventory and quantity is being updated, adjust inventory
       if (existingExpense.inventoryItemId && input.quantity !== undefined) {
         const ticket = await db.repairTicket.findUnique({
           where: { id: existingExpense.ticketId },
@@ -687,11 +632,8 @@ export const ticketStorage = {
         const quantityChange = input.quantity - existingExpense.quantity
         
         if (quantityChange !== 0) {
-          // Check if enough quantity is available (if decreasing)
           if (quantityChange < 0) {
-            // Restoring quantity, no check needed
           } else {
-            // Deducting more quantity, check availability
             const inventoryItem = await inventoryStorage.getById(existingExpense.inventoryItemId, ticket.storeId)
             if (!inventoryItem) {
               throw new Error('Inventory item not found')
@@ -701,7 +643,6 @@ export const ticketStorage = {
             }
           }
 
-          // Adjust inventory quantity
           await inventoryStorage.adjustQuantity(existingExpense.inventoryItemId, ticket.storeId, -quantityChange)
         }
       }
@@ -719,7 +660,6 @@ export const ticketStorage = {
       }
 
       if (Object.keys(updateData).length === 0) {
-        // No updates, just return the existing expense
         return existingExpense
       }
 
@@ -737,22 +677,18 @@ export const ticketStorage = {
 
   deleteExpense: async (expenseId: string): Promise<boolean> => {
     try {
-      // Get existing expense to check if it's linked to inventory
       const existingExpense = await ticketStorage.getExpenseById(expenseId)
       
-      // Delete the expense first
       await db.expense.delete({
         where: { id: expenseId },
       })
 
-      // If expense was linked to inventory, restore the quantity
       if (existingExpense?.inventoryItemId) {
         const ticket = await db.repairTicket.findUnique({
           where: { id: existingExpense.ticketId },
         })
 
         if (ticket && ticket.storeId) {
-          // Restore quantity to inventory
           await inventoryStorage.adjustQuantity(
             existingExpense.inventoryItemId,
             ticket.storeId,

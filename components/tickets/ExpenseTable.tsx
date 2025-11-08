@@ -33,7 +33,6 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
   const inventorySearchRef = useRef<HTMLInputElement>(null)
   const inventoryDropdownRef = useRef<HTMLDivElement>(null)
   
-  // Handle external trigger to add expense
   useEffect(() => {
     if (triggerAdd && editable && !isAdding) {
       setIsAdding(true)
@@ -50,7 +49,6 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
     price: '',
   })
   
-  // Fetch inventory items on mount
   useEffect(() => {
     const fetchInventoryItems = async () => {
       try {
@@ -100,7 +98,6 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
     }
   }
 
-  // Filter inventory items based on search query
   useEffect(() => {
     if (!inventorySearchQuery.trim()) {
       setFilteredInventoryItems([])
@@ -115,13 +112,12 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
         const skuMatch = item.sku?.toLowerCase().includes(query)
         return nameMatch || skuMatch
       })
-      .slice(0, 20) // Limit to 20 results for performance
+      .slice(0, 20)
 
     setFilteredInventoryItems(filtered)
     setShowInventoryDropdown(filtered.length > 0)
   }, [inventorySearchQuery, inventoryItems])
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -178,7 +174,6 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
       return
     }
 
-    // If inventory item is selected, verify quantity is available
     if (newExpense.inventoryItemId) {
       const selectedItem = inventoryItems.find(item => item.id === newExpense.inventoryItemId)
       if (selectedItem && selectedItem.currentQuantity < quantity) {
@@ -202,7 +197,6 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
 
       if (response.ok) {
         await fetchExpenses()
-        // Refresh inventory items to reflect updated quantities
         const inventoryResponse = await fetch('/api/inventory?limit=1000')
         if (inventoryResponse.ok) {
           const inventoryData = await inventoryResponse.json()

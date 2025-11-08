@@ -64,20 +64,17 @@ function generateChartData(
     } | null
   }>
 ): ChartDataPoint[] {
-  // Determine interval based on period length
-  let intervalDays = 1 // Daily for 7d and 30d
+  let intervalDays = 1
   if (days > 30 && days <= 180) {
-    intervalDays = 7 // Weekly for 180d
+    intervalDays = 7
   } else if (days > 180) {
-    intervalDays = 30 // Monthly for 360d
+    intervalDays = 30
   }
 
-  // Generate date buckets
   const now = new Date()
   const dataPoints: ChartDataPoint[] = []
   const dataMap = new Map<string, { income: number; expenses: number }>()
 
-  // Initialize all date buckets with zeros
   for (let i = days; i >= 0; i -= intervalDays) {
     const date = new Date(now)
     date.setDate(date.getDate() - i)
@@ -85,9 +82,8 @@ function generateChartData(
     
     let dateKey: string
     if (intervalDays === 1) {
-      dateKey = date.toISOString().split('T')[0] // YYYY-MM-DD
+      dateKey = date.toISOString().split('T')[0]
     } else if (intervalDays === 7) {
-      // Get start of week (Monday)
       const weekStart = new Date(date)
       const dayOfWeek = weekStart.getDay()
       const diff = weekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
@@ -95,14 +91,12 @@ function generateChartData(
       weekStart.setHours(0, 0, 0, 0)
       dateKey = weekStart.toISOString().split('T')[0]
     } else {
-      // Monthly
       dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
     }
     
     dataMap.set(dateKey, { income: 0, expenses: 0 })
   }
 
-  // Aggregate income by completion date (or creation date if no completion date)
   for (const ticket of completedTickets) {
     const completionDate = ticket.actualCompletionDate || ticket.createdAt
     const cost = ticket.actualCost ? ticket.actualCost.toNumber() : (ticket.estimatedCost ? ticket.estimatedCost.toNumber() : 0)
@@ -132,12 +126,10 @@ function generateChartData(
     }
   }
 
-  // Aggregate expenses by creation date
   for (const expense of expenses) {
     const date = new Date(expense.createdAt)
     date.setHours(0, 0, 0, 0)
     
-    // Use costPrice from inventory item if available, otherwise use expense price
     let costPerUnit = expense.price.toNumber()
     if (expense.inventoryItemId && expense.inventoryItem?.costPrice) {
       costPerUnit = expense.inventoryItem.costPrice.toNumber()
@@ -165,7 +157,6 @@ function generateChartData(
     }
   }
 
-  // Convert map to array and calculate profit and profit percentage
   for (const [dateKey, values] of dataMap.entries()) {
     const profit = Math.round((values.income - values.expenses) * 100) / 100
     const profitPercentage = values.income > 0 ? Math.round((profit / values.income) * 100 * 100) / 100 : 0
@@ -179,7 +170,6 @@ function generateChartData(
     })
   }
 
-  // Sort by date
   dataPoints.sort((a, b) => a.date.localeCompare(b.date))
 
   return dataPoints
@@ -195,7 +185,6 @@ export async function GET(request: NextRequest) {
   }
   const session = authResult.session
 
-  // Get user's storeId
   const storeId = await userStorage.getStoreId(session.user.id)
   if (!storeId) {
     logger.error('User store not found', { userId: session.user.id }, requestId)
@@ -209,7 +198,6 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const period = searchParams.get('period') || '30d'
 
-    // Parse period
     let days = 30
     switch (period) {
       case '7d':
@@ -232,15 +220,13 @@ export async function GET(request: NextRequest) {
 
     logger.info('Fetching dashboard stats', { userId: session.user.id, storeId, period, days }, requestId)
 
-    // Build where clause for date filtering and store filtering
     const dateFilter = {
-      storeId: storeId, // Filter by store
+      storeId: storeId,
       createdAt: {
         gte: startDate,
       },
     }
 
-    // Get all tickets in the date range for this store
     const tickets = await db.repairTicket.findMany({
       where: dateFilter,
       select: {
@@ -255,11 +241,9 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    // Filter to only completed tickets for income and profit calculations
     const completedTickets = tickets.filter((t: typeof tickets[0]) => t.status === 'completed')
     const completedTicketIds = completedTickets.map(t => t.id)
 
-    // Get expenses only for completed tickets in the date range, with creation date and inventory item info
     const expenses = completedTicketIds.length > 0 
       ? await (db as any).expense.findMany({
           where: {
@@ -277,23 +261,18 @@ export async function GET(request: NextRequest) {
         })
       : []
 
-    // Calculate statistics with default values of 0
     const totalRepairs = tickets.length || 0
     const inProgressRepairs = tickets.filter((t: typeof tickets[0]) => t.status === 'in_progress').length || 0
     const waitingRepairs = tickets.filter((t: typeof tickets[0]) => t.status === 'pending' || t.status === 'waiting_parts').length || 0
 
-    // Calculate income: sum of actualCost (or estimatedCost if actualCost is null) for completed tickets only
     let income = 0
     for (const ticket of completedTickets) {
-      // For completed tickets, prefer actualCost, fall back to estimatedCost
       const cost = ticket.actualCost ? ticket.actualCost.toNumber() : (ticket.estimatedCost ? ticket.estimatedCost.toNumber() : 0)
       income += cost
     }
 
-    // Calculate expenses: sum of all expense amounts using costPrice for inventory items
     let totalExpenses = 0
     for (const expense of expenses) {
-      // Use costPrice from inventory item if available, otherwise use expense price
       let costPerUnit = expense.price.toNumber()
       const expenseWithInventory = expense as typeof expense & { inventoryItemId?: string | null; inventoryItem?: { costPrice: Decimal | null } | null }
       if (expenseWithInventory.inventoryItemId && expenseWithInventory.inventoryItem?.costPrice) {
@@ -304,14 +283,10 @@ export async function GET(request: NextRequest) {
       totalExpenses += amount
     }
 
-    // Gross profit = Income - Expenses
     const grossProfit = income - totalExpenses
 
-    // Gross profit percentage = (Gross Profit / Income) * 100
-    // Avoid division by zero
     const grossProfitPercentage = income > 0 ? (grossProfit / income) * 100 : 0
 
-    // Calculate Average Repair Time (in days) for completed tickets
     let totalRepairTime = 0
     let completedCount = 0
     for (const ticket of completedTickets) {
@@ -326,11 +301,8 @@ export async function GET(request: NextRequest) {
     }
     const averageRepairTime = completedCount > 0 ? totalRepairTime / completedCount : 0
 
-    // Calculate Completion Rate (percentage of completed tickets)
     const completionRate = totalRepairs > 0 ? (completedTickets.length / totalRepairs) * 100 : 0
 
-    // Calculate Overdue Tickets (tickets past estimated completion date that aren't completed)
-    // Check all active tickets, not just those in the date range
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const allActiveTickets = await db.repairTicket.findMany({
@@ -353,26 +325,22 @@ export async function GET(request: NextRequest) {
       return estimatedDate < today
     }).length
 
-    // Calculate High Priority Tickets (high or urgent priority)
     const highPriorityTickets = tickets.filter((t: typeof tickets[0]) => {
       return t.priority === 'high' || t.priority === 'urgent'
     }).length
 
-    // Calculate Total Clients
     const totalClients = await db.customer.count({
       where: {
         storeId: storeId as any,
       } as any,
     })
 
-    // Calculate Period-over-Period Growth
-    // Get previous period data for comparison
-    const previousPeriodStartDate = getDateRange(days * 2) // Start of previous period
-    const previousPeriodEndDate = getDateRange(days) // End of previous period (same as current start)
+    const previousPeriodStartDate = getDateRange(days * 2)
+    const previousPeriodEndDate = getDateRange(days)
     
     const previousPeriodTickets = await db.repairTicket.findMany({
       where: {
-        storeId: storeId as any, // Type assertion for Prisma client
+        storeId: storeId as any,
         createdAt: {
           gte: previousPeriodStartDate,
           lt: startDate,
@@ -392,17 +360,15 @@ export async function GET(request: NextRequest) {
     }
     previousPeriodIncome = Math.round(previousPeriodIncome * 100) / 100
 
-    // Calculate revenue growth percentage
     let revenueGrowth: number | null = null
     if (previousPeriodIncome > 0 && income > 0) {
       revenueGrowth = Math.round(((income - previousPeriodIncome) / previousPeriodIncome) * 100 * 100) / 100
     } else if (previousPeriodIncome === 0 && income > 0) {
-      revenueGrowth = 100 // 100% growth if previous was 0
+      revenueGrowth = 100
     } else if (previousPeriodIncome > 0 && income === 0) {
-      revenueGrowth = -100 // -100% if current is 0
+      revenueGrowth = -100
     }
 
-    // Calculate Low Stock Items
     const inventoryItems = await (db as any).inventoryItem.findMany({
       where: {
         storeId: storeId
@@ -417,20 +383,16 @@ export async function GET(request: NextRequest) {
       return item.currentQuantity.toNumber() <= item.minQuantity.toNumber()
     }).length
 
-    // Calculate Status Distribution
     const statusCounts = new Map<string, number>()
     const statusOrder = ['pending', 'in_progress', 'waiting_parts', 'completed', 'cancelled']
     
-    // Initialize all statuses with 0
     statusOrder.forEach(status => statusCounts.set(status, 0))
     
-    // Count tickets by status
     tickets.forEach(ticket => {
       const currentCount = statusCounts.get(ticket.status) || 0
       statusCounts.set(ticket.status, currentCount + 1)
     })
     
-    // Create distribution array with percentages
     const statusDistribution: StatusDistributionItem[] = statusOrder.map(status => {
       const count = statusCounts.get(status) || 0
       const percentage = totalRepairs > 0 ? Math.round((count / totalRepairs) * 100 * 100) / 100 : 0
@@ -441,18 +403,17 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Generate chart data (time-series)
     const chartData = generateChartData(days, completedTickets, expenses)
 
     const stats: DashboardStats = {
       totalRepairs: totalRepairs || 0,
       inProgressRepairs: inProgressRepairs || 0,
       waitingRepairs: waitingRepairs || 0,
-      income: Math.round((income || 0) * 100) / 100, // Round to 2 decimal places
+      income: Math.round((income || 0) * 100) / 100,
       expenses: Math.round((totalExpenses || 0) * 100) / 100,
       grossProfit: Math.round((grossProfit || 0) * 100) / 100,
       grossProfitPercentage: Math.round((grossProfitPercentage || 0) * 100) / 100,
-      averageRepairTime: Math.round((averageRepairTime || 0) * 10) / 10, // Round to 1 decimal place
+      averageRepairTime: Math.round((averageRepairTime || 0) * 10) / 10,
       completionRate: Math.round((completionRate || 0) * 100) / 100,
       chartData,
       overdueTickets: overdueTickets || 0,
@@ -470,7 +431,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const duration = Date.now() - startTime
     logger.error('Error fetching dashboard stats', { error, duration }, requestId)
-    // Return default zero values instead of failing
     const defaultStats: DashboardStats = {
       totalRepairs: 0,
       inProgressRepairs: 0,

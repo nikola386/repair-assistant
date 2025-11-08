@@ -134,7 +134,6 @@ export default function InventoryTable({
     setAdjustQuantity('')
   }
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (openMenuId) {
@@ -154,7 +153,6 @@ export default function InventoryTable({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [openMenuId])
   
-  // Update menu position on scroll
   useEffect(() => {
     if (!openMenuId || !menuPosition) return
 

@@ -133,7 +133,6 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
     }
   }
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (openMenuId) {
@@ -153,7 +152,6 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [openMenuId])
   
-  // Update menu position on scroll
   useEffect(() => {
     if (!openMenuId || !menuPosition) return
 

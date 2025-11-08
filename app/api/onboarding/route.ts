@@ -43,7 +43,6 @@ export async function POST(request: NextRequest) {
     const secondaryColor = formData.get('secondaryColor') as string | null
     const language = formData.get('language') as string | null
 
-    // Validate required fields
     if (!storeName || storeName.trim().length === 0) {
       return NextResponse.json(
         { error: 'Store name is required' },
@@ -51,7 +50,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate colors if provided
     if (primaryColor) {
       const colorError = validateHexColor(primaryColor, 'Primary color')
       if (colorError) {
@@ -71,7 +69,6 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Validate language if provided
     if (language && !isValidLanguage(language)) {
       return NextResponse.json(
         { error: `Invalid language. Must be one of: ${SUPPORTED_LANGUAGES.join(', ')}` },
@@ -79,7 +76,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get user's store ID
     const storeId = await userStorage.getStoreId(session.user.id)
     if (!storeId) {
       return NextResponse.json(
@@ -88,16 +84,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get existing store to check for old logo
     const existingStore = await db.store.findUnique({
       where: { id: storeId },
     })
 
     let logoUrl: string | null = null
 
-    // Handle logo upload if provided
     if (logoFile && logoFile.size > 0) {
-      // Validate file type
       if (!validateFileType(logoFile, ALLOWED_IMAGE_TYPES)) {
         return NextResponse.json(
           { error: 'Invalid file type. Only images are allowed.' },
@@ -105,7 +98,6 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Validate file size
       if (!validateFileSize(logoFile, MAX_FILE_SIZE)) {
         return NextResponse.json(
           { error: 'File size too large. Maximum size is 2MB.' },
@@ -113,7 +105,6 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Validate file content using magic bytes
       const isValidContent = await validateFileContent(logoFile, logoFile.type)
       if (!isValidContent) {
         return NextResponse.json(
@@ -122,20 +113,16 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Delete old logo if exists
       if (existingStore?.logo) {
         try {
           await deleteFile(existingStore.logo)
         } catch (error) {
           console.error('Error deleting old logo:', error)
-          // Continue even if deletion fails
         }
       }
 
-      // Compress and convert image to JPG
       const processedFile = await compressAndConvertToJpg(logoFile)
 
-      // Generate unique filename using secure random (use processed file name for correct extension)
       let fileName: string
       try {
         fileName = generateUniqueFileName('stores', storeId, processedFile.name, ALLOWED_IMAGE_EXTENSIONS, storeId)
@@ -146,21 +133,17 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Upload file to storage (blob or local)
       logoUrl = await uploadFile(fileName, processedFile, {
         access: 'public',
         contentType: processedFile.type,
       })
     } else if (existingStore?.logo) {
-      // Keep existing logo if no new one provided
       logoUrl = existingStore.logo
     }
 
-    // Build address string from components if available
     const addressParts = [street, city, state, postalCode, country].filter(Boolean)
     const address = addressParts.length > 0 ? addressParts.join(', ') : null
 
-    // Update store with all information
     const updatedStore = await db.store.update({
       where: { id: storeId },
       data: { 
@@ -180,7 +163,6 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Update or create settings with colors and language
     const updatedSettings = await db.settings.upsert({
       where: { storeId },
       create: {
@@ -222,7 +204,6 @@ export async function GET(request: NextRequest) {
   const session = authResult.session
 
   try {
-    // Get user's store ID
     const storeId = await userStorage.getStoreId(session.user.id)
     if (!storeId) {
       return NextResponse.json(
@@ -231,7 +212,6 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get store info and settings
     const store = await db.store.findUnique({
       where: { id: storeId },
     })
@@ -240,7 +220,6 @@ export async function GET(request: NextRequest) {
       where: { storeId },
     })
 
-    // Check if onboarding is complete: store must be onboarded
     const isComplete = store?.onboarded === true
 
     return NextResponse.json(

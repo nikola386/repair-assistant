@@ -14,13 +14,11 @@ import { getCachedPermissions, setCachedPermissions, clearPermissionsCache } fro
  * @returns Promise that resolves to the permissions array
  */
 export async function fetchPermissions(userId: string): Promise<Permission[]> {
-  // Check cache first
   const cached = getCachedPermissions(userId)
   if (cached) {
     return cached
   }
 
-  // Fetch from API
   try {
     const response = await fetch('/api/users/permissions')
     if (!response.ok) {
@@ -29,7 +27,6 @@ export async function fetchPermissions(userId: string): Promise<Permission[]> {
     const data = await response.json()
     const permissions = data.permissions || []
     
-    // Cache the result
     setCachedPermissions(userId, permissions)
     
     return permissions
@@ -46,14 +43,11 @@ export async function fetchPermissions(userId: string): Promise<Permission[]> {
  * @returns Promise that resolves to true if the user has the permission
  */
 export async function checkPermission(userId: string, permission: Permission): Promise<boolean> {
-  // Check cache first
   const cached = getCachedPermissions(userId)
   if (cached) {
     return cached.includes(permission)
   }
 
-  // If cache is empty, fetch all permissions to cache them
-  // This is more efficient than fetching individual permissions
   try {
     const permissions = await fetchPermissions(userId)
     return permissions.includes(permission)

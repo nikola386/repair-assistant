@@ -17,7 +17,6 @@ export function getFromCache<T>(key: string): T | null {
       return JSON.parse(cached) as T
     }
   } catch (err) {
-    // If cache is invalid, clear it
     localStorage.removeItem(key)
   }
   return null
@@ -177,7 +176,6 @@ export function getCachedPermissions(userId: string): Permission[] | null {
     return null
   }
   
-  // Check if cache is expired
   const now = Date.now()
   if (now - cached.timestamp > PERMISSIONS_CACHE_TTL) {
     removeCache(cacheKey)
@@ -209,7 +207,6 @@ export function clearPermissionsCache(userId?: string): void {
   if (userId) {
     removeCache(getPermissionsCacheKey(userId))
   } else {
-    // Clear all permission caches
     clearCacheByPrefix(PERMISSIONS_CACHE_KEY_PREFIX)
   }
 }

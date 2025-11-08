@@ -17,7 +17,6 @@ export interface PaginatedWarrantyResponse {
   totalPages: number
 }
 
-// Map Prisma Warranty to domain Warranty
 const mapPrismaWarranty = (warranty: PrismaWarranty & { ticket?: any; customer?: any; warrantyClaims?: PrismaWarrantyClaim[] }): Warranty => {
   return {
     id: warranty.id,
@@ -39,7 +38,6 @@ const mapPrismaWarranty = (warranty: PrismaWarranty & { ticket?: any; customer?:
   }
 }
 
-// Map Prisma WarrantyClaim to domain WarrantyClaim
 const mapPrismaWarrantyClaim = (claim: PrismaWarrantyClaim): WarrantyClaim => {
   return {
     id: claim.id,
@@ -56,14 +54,12 @@ const mapPrismaWarrantyClaim = (claim: PrismaWarrantyClaim): WarrantyClaim => {
   }
 }
 
-// Auto-update warranty status based on expiry date
 const updateWarrantyStatus = async (warranty: PrismaWarranty): Promise<void> => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const expiryDate = new Date(warranty.expiryDate)
   expiryDate.setHours(0, 0, 0, 0)
 
-  // Only update if currently active and expired
   if (warranty.status === 'active' && expiryDate < today) {
     await db.warranty.update({
       where: { id: warranty.id },
@@ -75,7 +71,6 @@ const updateWarrantyStatus = async (warranty: PrismaWarranty): Promise<void> => 
 export const warrantyStorage = {
   create: async (input: CreateWarrantyInput, storeId: string): Promise<Warranty> => {
     try {
-      // Get ticket to ensure it exists and belongs to store
       const ticket = await db.repairTicket.findFirst({
         where: {
           id: input.ticketId,
@@ -90,7 +85,6 @@ export const warrantyStorage = {
         throw new Error('Ticket not found or does not belong to this store')
       }
 
-      // Check if warranty already exists for this ticket
       const existing = await db.warranty.findUnique({
         where: { ticketId: input.ticketId },
       })
@@ -99,13 +93,11 @@ export const warrantyStorage = {
         throw new Error('Warranty already exists for this ticket')
       }
 
-      // Get default warranty period from settings or use 30 days
       const settings = await db.settings.findUnique({
         where: { storeId },
       })
       const warrantyPeriodDays = input.warrantyPeriodDays ?? settings?.defaultWarrantyPeriodDays ?? 30
 
-      // Calculate dates
       const startDate = input.startDate ? new Date(input.startDate) : (ticket.actualCompletionDate ? new Date(ticket.actualCompletionDate) : new Date())
       const expiryDate = new Date(startDate)
       expiryDate.setDate(expiryDate.getDate() + warrantyPeriodDays)
@@ -163,10 +155,8 @@ export const warrantyStorage = {
         return undefined
       }
 
-      // Update status if expired
       await updateWarrantyStatus(warranty)
 
-      // Re-fetch if status was updated
       const updatedWarranty = await db.warranty.findUnique({
         where: { id },
         include: {
@@ -209,10 +199,8 @@ export const warrantyStorage = {
         return undefined
       }
 
-      // Update status if expired
       await updateWarrantyStatus(warranty)
 
-      // Re-fetch if status was updated
       const updatedWarranty = await db.warranty.findUnique({
         where: { id: warranty.id },
         include: {
@@ -254,12 +242,10 @@ export const warrantyStorage = {
         },
       })
 
-      // Update statuses for all warranties
       for (const warranty of warranties) {
         await updateWarrantyStatus(warranty)
       }
 
-      // Re-fetch all warranties
       const updatedWarranties = await db.warranty.findMany({
         where: {
           customerId,
@@ -295,10 +281,8 @@ export const warrantyStorage = {
       const limit = filters?.limit ?? 50
       const offset = (page - 1) * limit
 
-      // Build where clause
       const where: any = { storeId }
 
-      // Search filter
       if (filters?.search && filters.search.trim()) {
         const searchTerm = filters.search.trim()
         where.OR = [
@@ -313,7 +297,6 @@ export const warrantyStorage = {
         ]
       }
 
-      // Status filter - support comma-separated values (e.g., "active,expired")
       if (filters?.status) {
         const statuses = filters.status.split(',').map(s => s.trim()).filter(Boolean)
         if (statuses.length === 1) {
@@ -323,7 +306,6 @@ export const warrantyStorage = {
         }
       }
 
-      // Get total count and paginated results
       const [total, warranties] = await Promise.all([
         db.warranty.count({ where }),
         db.warranty.findMany({
@@ -345,12 +327,10 @@ export const warrantyStorage = {
         }),
       ])
 
-      // Update statuses for paginated warranties
       for (const warranty of warranties) {
         await updateWarrantyStatus(warranty)
       }
 
-      // Re-fetch paginated warranties after status updates
       const updatedWarranties = await db.warranty.findMany({
         where: {
           id: { in: warranties.map((w: PrismaWarranty) => w.id) },
@@ -414,12 +394,10 @@ export const warrantyStorage = {
         },
       })
 
-      // Update statuses for all warranties
       for (const warranty of warranties) {
         await updateWarrantyStatus(warranty)
       }
 
-      // Re-fetch active warranties
       const updatedWarranties = await db.warranty.findMany({
         where: {
           storeId,
@@ -455,7 +433,6 @@ export const warrantyStorage = {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      // First update all active warranties that are expired
       await db.warranty.updateMany({
         where: {
           storeId,
@@ -497,7 +474,6 @@ export const warrantyStorage = {
 
   update: async (id: string, input: UpdateWarrantyInput, storeId: string): Promise<Warranty | null> => {
     try {
-      // Verify warranty belongs to store
       const existing = await db.warranty.findFirst({
         where: {
           id,
@@ -513,7 +489,6 @@ export const warrantyStorage = {
 
       if (input.warrantyPeriodDays !== undefined) {
         updateData.warrantyPeriodDays = input.warrantyPeriodDays
-        // Recalculate expiry date
         const startDate = existing.startDate
         const expiryDate = new Date(startDate)
         expiryDate.setDate(expiryDate.getDate() + input.warrantyPeriodDays)
@@ -537,7 +512,6 @@ export const warrantyStorage = {
       }
 
       if (Object.keys(updateData).length === 0) {
-        // No updates, return existing
         const warranty = await db.warranty.findUnique({
           where: { id },
           include: {
@@ -587,10 +561,8 @@ export const warrantyStorage = {
     }
   },
 
-  // Warranty Claim methods
   createClaim: async (input: CreateWarrantyClaimInput, storeId: string): Promise<WarrantyClaim> => {
     try {
-      // Verify warranty exists and belongs to store
       const warranty = await db.warranty.findFirst({
         where: {
           id: input.warrantyId,
@@ -602,7 +574,6 @@ export const warrantyStorage = {
         throw new Error('Warranty not found or does not belong to this store')
       }
 
-      // Update warranty status to 'claimed' if it's active
       if (warranty.status === 'active') {
         await db.warranty.update({
           where: { id: input.warrantyId },
@@ -689,7 +660,6 @@ export const warrantyStorage = {
 
   updateClaim: async (id: string, input: UpdateWarrantyClaimInput, storeId: string): Promise<WarrantyClaim | null> => {
     try {
-      // Verify claim belongs to store
       const existing = await db.warrantyClaim.findFirst({
         where: {
           id,
@@ -720,7 +690,6 @@ export const warrantyStorage = {
       }
 
       if (Object.keys(updateData).length === 0) {
-        // No updates, return existing
         return mapPrismaWarrantyClaim(existing)
       }
 

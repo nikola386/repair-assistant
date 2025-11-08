@@ -43,7 +43,6 @@ export default function WarrantyTable({ warranties, onWarrantyUpdate, isLoading 
     return labels[type] || type
   }
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (openMenuId) {
@@ -63,7 +62,6 @@ export default function WarrantyTable({ warranties, onWarrantyUpdate, isLoading 
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [openMenuId])
   
-  // Update menu position on scroll
   useEffect(() => {
     if (!openMenuId || !menuPosition) return
 

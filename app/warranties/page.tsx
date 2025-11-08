@@ -24,13 +24,11 @@ function WarrantyPageContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // Convert comma-separated string to array for multi-select
   const parseFilterArray = (value: string | undefined): string[] => {
     if (!value) return []
     return value.split(',').map(v => v.trim()).filter(Boolean)
   }
 
-  // Initialize filters from URL params
   const getFiltersFromUrl = () => {
     return {
       search: searchParams.get('search') || '',
@@ -39,10 +37,8 @@ function WarrantyPageContent() {
   }
   
   const [filters, setFilters] = useState(getFiltersFromUrl)
-  // Local state for UI (arrays for multi-select)
   const [statusFilter, setStatusFilter] = useState<string[]>(parseFilterArray(filters.status))
   
-  // Sync filters and pagination when URL changes
   const prevFiltersRef = useRef(filters)
   useEffect(() => {
     const urlFilters = {
@@ -70,7 +66,6 @@ function WarrantyPageContent() {
     }
   }, [searchParams, pagination.page, pagination.limit])
 
-  // Fetch warranties
   const fetchWarranties = useCallback(async () => {
     setIsLoading(true)
     setError(null)
@@ -108,7 +103,6 @@ function WarrantyPageContent() {
     fetchWarranties()
   }, [fetchWarranties])
 
-  // Sync filters to URL
   const syncFiltersToUrl = useCallback((newFilters: typeof filters, newPagination = pagination, newStatusFilter = statusFilter) => {
     if (typeof window === 'undefined') return
     

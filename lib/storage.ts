@@ -43,23 +43,16 @@ export async function uploadFile(
   }
 ): Promise<string> {
   if (isBlobStorageAvailable()) {
-    // Use Vercel Blob storage
     try {
-      // Convert File or Buffer for Vercel Blob compatibility
-      // Vercel Blob accepts File, Blob, ArrayBuffer, or Readable streams
       let fileData: File | ArrayBuffer | Uint8Array
       if (file instanceof File) {
-        // File is directly compatible
         fileData = file
       } else if (Buffer.isBuffer(file)) {
-        // Convert Buffer to Uint8Array for compatibility
         fileData = new Uint8Array(file)
       } else {
         fileData = file
       }
       
-      // Type assertion needed due to strict PutBody typing
-      // Vercel Blob put function has strict typing
       const putOptions = {
         access: (options?.access || 'public') as 'public' | 'private',
         contentType: options?.contentType,
@@ -68,28 +61,22 @@ export async function uploadFile(
       return blob.url
     } catch (error) {
       console.error('Error uploading to blob storage, falling back to local storage:', error)
-      // Fall through to local storage fallback
     }
   }
   
-  // Fallback to local storage (or if blob upload failed)
   await ensureUploadsDir()
   
   const filePath = path.join(UPLOADS_DIR, fileName)
   const dirPath = path.dirname(filePath)
   
-  // Ensure subdirectories exist
   await fs.mkdir(dirPath, { recursive: true })
   
-  // Convert File to Buffer if needed
   const buffer = file instanceof File 
     ? Buffer.from(await file.arrayBuffer())
     : file
   
-  // Write file to disk
   await fs.writeFile(filePath, buffer)
   
-  // Return URL path (relative to public directory)
   return `/uploads/${fileName}`
 }
 
@@ -99,23 +86,19 @@ export async function uploadFile(
  */
 export async function deleteFile(url: string): Promise<void> {
   if (url.startsWith('https://')) {
-    // Vercel Blob URL - try to delete from blob storage
     if (isBlobStorageAvailable()) {
       try {
         await del(url)
       } catch (error) {
         console.error('Error deleting blob file:', error)
-        // Continue even if deletion fails
       }
     }
   } else if (url.startsWith('/uploads/')) {
-    // Local storage URL - delete from filesystem
     try {
       const fileName = url.replace('/uploads/', '')
       const filePath = path.join(UPLOADS_DIR, fileName)
       await fs.unlink(filePath)
     } catch (error) {
-      // File might not exist, which is fine
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
         console.error('Error deleting local file:', error)
       }

@@ -41,7 +41,6 @@ export default function LogoUpload({
     e.stopPropagation()
     onChange(null)
     onRemove()
-    // Reset file input
     const fileInput = document.getElementById(inputId) as HTMLInputElement
     if (fileInput) {
       fileInput.value = ''

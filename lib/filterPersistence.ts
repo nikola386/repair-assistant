@@ -29,7 +29,6 @@ interface ClientsFilters {
 }
 
 export const filterPersistence = {
-  // Tickets filters
   saveTicketsFilters: (filters: TicketsFilters) => {
     if (typeof window !== 'undefined') {
       try {
@@ -64,7 +63,6 @@ export const filterPersistence = {
     }
   },
   
-  // Tickets sorting
   saveTicketsSorting: (sorting: TicketsSorting[]) => {
     if (typeof window !== 'undefined') {
       try {
@@ -89,7 +87,6 @@ export const filterPersistence = {
     return null
   },
   
-  // Clients filters
   saveClientsFilters: (filters: ClientsFilters) => {
     if (typeof window !== 'undefined') {
       try {
@@ -124,7 +121,6 @@ export const filterPersistence = {
     }
   },
   
-  // Warranties sorting
   saveWarrantiesSorting: (sorting: TicketsSorting[]) => {
     if (typeof window !== 'undefined') {
       try {

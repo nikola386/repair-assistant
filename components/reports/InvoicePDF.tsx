@@ -5,12 +5,10 @@ import { PDF_FONT_FAMILY } from '@/lib/pdfFonts'
 import { PdfTranslations } from '@/lib/pdfTranslations'
 import { Language } from '@/lib/languages'
 
-// Define styles for the PDF
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    // Use Roboto for Cyrillic support, falls back to Times-Roman if registration fails
     fontFamily: PDF_FONT_FAMILY,
     backgroundColor: '#FFFFFF',
   },
@@ -250,7 +248,6 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store, translations, la
     return priorityMap[priority] || priority
   }
 
-  // Calculate expenses total
   const expensesTotal = ticket.expenses?.reduce(
     (sum, expense) => {
       const qty = typeof expense.quantity === 'number' ? expense.quantity : Number(expense.quantity) || 0
@@ -260,16 +257,12 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store, translations, la
     0
   ) || 0
 
-  // Calculate labor cost (if actualCost includes labor, or estimate it)
-  // For now, we'll show actualCost if available, otherwise estimatedCost
   const actualCostNum = typeof ticket.actualCost === 'number' ? ticket.actualCost : (ticket.actualCost ? Number(ticket.actualCost) : 0)
   const estimatedCostNum = typeof ticket.estimatedCost === 'number' ? ticket.estimatedCost : (ticket.estimatedCost ? Number(ticket.estimatedCost) : 0)
   const totalCost = actualCostNum || estimatedCostNum || 0
 
-  // Calculate subtotal (expenses + labor)
   const subtotal = (expensesTotal || 0) + (totalCost || 0)
 
-  // Calculate tax
   let taxAmount = 0
   let subtotalBeforeTax = subtotal
   let grandTotal = subtotal
@@ -277,32 +270,23 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ ticket, store, translations, la
   if (store.taxEnabled && store.taxRate !== null && store.taxRate !== undefined) {
     const taxRate = typeof store.taxRate === 'number' ? store.taxRate : Number(store.taxRate) || 0
     
-    // Validate taxRate is a valid number
     if (!isNaN(taxRate) && isFinite(taxRate) && taxRate >= 0 && taxRate <= 100) {
       if (store.taxInclusive) {
-        // Tax is included in prices, so we need to extract it
-        // If tax is 20%, and price is 100 (inclusive), then:
-        // subtotal = 100
-        // tax = subtotal * (taxRate / (100 + taxRate))
-        // base = subtotal - tax
         taxAmount = subtotal * (taxRate / (100 + taxRate))
         subtotalBeforeTax = subtotal - taxAmount
-        grandTotal = subtotal // Total already includes tax
+        grandTotal = subtotal
       } else {
-        // Tax is added on top of prices
         taxAmount = subtotal * (taxRate / 100)
         subtotalBeforeTax = subtotal
         grandTotal = subtotal + taxAmount
       }
       
-      // Ensure all calculated values are valid numbers
       if (isNaN(taxAmount) || !isFinite(taxAmount)) taxAmount = 0
       if (isNaN(subtotalBeforeTax) || !isFinite(subtotalBeforeTax)) subtotalBeforeTax = subtotal
       if (isNaN(grandTotal) || !isFinite(grandTotal)) grandTotal = subtotal
     }
   }
 
-  // Build company address
   const companyAddressParts = [
     store.street,
     store.city,

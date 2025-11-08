@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user already exists
     const existingUser = await userStorage.findByEmail(invitation.email)
     if (existingUser) {
       return NextResponse.json(
@@ -45,7 +44,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create user and mark invitation as accepted
     const user = await userStorage.create({
       email: invitation.email,
       password,

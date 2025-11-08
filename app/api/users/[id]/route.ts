@@ -35,7 +35,6 @@ export async function PATCH(
       )
     }
 
-    // Prevent changing own role or deactivating self
     if (targetUser.id === session.user.id) {
       if (data.role !== undefined || data.isActive === false) {
         return NextResponse.json(
@@ -45,7 +44,6 @@ export async function PATCH(
       }
     }
 
-    // Cast role to UserRole enum type
     const updateData: {
       role?: UserRole
       isActive?: boolean
@@ -99,7 +97,6 @@ export async function DELETE(
       )
     }
 
-    // Prevent deleting self
     if (targetUser.id === session.user.id) {
       return NextResponse.json(
         { error: 'Cannot delete yourself' },
@@ -107,7 +104,6 @@ export async function DELETE(
       )
     }
 
-    // Soft delete by deactivating
     await userStorage.update(params.id, { isActive: false })
 
     return NextResponse.json({ message: 'User deactivated successfully' })
