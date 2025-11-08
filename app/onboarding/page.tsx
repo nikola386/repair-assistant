@@ -139,6 +139,12 @@ export default function OnboardingPage() {
         showAlert.error(errorMsg)
         return false
       }
+      if (!country.trim()) {
+        const errorMsg = 'Country is required'
+        setError(errorMsg)
+        showAlert.error(errorMsg)
+        return false
+      }
     }
     
     if (step === 2) {
@@ -194,7 +200,7 @@ export default function OnboardingPage() {
       if (city) formData.append('city', city)
       if (state) formData.append('state', state)
       if (postalCode) formData.append('postalCode', postalCode)
-      if (country) formData.append('country', country)
+      formData.append('country', country)
       if (website) formData.append('website', website)
       if (phone) formData.append('phone', phone)
       formData.append('currency', currency)
@@ -422,7 +428,7 @@ export default function OnboardingPage() {
 
                   <div className="form-group">
                     <label htmlFor="country" className="form-label">
-                      {t.onboarding?.country || 'Country'}
+                      {t.onboarding?.country || 'Country'} *
                     </label>
                     <SearchableSelect
                       id="country"
@@ -631,17 +637,15 @@ export default function OnboardingPage() {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={loading || !storeName.trim()}
-                  style={{ marginLeft: 'auto' }}
+                  disabled={loading || !storeName.trim() || !country.trim()}
+                  style={{ marginLeft: 'auto', position: 'relative' }}
                 >
-                  {loading ? (
-                    <>
+                  {loading && (
+                    <span style={{ position: 'absolute', left: '1rem', display: 'inline-flex', alignItems: 'center' }}>
                       <Spinner size="small" />
-                      {t.onboarding?.completing || 'Completing setup...'}
-                    </>
-                  ) : (
-                    t.onboarding?.complete || 'Complete Setup'
+                    </span>
                   )}
+                  {t.onboarding?.complete || 'Complete Setup'}
                 </button>
               )}
             </div>

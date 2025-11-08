@@ -50,6 +50,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!country || country.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Country is required' },
+        { status: 400 }
+      )
+    }
+
     if (primaryColor) {
       const colorError = validateHexColor(primaryColor, 'Primary color')
       if (colorError) {
@@ -153,7 +160,7 @@ export async function POST(request: NextRequest) {
         city: city?.trim() || null,
         state: state?.trim() || null,
         postalCode: postalCode?.trim() || null,
-        country: country?.trim() || null,
+        country: country.trim(),
         website: website?.trim() || null,
         phone: phone?.trim() || null,
         currency: currency?.trim() || 'USD',
