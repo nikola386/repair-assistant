@@ -26,8 +26,8 @@ export default function ProtectedRoutes({
   const [hasPermission, setHasPermission] = useState(false)
   const hasCheckedOnboarding = useRef(false)
 
-  const publicRoutes = ['/login', '/register', '/onboarding', '/verify-email', '/accept-invitation']
-  const isPublicRoute = publicRoutes.some(route => pathname?.startsWith(route))
+  const publicRoutes = ['/', '/login', '/register', '/onboarding', '/verify-email', '/accept-invitation']
+  const isPublicRoute = pathname === '/' || publicRoutes.some(route => route !== '/' && pathname?.startsWith(route))
 
   useEffect(() => {
     if (status === 'unauthenticated') {

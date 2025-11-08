@@ -8,8 +8,8 @@ import ProtectedRoutes from '@/components/ProtectedRoutes'
 import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
-  title: 'Dashboard - Repair Assistant',
-  description: 'Repair management dashboard',
+  title: 'Repair Assistant - Streamline Your Electronics Repair Business',
+  description: 'A comprehensive repair management system built specifically for electronics repair businesses. Eliminate the chaos of spreadsheets and disconnected systems with a single, powerful platform.',
   icons: {
     icon: '/icon.svg',
     shortcut: '/icon.svg',
