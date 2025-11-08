@@ -27,6 +27,7 @@ import { Permission } from '@/lib/permissions'
 import { checkPermission } from '@/lib/permissionsCache'
 import InviteUserModal from '@/components/users/InviteUserModal'
 import UserTable from '@/components/users/UserTable'
+import SearchableSelect from '@/components/ui/SearchableSelect'
 
 type Tab = 'profile' | 'password' | 'store' | 'appearance' | 'team'
 
@@ -74,6 +75,7 @@ export default function SettingsPage() {
     taxEnabled: false,
     taxRate: '',
     taxInclusive: false,
+    defaultWarrantyPeriodDays: 30,
   })
 
   const [logo, setLogo] = useState<File | null>(null)
@@ -183,6 +185,7 @@ export default function SettingsPage() {
             taxEnabled: data.store.taxEnabled || false,
             taxRate: data.store.taxRate ? data.store.taxRate.toString() : '',
             taxInclusive: data.store.taxInclusive || false,
+            defaultWarrantyPeriodDays: data.settings?.defaultWarrantyPeriodDays ?? 30,
           })
           if (data.store.logo) {
             setLogoPreview(data.store.logo)
@@ -514,7 +517,11 @@ export default function SettingsPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(appearanceFormData),
+          body: JSON.stringify({
+            primaryColor: appearanceFormData.primaryColor,
+            secondaryColor: appearanceFormData.secondaryColor,
+            language: appearanceFormData.language,
+          }),
         })
 
         const data = await response.json()
@@ -596,6 +603,7 @@ export default function SettingsPage() {
       formData.append('taxInclusive', storeFormData.taxInclusive ? 'true' : 'false')
       formData.append('primaryColor', appearanceFormData.primaryColor)
       formData.append('secondaryColor', appearanceFormData.secondaryColor)
+      formData.append('defaultWarrantyPeriodDays', storeFormData.defaultWarrantyPeriodDays.toString())
 
       const response = await fetch('/api/settings', {
         method: 'PATCH',
@@ -1021,11 +1029,10 @@ export default function SettingsPage() {
                             <label htmlFor="country" className="settings-page__label">
                               {t.onboarding?.country || 'Country'}
                             </label>
-                            <select
+                            <SearchableSelect
                               id="country"
                               value={storeFormData.country}
-                              onChange={(e) => {
-                                const selectedCode = e.target.value
+                              onChange={(selectedCode) => {
                                 const selectedCountry = countries.find(c => c.code === selectedCode)
                                 setStoreFormData({ ...storeFormData, country: selectedCode })
                                 // Clear VAT number if country doesn't require VAT
@@ -1033,16 +1040,15 @@ export default function SettingsPage() {
                                   setStoreFormData(prev => ({ ...prev, vatNumber: '' }))
                                 }
                               }}
-                              className="settings-page__input"
+                              options={countries.map((c) => ({
+                                value: c.code,
+                                label: `${c.name}`
+                              }))}
+                              placeholder={t.onboarding?.countryPlaceholder || 'Select a country...'}
+                              searchPlaceholder="Search countries..."
                               disabled={storeLoading}
-                            >
-                              <option value="">{t.onboarding?.countryPlaceholder || 'Select a country...'}</option>
-                              {countries.map((c) => (
-                                <option key={c.id} value={c.code}>
-                                  {c.name} {c.requiresVat && '(VAT required)'}
-                                </option>
-                              ))}
-                            </select>
+                              className="settings-page__input"
+                            />
                           </div>
                         </div>
 
@@ -1182,6 +1188,34 @@ export default function SettingsPage() {
                             </div>
                           </>
                         )}
+
+                        <div className="settings-page__section-divider"></div>
+
+                        <div className="settings-page__field">
+                          <label htmlFor="defaultWarrantyPeriodDays" className="settings-page__label">
+                            {t.settings?.defaultWarrantyPeriod || 'Default Warranty Period (days)'}
+                          </label>
+                          <input
+                            id="defaultWarrantyPeriodDays"
+                            type="number"
+                            min="1"
+                            max="3650"
+                            value={storeFormData.defaultWarrantyPeriodDays}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value) || 30
+                              setStoreFormData({
+                                ...storeFormData,
+                                defaultWarrantyPeriodDays: value,
+                              })
+                            }}
+                            className="settings-page__input"
+                            disabled={storeLoading}
+                            placeholder="30"
+                          />
+                          <p className="settings-page__field-hint">
+                            {t.settings?.defaultWarrantyPeriodHint || 'This will be used as the default warranty period when creating warranties for completed tickets.'}
+                          </p>
+                        </div>
 
                         <div className="settings-page__form-actions">
                           <button

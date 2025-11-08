@@ -125,3 +125,207 @@
   color: var(--text-gray);
 }
 
+// Searchable Select Component Styles
+.searchable-select {
+  position: relative;
+  width: 100%;
+
+  &__button {
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    cursor: pointer;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    line-height: normal;
+    padding: 0.75rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--bg-white);
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+
+    &.settings-page__input {
+      padding: 0.4rem 0.875rem;
+      line-height: 1.5;
+      min-height: 0;
+      align-items: center;
+    }
+
+    &.form-input {
+      line-height: 1.5;
+      min-height: 0;
+      align-items: center;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: var(--primary-yellow);
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+
+    &-text {
+      flex: 1;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+      display: block;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      height: 1.5em;
+      overflow: hidden;
+    }
+  }
+
+  &__chevron {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+    color: var(--text-gray);
+    width: 16px;
+    height: 16px;
+    display: block;
+    margin-left: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    align-self: center;
+    max-height: 1.5em;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg-white);
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 300px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+    overflow: hidden;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--bg-gray);
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--border-gray);
+      border-radius: 4px;
+
+      &:hover {
+        background: var(--primary-yellow);
+      }
+    }
+  }
+
+  &__search {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-gray);
+    background: var(--bg-white);
+  }
+
+  &__search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    background: var(--bg-white);
+    color: var(--text-dark);
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-yellow);
+      box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.1);
+    }
+
+    &::placeholder {
+      color: var(--text-gray);
+    }
+  }
+
+  &__options {
+    overflow-y: auto;
+    max-height: 250px;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid var(--border-light);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: var(--bg-gray);
+    }
+
+    &.selected {
+      background: rgba(255, 215, 0, 0.1);
+      font-weight: 500;
+    }
+  }
+
+  &__option-label {
+    flex: 1;
+    user-select: none;
+    color: var(--text-dark);
+  }
+
+  &__check {
+    flex-shrink: 0;
+    color: var(--primary-yellow);
+    width: 16px;
+    height: 16px;
+  }
+
+  &__no-results {
+    padding: 0.75rem 1rem;
+    text-align: center;
+    color: var(--text-gray);
+    font-size: 0.875rem;
+  }
+}
+

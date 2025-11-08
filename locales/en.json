@@ -85,6 +85,7 @@
     "contact": "Contact",
     "dashboard": "Dashboard",
     "tickets": "Tickets",
+    "warranties": "Warranties",
     "clients": "Clients",
     "inventory": "Inventory",
     "reports": "Reports",
@@ -480,7 +481,9 @@
     "team": "Team",
     "teamDescription": "Manage team members and their roles.",
     "teamMembers": "Team Members",
-    "inviteUser": "Invite User"
+    "inviteUser": "Invite User",
+    "defaultWarrantyPeriod": "Default Warranty Period (days)",
+    "defaultWarrantyPeriodHint": "This will be used as the default warranty period when creating warranties for completed tickets."
   },
   "team": {
     "title": "Team",
@@ -579,5 +582,96 @@
     "error": "Failed to complete setup",
     "back": "Back",
     "next": "Next"
+  },
+  "warranties": {
+    "title": "Warranties",
+    "noWarrantiesFound": "No warranties found",
+    "loadingWarranties": "Loading warranties...",
+    "searchPlaceholder": "Search warranties...",
+    "table": {
+      "ticketNumber": "Ticket #",
+      "customer": "Customer",
+      "device": "Device",
+      "type": "Type",
+      "period": "Period",
+      "startDate": "Start Date",
+      "expiryDate": "Expiry Date",
+      "status": "Status",
+      "actions": "Actions",
+      "edit": "Edit",
+      "createClaim": "Create Claim",
+      "voidWarranty": "Void Warranty",
+      "editWarranty": "Edit Warranty",
+      "createWarrantyClaim": "Create Warranty Claim"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "voided": "Voided",
+      "claimed": "Claimed",
+      "expiringSoon": "Expiring Soon"
+    },
+    "type": {
+      "parts": "Parts Only",
+      "labor": "Labor Only",
+      "both": "Parts & Labor"
+    },
+    "form": {
+      "warrantyPeriod": "Warranty Period (days)",
+      "warrantyType": "Warranty Type",
+      "terms": "Terms",
+      "termsPlaceholder": "Enter warranty terms and conditions...",
+      "notes": "Notes",
+      "notesPlaceholder": "Enter any additional notes...",
+      "periodMinError": "Warranty period must be at least 1 day",
+      "updateError": "Error updating warranty",
+      "createError": "Error creating warranty",
+      "updateSuccess": "Warranty updated successfully"
+    },
+    "claim": {
+      "title": "Warranty Claims",
+      "createClaim": "Create Claim",
+      "issueDescription": "Issue Description",
+      "issueDescriptionPlaceholder": "Describe the issue with the repaired device...",
+      "issueDescriptionRequired": "Please provide an issue description",
+      "createSuccess": "Warranty claim created successfully",
+      "createError": "Error creating warranty claim",
+      "noClaimsFound": "No warranty claims found",
+      "claimDate": "Claim Date",
+      "warranty": "Warranty",
+      "warrantyId": "Warranty ID:",
+      "resolution": "Resolution",
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "completed": "Completed"
+      }
+    },
+    "card": {
+      "type": "Type:",
+      "period": "Period:",
+      "expires": "Expires:",
+      "claim": "claim",
+      "claims": "claims",
+      "unknownCustomer": "Unknown Customer"
+    },
+    "void": {
+      "confirmMessage": "Are you sure you want to void this warranty? This action cannot be undone.",
+      "confirmText": "Void",
+      "cancelText": "Cancel",
+      "success": "Warranty voided successfully",
+      "error": "Error voiding warranty"
+    },
+    "filter": {
+      "status": "Status:",
+      "allStatuses": "All Statuses"
+    },
+    "widget": {
+      "expiringWarranties": "Expiring Warranties",
+      "viewAll": "View All",
+      "noExpiringWarranties": "No warranties expiring in the next {days} days",
+      "expires": "Expires:"
+    }
   }
 }

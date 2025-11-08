@@ -1,8 +1,10 @@
 import { RepairTicket, CreateTicketInput, UpdateTicketInput, PaginatedTicketsResponse, TicketStatus, TicketPriority, Expense, CreateExpenseInput, UpdateExpenseInput } from '../types/ticket'
 import { db } from './db'
 import { deleteFile } from './storage'
+import { del } from '@vercel/blob'
 import { Decimal } from '@prisma/client/runtime/library'
 import { inventoryStorage } from './inventoryStorage'
+import { warrantyStorage } from './warrantyStorage'
 // Prisma generates TicketImage type automatically - use it directly
 import type { TicketImage as PrismaTicketImage, Expense as PrismaExpense } from '@prisma/client'
 
@@ -403,6 +405,48 @@ export const ticketStorage = {
       if (!ticket) {
         return null
       }
+
+      // Auto-create warranty if ticket is completed and has actualCompletionDate
+      // Check if ticket is now completed (either was just set to completed, or was already completed)
+      const isCompleted = input.status === 'completed' || ticket.status === 'completed'
+      // Check if we have a completion date (either in input or already on ticket)
+      const hasCompletionDate = input.actualCompletionDate || ticket.actualCompletionDate
+      
+      if (isCompleted && hasCompletionDate) {
+        try {
+          // Check if warranty already exists
+          const existingWarranty = await warrantyStorage.getByTicketId(id, storeId)
+          if (!existingWarranty) {
+            // Get settings for default warranty period
+            const settings = await db.settings.findUnique({
+              where: { storeId },
+            })
+            const warrantyPeriodDays = settings?.defaultWarrantyPeriodDays ?? 30
+
+            // Use the completion date from input if provided, otherwise use the ticket's completion date
+            const completionDate = input.actualCompletionDate || ticket.actualCompletionDate
+            if (!completionDate) {
+              console.warn('Cannot create warranty: no completion date available')
+              return ticket
+            }
+
+            // Create warranty
+            await warrantyStorage.create(
+              {
+                ticketId: id,
+                warrantyPeriodDays,
+                warrantyType: 'both',
+                startDate: completionDate,
+              },
+              storeId
+            )
+          }
+        } catch (warrantyError) {
+          // Log error but don't fail the ticket update
+          console.error('Error auto-creating warranty:', warrantyError)
+        }
+      }
+
       return ticket
     } catch (error) {
       console.error('Error updating ticket:', error)

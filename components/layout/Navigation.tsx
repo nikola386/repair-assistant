@@ -144,6 +144,11 @@ export default function Navigation() {
                   <Link href="/tickets">{t.nav.tickets}</Link>
                 </li>
               )}
+              {permissions.has(Permission.VIEW_TICKETS) && (
+                <li>
+                  <Link href="/warranties">{t.nav.warranties}</Link>
+                </li>
+              )}
               {permissions.has(Permission.VIEW_INVENTORY) && (
                 <li>
                   <Link href="/inventory">{t.nav.inventory}</Link>

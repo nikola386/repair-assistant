@@ -43,7 +43,7 @@ model Store {
   phone        String?
   email        String?
   currency     String?  @default("USD")
-  vatNumber    String?  @map("vat_number")
+  vatNumber     String?  @map("vat_number")
   taxEnabled   Boolean  @default(false) @map("tax_enabled")
   taxRate      Decimal? @map("tax_rate") @db.Decimal(5, 2)
   taxInclusive Boolean  @default(false) @map("tax_inclusive")
@@ -57,6 +57,8 @@ model Store {
   repairTickets    RepairTicket[]
   settings         Settings?
   inventoryItems   InventoryItem[]
+  warranties       Warranty[]
+  warrantyClaims    WarrantyClaim[]
 
   @@map("stores")
 }
@@ -94,13 +96,14 @@ model User {
 }
 
 model Settings {
-  id             String   @id @default(uuid())
-  storeId        String   @unique @map("store_id")
-  primaryColor   String   @default("#FFD700") @map("primary_color")
-  secondaryColor String   @default("#000000") @map("secondary_color")
-  language       String?  @default("en") @map("language")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id                        String   @id @default(uuid())
+  storeId                   String   @unique @map("store_id")
+  primaryColor              String   @default("#FFD700") @map("primary_color")
+  secondaryColor            String   @default("#000000") @map("secondary_color")
+  language                  String?  @default("en") @map("language")
+  defaultWarrantyPeriodDays Int?     @default(30) @map("default_warranty_period_days")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
 
   store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
@@ -119,6 +122,7 @@ model Customer {
 
   store         Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
   repairTickets RepairTicket[]
+  warranties    Warranty[]
 
   @@unique([storeId, email])
   @@index([storeId])
@@ -145,10 +149,12 @@ model RepairTicket {
   createdAt               DateTime  @default(now()) @map("created_at")
   updatedAt               DateTime  @updatedAt @map("updated_at")
 
-  store        Store         @relation(fields: [storeId], references: [id], onDelete: Restrict)
-  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  ticketImages TicketImage[]
-  expenses     Expense[]
+  store         Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  customer      Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  ticketImages  TicketImage[]
+  expenses      Expense[]
+  warranty      Warranty?
+  warrantyClaims WarrantyClaim[] @relation("WarrantyClaimTicket")
 
   @@index([customerId])
   @@index([storeId])
@@ -274,4 +280,73 @@ model UserInvitation {
   @@index([token])
   @@index([expiresAt])
   @@map("user_invitations")
+}
+
+model Warranty {
+  id                    String    @id @default(uuid())
+  ticketId              String    @unique @map("ticket_id")
+  storeId               String    @map("store_id")
+  customerId            String    @map("customer_id")
+  
+  // Warranty details
+  warrantyPeriodDays    Int       @default(30) @map("warranty_period_days")
+  startDate             DateTime  @map("start_date") @db.Date
+  expiryDate            DateTime  @map("expiry_date") @db.Date
+  warrantyType          String    @default("both") @map("warranty_type") // "parts", "labor", "both"
+  
+  // Status tracking
+  status                String    @default("active") // "active", "expired", "voided", "claimed"
+  
+  // Warranty terms
+  terms                 String?   @db.Text // Optional warranty terms/conditions
+  notes                 String?   @db.Text
+  
+  // Metadata
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  ticket                RepairTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  store                 Store        @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  customer              Customer     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  warrantyClaims        WarrantyClaim[]
+  
+  @@index([storeId])
+  @@index([customerId])
+  @@index([status])
+  @@index([expiryDate])
+  @@index([ticketId])
+  @@map("warranties")
+}
+
+model WarrantyClaim {
+  id                    String    @id @default(uuid())
+  warrantyId            String    @map("warranty_id")
+  storeId               String    @map("store_id")
+  
+  // Claim details
+  issueDescription      String    @map("issue_description") @db.Text
+  claimDate             DateTime  @default(now()) @map("claim_date") @db.Date
+  status                String    @default("pending") // "pending", "approved", "rejected", "completed"
+  
+  // Resolution
+  resolutionNotes       String?   @map("resolution_notes") @db.Text
+  resolutionDate        DateTime? @map("resolution_date") @db.Date
+  
+  // Related ticket (if new repair ticket created)
+  relatedTicketId       String?   @map("related_ticket_id")
+  
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  warranty              Warranty     @relation(fields: [warrantyId], references: [id], onDelete: Cascade)
+  store                 Store        @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  relatedTicket         RepairTicket? @relation("WarrantyClaimTicket", fields: [relatedTicketId], references: [id], onDelete: SetNull)
+  
+  @@index([warrantyId])
+  @@index([storeId])
+  @@index([status])
+  @@index([claimDate])
+  @@map("warranty_claims")
 }

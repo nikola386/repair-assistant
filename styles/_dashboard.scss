@@ -4,18 +4,12 @@
   background: linear-gradient(135deg, var(--bg-gray) 0%, var(--white) 100%);
 
   &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    @extend .page-header;
     margin-bottom: 40px;
-    flex-wrap: wrap;
     gap: 20px;
 
     h1 {
-      font-size: 2.5rem;
       font-weight: 700;
-      color: var(--text-dark);
-      margin: 0;
     }
   }
 
@@ -55,6 +49,7 @@
 
   &__loading,
   &__error {
+    @extend .loading-state;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -64,7 +59,6 @@
 
     p {
       font-size: 1.2rem;
-      color: var(--text-gray);
     }
   }
 }
@@ -394,88 +388,22 @@
 }
 
 .chart-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  animation: fadeIn 0.2s ease;
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
+  @extend .modal;
 
   &__content {
-    background: var(--white);
-    border-radius: 16px;
-    width: 100%;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.3s ease;
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
+    @extend .modal__content;
   }
 
   &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 32px;
-    border-bottom: 2px solid var(--border-gray);
+    @extend .modal__header;
   }
 
   &__title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin: 0;
+    @extend .modal__title;
   }
 
   &__close {
-    background: transparent;
-    border: none;
-    font-size: 2rem;
-    color: var(--text-gray);
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    line-height: 1;
-
-    &:hover {
-      background: var(--bg-gray);
-      color: var(--text-dark);
-    }
-
-    &:active {
-      transform: scale(0.9);
-    }
+    @extend .modal__close;
   }
 
   &__chart {
@@ -488,20 +416,6 @@
 // Responsive styles for modal
 @media (max-width: 768px) {
   .chart-modal {
-    padding: 10px;
-
-    &__content {
-      max-height: 95vh;
-    }
-
-    &__header {
-      padding: 20px;
-    }
-
-    &__title {
-      font-size: 1.5rem;
-    }
-
     &__chart {
       padding: 20px;
       height: 400px;

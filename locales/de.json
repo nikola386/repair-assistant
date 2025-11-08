@@ -85,6 +85,7 @@
     "contact": "Kontakt",
     "dashboard": "Dashboard",
     "tickets": "Tickets",
+    "warranties": "Garantien",
     "clients": "Kunden",
     "inventory": "Inventar",
     "reports": "Berichte",
@@ -480,7 +481,9 @@
     "team": "Team",
     "teamDescription": "Verwalten Sie Teammitglieder und ihre Rollen.",
     "teamMembers": "Teammitglieder",
-    "inviteUser": "Benutzer einladen"
+    "inviteUser": "Benutzer einladen",
+    "defaultWarrantyPeriod": "Standard-Garantiezeitraum (Tage)",
+    "defaultWarrantyPeriodHint": "Dies wird als Standard-Garantiezeitraum verwendet, wenn Garantien für abgeschlossene Tickets erstellt werden."
   },
   "team": {
     "title": "Team",
@@ -579,5 +582,96 @@
     "error": "Fehler beim Abschließen der Einrichtung",
     "back": "Zurück",
     "next": "Weiter"
+  },
+  "warranties": {
+    "title": "Garantien",
+    "noWarrantiesFound": "Keine Garantien gefunden",
+    "loadingWarranties": "Garantien werden geladen...",
+    "searchPlaceholder": "Garantien suchen...",
+    "table": {
+      "ticketNumber": "Ticket #",
+      "customer": "Kunde",
+      "device": "Gerät",
+      "type": "Typ",
+      "period": "Zeitraum",
+      "startDate": "Startdatum",
+      "expiryDate": "Ablaufdatum",
+      "status": "Status",
+      "actions": "Aktionen",
+      "edit": "Bearbeiten",
+      "createClaim": "Anspruch erstellen",
+      "voidWarranty": "Garantie aufheben",
+      "editWarranty": "Garantie bearbeiten",
+      "createWarrantyClaim": "Garantieanspruch erstellen"
+    },
+    "status": {
+      "active": "Aktiv",
+      "expired": "Abgelaufen",
+      "voided": "Aufgehoben",
+      "claimed": "Geltend gemacht",
+      "expiringSoon": "Läuft bald ab"
+    },
+    "type": {
+      "parts": "Nur Teile",
+      "labor": "Nur Arbeitszeit",
+      "both": "Teile & Arbeitszeit"
+    },
+    "form": {
+      "warrantyPeriod": "Garantiezeitraum (Tage)",
+      "warrantyType": "Garantietyp",
+      "terms": "Bedingungen",
+      "termsPlaceholder": "Geben Sie Garantiebedingungen ein...",
+      "notes": "Notizen",
+      "notesPlaceholder": "Geben Sie zusätzliche Notizen ein...",
+      "periodMinError": "Garantiezeitraum muss mindestens 1 Tag betragen",
+      "updateError": "Fehler beim Aktualisieren der Garantie",
+      "createError": "Fehler beim Erstellen der Garantie",
+      "updateSuccess": "Garantie erfolgreich aktualisiert"
+    },
+    "claim": {
+      "title": "Garantieansprüche",
+      "createClaim": "Anspruch erstellen",
+      "issueDescription": "Problembeschreibung",
+      "issueDescriptionPlaceholder": "Beschreiben Sie das Problem mit dem reparierten Gerät...",
+      "issueDescriptionRequired": "Bitte geben Sie eine Problembeschreibung an",
+      "createSuccess": "Garantieanspruch erfolgreich erstellt",
+      "createError": "Fehler beim Erstellen des Garantieanspruchs",
+      "noClaimsFound": "Keine Garantieansprüche gefunden",
+      "claimDate": "Anspruchsdatum",
+      "warranty": "Garantie",
+      "warrantyId": "Garantie-ID:",
+      "resolution": "Lösung",
+      "status": {
+        "pending": "Ausstehend",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt",
+        "completed": "Abgeschlossen"
+      }
+    },
+    "card": {
+      "type": "Typ:",
+      "period": "Zeitraum:",
+      "expires": "Läuft ab:",
+      "claim": "Anspruch",
+      "claims": "Ansprüche",
+      "unknownCustomer": "Unbekannter Kunde"
+    },
+    "void": {
+      "confirmMessage": "Sind Sie sicher, dass Sie diese Garantie aufheben möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "confirmText": "Aufheben",
+      "cancelText": "Abbrechen",
+      "success": "Garantie erfolgreich aufgehoben",
+      "error": "Fehler beim Aufheben der Garantie"
+    },
+    "filter": {
+      "status": "Status:",
+      "allStatuses": "Alle Status"
+    },
+    "widget": {
+      "expiringWarranties": "Ablaufende Garantien",
+      "viewAll": "Alle anzeigen",
+      "noExpiringWarranties": "Keine Garantien laufen in den nächsten {days} Tagen ab",
+      "expires": "Läuft ab:"
+    }
   }
 }

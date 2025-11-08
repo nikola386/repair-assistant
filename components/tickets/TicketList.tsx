@@ -6,6 +6,7 @@ import { useLanguage } from '../../contexts/LanguageContext'
 import TicketTable from './TicketTable'
 import Spinner from '../ui/Spinner'
 import MultiSelect from '../ui/MultiSelect'
+import Pagination from '../ui/Pagination'
 import { 
   defaultTicketsFilters, 
   TicketsFilters,
@@ -310,47 +311,6 @@ export default function TicketList({
     setFiltersState((prev) => ({ ...prev }))
   }
 
-  // Generate page numbers to display
-  const getPageNumbers = () => {
-    const { page, totalPages } = pagination
-    const pages: (number | string)[] = []
-    const maxVisible = 7 // Maximum number of page buttons to show
-
-    if (totalPages <= maxVisible) {
-      // Show all pages if total is less than max visible
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
-      }
-    } else {
-      // Always show first page
-      pages.push(1)
-
-      if (page <= 4) {
-        // Show pages 1-5, then ellipsis, then last page
-        for (let i = 2; i <= 5; i++) {
-          pages.push(i)
-        }
-        pages.push('ellipsis-end')
-        pages.push(totalPages)
-      } else if (page >= totalPages - 3) {
-        // Show first page, ellipsis, then last 5 pages
-        pages.push('ellipsis-start')
-        for (let i = totalPages - 4; i <= totalPages; i++) {
-          pages.push(i)
-        }
-      } else {
-        // Show first page, ellipsis, current page and neighbors, ellipsis, last page
-        pages.push('ellipsis-start')
-        for (let i = page - 1; i <= page + 1; i++) {
-          pages.push(i)
-        }
-        pages.push('ellipsis-end')
-        pages.push(totalPages)
-      }
-    }
-
-    return pages
-  }
 
   return (
     <div className="ticket-list">
@@ -457,66 +417,12 @@ export default function TicketList({
         <>
           <TicketTable tickets={ticketsData} />
 
-          {pagination.totalPages > 1 && (
-            <div className="ticket-list__pagination">
-              <button
-                className="ticket-list__pagination-arrow"
-                onClick={() => handlePageChange(pagination.page - 1)}
-                disabled={pagination.page === 1}
-                aria-label="Previous page"
-                title="Previous page"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                  <path
-                    fillRule="evenodd"
-                    d="M11.354 1.646a.5.5 0 010 .708L5.707 8l5.647 5.646a.5.5 0 01-.708.708l-6-6a.5.5 0 010-.708l6-6a.5.5 0 01.708 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-
-              <div className="ticket-list__pagination-numbers">
-                {getPageNumbers().map((pageNum, index) => {
-                  if (pageNum === 'ellipsis-start' || pageNum === 'ellipsis-end') {
-                    return (
-                      <span key={`ellipsis-${index}`} className="ticket-list__pagination-ellipsis">
-                        ...
-                      </span>
-                    )
-                  }
-                  return (
-                    <button
-                      key={pageNum}
-                      className={`ticket-list__pagination-number ${
-                        pageNum === pagination.page ? 'active' : ''
-                      }`}
-                      onClick={() => handlePageChange(pageNum as number)}
-                      aria-label={`Go to page ${pageNum}`}
-                      aria-current={pageNum === pagination.page ? 'page' : undefined}
-                    >
-                      {pageNum}
-                    </button>
-                  )
-                })}
-              </div>
-
-              <button
-                className="ticket-list__pagination-arrow"
-                onClick={() => handlePageChange(pagination.page + 1)}
-                disabled={pagination.page >= pagination.totalPages}
-                aria-label="Next page"
-                title="Next page"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                  <path
-                    fillRule="evenodd"
-                    d="M4.646 1.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L10.293 8 4.646 2.354a.5.5 0 010-.708z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-            </div>
-          )}
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            disabled={isLoading || isLoadingData}
+          />
         </>
       )}
     </div>

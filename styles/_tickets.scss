@@ -6,22 +6,10 @@
 }
 
 .tickets-page {
-  padding: 120px 0 60px;
-  min-height: 80vh;
+  @extend .page;
 
   &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-
-    h1 {
-      font-size: 2.5rem;
-      color: var(--text-dark);
-      margin: 0;
-    }
+    @extend .page-header;
   }
 
   &__form-section {
@@ -62,185 +50,50 @@
       font-size: 0.9rem;
     }
 
-    // Modern Image Upload Area
+    // Image Upload Area - uses reusable component
     .image-upload-area {
-      position: relative;
-      border: 2px dashed var(--border-gray);
-      border-radius: 8px;
-      padding: 3rem 2rem;
-      background: var(--bg-gray);
-      text-align: center;
-      transition: all 0.3s ease;
-      cursor: pointer;
-
-      &:hover:not(.disabled):not(.uploading) {
-        border-color: var(--primary-yellow);
-        background: rgba(255, 215, 0, 0.05);
-      }
-
-      &.drag-over {
-        border-color: var(--primary-yellow);
-        background: rgba(255, 215, 0, 0.1);
-        transform: scale(1.02);
-      }
-
-      &.uploading {
-        opacity: 0.7;
-        cursor: not-allowed;
-      }
-
-      &.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .image-upload-input {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-        overflow: hidden;
-        pointer-events: none;
-        display: none;
-      }
-
-      .image-upload-label {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        cursor: pointer;
-        user-select: none;
-
-        .upload-icon {
-          color: var(--primary-yellow);
-          transition: transform 0.3s ease;
-        }
-
-        .upload-text {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          color: var(--text-dark);
-          font-size: 1rem;
-
-          strong {
-            color: var(--primary-yellow);
-            font-weight: 600;
-          }
-
-          .upload-hint {
-            font-size: 0.85rem;
-            color: var(--text-gray);
-          }
-        }
-      }
-
-      &:hover:not(.disabled):not(.uploading) .upload-icon {
-        transform: scale(1.05);
-      }
+      // Styles are in _components.scss
     }
 
-    // Image Preview Container
+    // Image Preview - uses reusable components
     .image-preview-container {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      background: var(--bg-white);
-      border-radius: 8px;
-      border: 1px solid var(--border-light);
+      // Styles are in _components.scss
     }
 
     .image-preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
+      // Styles are in _components.scss
     }
 
     .image-preview-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      // Styles are in _components.scss
     }
 
     .image-preview-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border-light);
-      background: var(--bg-gray);
+      // Styles are in _components.scss
     }
 
     .image-preview-thumbnail {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+      // Styles are in _components.scss
     }
 
     .image-preview-remove {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(220, 53, 69, 0.95);
-      color: white;
-      font-size: 1.25rem;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      padding: 0;
-      opacity: 1;
-      transform: scale(1);
-      z-index: 10;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-
-      &:hover {
-        background: rgba(220, 53, 69, 1);
-        transform: scale(1.15);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-      }
-
-      &:active {
-        transform: scale(0.95);
-      }
+      // Styles are in _components.scss
     }
 
     .image-preview-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      // Styles are in _components.scss
     }
 
     .image-preview-name {
-      font-size: 0.85rem;
-      color: var(--text-dark);
-      font-weight: 500;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      // Styles are in _components.scss
     }
 
     .image-preview-size {
-      font-size: 0.75rem;
-      color: var(--text-gray);
+      // Styles are in _components.scss
     }
 
     .image-preview-note {
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--border-light);
-      font-size: 0.9rem;
-      color: var(--text-gray);
-      font-style: italic;
+      // Styles are in _components.scss
     }
 
     .image-preview-actions {
@@ -253,21 +106,7 @@
     }
 
     .image-upload-success {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
-      background: rgba(40, 167, 69, 0.1);
-      border: 1px solid rgba(40, 167, 69, 0.3);
-      border-radius: 6px;
-      color: #155724;
-      font-size: 0.9rem;
-
-      svg {
-        flex-shrink: 0;
-        color: #28a745;
-      }
+      // Styles are in _components.scss
     }
 
     input,
@@ -367,9 +206,7 @@
   }
 
   &__loading {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-gray);
+    @extend .loading-state;
   }
 
   &__pagination {
@@ -468,99 +305,23 @@
   }
 
   &__search {
-    flex: 1;
-    min-width: 200px;
-    display: flex;
-    gap: 0.5rem;
-    align-items: flex-end;
+    @extend .search;
 
     &-input {
-      flex: 1;
-      padding: 0.75rem;
-      border: 1px solid var(--border-gray);
-      border-radius: 4px;
-      font-size: 1rem;
-      font-family: inherit;
-      height: 44px;
-      box-sizing: border-box;
-
-      &:focus {
-        outline: none;
-        border-color: var(--primary-yellow);
-        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
-      }
+      @extend .search__input;
     }
 
     &-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75rem;
-      background: var(--primary-yellow);
-      border: 1px solid var(--primary-yellow);
-      border-radius: 4px;
-      cursor: pointer;
-      color: var(--text-dark);
-      transition: all 0.3s ease;
-      min-width: 44px;
-      height: 44px;
-      box-sizing: border-box;
-
-      &:hover {
-        background: var(--primary-yellow-dark, #d4af37);
-        border-color: var(--primary-yellow-dark, #d4af37);
-      }
-
-      &:active {
-        transform: scale(0.95);
-      }
-
-      &:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
-      }
-
-      svg {
-        width: 20px;
-        height: 20px;
-      }
+      @extend .search__button;
     }
   }
 
   &__filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-width: 150px;
-    justify-content: flex-end;
-
-    label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-dark);
-      line-height: 1;
-      height: 1.2rem;
-      display: flex;
-      align-items: flex-end;
-    }
+    @extend .filter-group;
   }
 
   &__filter {
-    padding: 0.75rem;
-    border: 1px solid var(--border-gray);
-    border-radius: 4px;
-    font-size: 1rem;
-    font-family: inherit;
-    background: var(--bg-white);
-    cursor: pointer;
-    height: 44px;
-    box-sizing: border-box;
-
-    &:focus {
-      outline: none;
-      border-color: var(--primary-yellow);
-      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
-    }
+    @extend .filter;
   }
 }
 
@@ -706,13 +467,7 @@
   }
 
   &__empty {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-gray);
-
-    p {
-      font-size: 1.2rem;
-    }
+    @extend .empty-state;
   }
 
   &__grid {
@@ -728,38 +483,11 @@
   }
 
   &__table-container {
-    overflow-x: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px var(--shadow);
-    background: var(--bg-white);
-    -webkit-overflow-scrolling: touch;
-    
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: var(--bg-gray);
-      border-radius: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: var(--border-gray);
-      border-radius: 4px;
-      
-      &:hover {
-        background: var(--primary-yellow);
-      }
-    }
+    @extend .table-container;
   }
 
   &__table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--bg-white);
-    font-size: 0.9rem;
-    position: relative;
-    table-layout: auto;
+    @extend .table;
     
     tbody tr {
       display: table-row;
@@ -999,41 +727,6 @@
       background-color: rgba(255, 215, 0, 0.12);
     }
 
-    .ticket-card__link,
-    .ticket-table__link {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      width: 100%;
-      padding: 0;
-      transition: color 0.2s ease;
-      
-      &:hover {
-        color: var(--primary-yellow);
-      }
-
-      &--cost {
-        text-align: right;
-      }
-    }
-
-    .ticket-table__number,
-    .ticket-table__customer,
-    .ticket-table__device,
-    .ticket-table__date,
-    .ticket-table__cost {
-      display: block;
-    }
-
-    .ticket-table__number {
-      font-family: 'Courier New', monospace;
-    }
-
-    .ticket-table__cost {
-      font-family: 'Courier New', monospace;
-      text-align: right;
-    }
-
     .ticket-card__td {
       padding: 0.75rem;
       vertical-align: middle;
@@ -1226,6 +919,44 @@
   &__cost {
     font-size: 0.85rem;
   }
+}
+
+// Reusable Table Styles (used across tickets and warranties tables)
+.table__link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+  padding: 0;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: var(--primary-yellow);
+  }
+
+  &--cost {
+    text-align: right;
+  }
+}
+
+.table__number {
+  display: block;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.table__customer,
+.table__device,
+.table__date {
+  display: block;
+}
+
+.table__cost {
+  display: block;
+  font-family: 'Courier New', monospace;
+  text-align: right;
 }
 
 // Ticket Status Badge
@@ -1631,209 +1362,13 @@
     margin-bottom: 1rem;
   }
 
-  // Image upload area in ticket detail uses the same styles as form
-  // The image-upload-area class is shared between form and detail views
+  // Image upload area in ticket detail - uses reusable component styles
   &__images {
     margin-top: 1rem;
 
-    // Modern Image Upload Area (same as form)
+    // Image upload area uses reusable component from _components.scss
     .image-upload-area {
-      position: relative;
-      border: 2px dashed var(--border-gray);
-      border-radius: 8px;
-      padding: 3rem 2rem;
-      background: var(--bg-gray);
-      text-align: center;
-      transition: all 0.3s ease;
-      cursor: pointer;
       margin-top: 1rem;
-
-      &:hover:not(.disabled):not(.uploading) {
-        border-color: var(--primary-yellow);
-        background: rgba(255, 215, 0, 0.05);
-      }
-
-      &.drag-over {
-        border-color: var(--primary-yellow);
-        background: rgba(255, 215, 0, 0.1);
-        transform: scale(1.02);
-      }
-
-      &.uploading {
-        opacity: 0.7;
-        cursor: not-allowed;
-      }
-
-      &.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .image-upload-input {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-        overflow: hidden;
-        pointer-events: none;
-        display: none;
-      }
-
-      .image-upload-label {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        cursor: pointer;
-        user-select: none;
-
-        .upload-icon {
-          color: var(--primary-yellow);
-          transition: transform 0.3s ease;
-        }
-
-        .upload-text {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          color: var(--text-dark);
-          font-size: 1rem;
-
-          strong {
-            color: var(--primary-yellow);
-            font-weight: 600;
-          }
-
-          .upload-hint {
-            font-size: 0.85rem;
-            color: var(--text-gray);
-          }
-        }
-      }
-
-      &:hover:not(.disabled):not(.uploading) .upload-icon {
-        transform: scale(1.05);
-      }
-    }
-
-    // Image Preview Container (same as form)
-    .image-preview-container {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      background: var(--bg-white);
-      border-radius: 8px;
-      border: 1px solid var(--border-light);
-    }
-
-    .image-preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .image-preview-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .image-preview-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border-light);
-      background: var(--bg-gray);
-    }
-
-    .image-preview-thumbnail {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .image-preview-remove {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(220, 53, 69, 0.95);
-      color: white;
-      font-size: 1.25rem;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      padding: 0;
-      opacity: 1;
-      transform: scale(1);
-      z-index: 10;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-
-      &:hover {
-        background: rgba(220, 53, 69, 1);
-        transform: scale(1.15);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-      }
-
-      &:active {
-        transform: scale(0.95);
-      }
-    }
-
-    .image-preview-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .image-preview-name {
-      font-size: 0.85rem;
-      color: var(--text-dark);
-      font-weight: 500;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .image-preview-size {
-      font-size: 0.75rem;
-      color: var(--text-gray);
-    }
-
-    .image-preview-note {
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--border-light);
-      font-size: 0.9rem;
-      color: var(--text-gray);
-      font-style: italic;
-    }
-
-    .image-upload-success {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
-      background: rgba(40, 167, 69, 0.1);
-      border: 1px solid rgba(40, 167, 69, 0.3);
-      border-radius: 6px;
-      color: #155724;
-      font-size: 0.9rem;
-
-      svg {
-        flex-shrink: 0;
-        color: #28a745;
-      }
     }
   }
 }
@@ -2501,122 +2036,28 @@
   }
 }
 
-// Ticket Modal
+// Ticket Modal - uses reusable modal component
 .ticket-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  animation: fadeIn 0.2s ease;
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
+  @extend .modal;
 
   &__content {
-    background: var(--white);
-    border-radius: 16px;
-    width: 100%;
-    max-width: 900px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.3s ease;
-    overflow: hidden;
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
+    @extend .modal__content;
   }
 
   &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 32px;
-    border-bottom: 2px solid var(--border-gray);
+    @extend .modal__header;
   }
 
   &__title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin: 0;
+    @extend .modal__title;
   }
 
   &__close {
-    background: transparent;
-    border: none;
-    font-size: 2rem;
-    color: var(--text-gray);
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    line-height: 1;
-
-    &:hover {
-      background: var(--bg-gray);
-      color: var(--text-dark);
-    }
-
-    &:active {
-      transform: scale(0.9);
-    }
+    @extend .modal__close;
   }
 
   &__body {
-    padding: 32px;
-    overflow-y: auto;
-    flex: 1;
-  }
-}
-
-// Responsive Design for Ticket Modal
-@media (max-width: 768px) {
-  .ticket-modal {
-    padding: 10px;
-
-    &__content {
-      max-width: 100%;
-      max-height: 95vh;
-    }
-
-    &__header {
-      padding: 16px 20px;
-    }
-
-    &__title {
-      font-size: 1.25rem;
-    }
-
-    &__body {
-      padding: 20px;
-    }
+    @extend .modal__body;
   }
 }
 

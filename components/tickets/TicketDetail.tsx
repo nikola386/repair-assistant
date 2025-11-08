@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, DragEvent } from 'react'
+import { useState, useRef, useEffect, useCallback, DragEvent } from 'react'
 import Image from 'next/image'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -13,6 +13,9 @@ import ExpenseTable from './ExpenseTable'
 import { showAlert } from '../../lib/alerts'
 import ConfirmationModal from '../ui/ConfirmationModal'
 import { useConfirmation } from '../../lib/useConfirmation'
+import { Warranty } from '../../types/warranty'
+import WarrantyStatusBadge from '../warranties/WarrantyStatusBadge'
+import Link from 'next/link'
 
 interface TicketDetailProps {
   ticket: RepairTicket
@@ -32,6 +35,8 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   const [pendingFiles, setPendingFiles] = useState<File[]>([]) // Files selected before upload
   const [updatedTicket, setUpdatedTicket] = useState<RepairTicket>(ticket)
   const [triggerAddExpense, setTriggerAddExpense] = useState(false)
+  const [warranty, setWarranty] = useState<Warranty | null>(null)
+  const [loadingWarranty, setLoadingWarranty] = useState(false)
   const [editFormData, setEditFormData] = useState<UpdateTicketInput>({
     customerName: ticket.customerName,
     customerEmail: ticket.customerEmail,
@@ -72,6 +77,34 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
     })
   }, [ticket])
 
+  const fetchWarranty = useCallback(async () => {
+    setLoadingWarranty(true)
+    try {
+      const response = await fetch(`/api/warranties/ticket/${ticket.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setWarranty(data.warranty)
+      } else if (response.status !== 404) {
+        console.error('Error fetching warranty')
+      }
+    } catch (error) {
+      console.error('Error fetching warranty:', error)
+    } finally {
+      setLoadingWarranty(false)
+    }
+  }, [ticket.id])
+
+  // Fetch warranty when ticket status becomes completed (watch both prop and local state)
+  useEffect(() => {
+    const currentStatus = updatedTicket?.status || ticket.status
+    if (currentStatus === 'completed') {
+      fetchWarranty()
+    } else {
+      // Clear warranty if status is no longer completed
+      setWarranty(null)
+    }
+  }, [ticket.status, updatedTicket?.status, fetchWarranty])
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-'
     return new Date(dateString).toLocaleDateString()
@@ -92,7 +125,9 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
 
       if (response.ok) {
         const data = await response.json()
-        setUpdatedTicket(data.ticket)
+        const updatedTicketData = data.ticket
+        setUpdatedTicket(updatedTicketData)
+        
         if (newStatus === 'completed') {
           // Auto-set completion date if not set
           const completionResponse = await fetch(`/api/tickets/${ticket.id}`, {
@@ -104,7 +139,31 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
           })
           if (completionResponse.ok) {
             const completionData = await completionResponse.json()
-            setUpdatedTicket(completionData.ticket)
+            const finalTicket = completionData.ticket
+            setUpdatedTicket(finalTicket)
+            
+            // Notify parent component of the update
+            if (onTicketUpdate) {
+              onTicketUpdate(finalTicket)
+            }
+            
+            // Fetch warranty reactively - wait a bit for warranty to be created on backend
+            setTimeout(() => {
+              fetchWarranty()
+            }, 500)
+          } else {
+            // Even if completion date update fails, still notify parent and fetch warranty
+            if (onTicketUpdate) {
+              onTicketUpdate(updatedTicketData)
+            }
+            setTimeout(() => {
+              fetchWarranty()
+            }, 500)
+          }
+        } else {
+          // Notify parent component of the update for non-completed status changes
+          if (onTicketUpdate) {
+            onTicketUpdate(updatedTicketData)
           }
         }
       }
@@ -888,6 +947,59 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
             onAddTriggered={() => setTriggerAddExpense(false)}
           />
         </div>
+
+        {ticket.status === 'completed' && (
+          <div className="ticket-detail__section">
+            <div className="ticket-detail__section-header">
+              <h2>{t.warranties.title}</h2>
+            </div>
+            {loadingWarranty ? (
+              <div className="spinner-container spinner-container--inline">
+                <Spinner size="small" />
+                <span>{t.warranties.loadingWarranties}</span>
+              </div>
+            ) : warranty ? (
+              <div className="ticket-detail__warranty">
+                <div className="ticket-detail__info-grid">
+                  <div>
+                    <label>{t.warranties.table.status}</label>
+                    <p>
+                      <WarrantyStatusBadge status={warranty.status} expiryDate={warranty.expiryDate} />
+                    </p>
+                  </div>
+                  <div>
+                    <label>{t.warranties.form.warrantyType}</label>
+                    <p>
+                      {warranty.warrantyType === 'parts' ? t.warranties.type.parts :
+                       warranty.warrantyType === 'labor' ? t.warranties.type.labor :
+                       t.warranties.type.both}
+                    </p>
+                  </div>
+                  <div>
+                    <label>{t.warranties.table.period}</label>
+                    <p>{warranty.warrantyPeriodDays} days</p>
+                  </div>
+                  <div>
+                    <label>{t.warranties.table.startDate}</label>
+                    <p>{formatDate(warranty.startDate)}</p>
+                  </div>
+                  <div>
+                    <label>{t.warranties.table.expiryDate}</label>
+                    <p>{formatDate(warranty.expiryDate)}</p>
+                  </div>
+                  {warranty.warrantyClaims && warranty.warrantyClaims.length > 0 && (
+                    <div>
+                      <label>{t.warranties.claim.title}</label>
+                      <p>{warranty.warrantyClaims.length} {warranty.warrantyClaims.length !== 1 ? t.warranties.card.claims : t.warranties.card.claim}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="ticket-detail__no-warranty">{t.warranties.noWarrantiesFound}</p>
+            )}
+          </div>
+        )}
 
         <div className="ticket-detail__section">
           <h2>{t.common.info.importantDates}</h2>

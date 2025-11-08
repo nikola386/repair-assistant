@@ -58,8 +58,8 @@ export default function TicketTable({ tickets }: TicketTableProps) {
         cell: (info) => {
           const ticket = info.row.original
           return (
-            <Link href={`/tickets/${ticket.id}`} className="ticket-table__link">
-              <span className="ticket-table__number">{info.getValue() as string}</span>
+            <Link href={`/tickets/${ticket.id}`} className="table__link">
+              <span className="table__number">{info.getValue() as string}</span>
             </Link>
           )
         },
@@ -71,8 +71,8 @@ export default function TicketTable({ tickets }: TicketTableProps) {
         cell: (info) => {
           const ticket = info.row.original
           return (
-            <Link href={`/clients/${ticket.customerId}`} className="ticket-table__link">
-              <span className="ticket-table__customer">{info.getValue() as string}</span>
+            <Link href={`/clients/${ticket.customerId}`} className="table__link">
+              <span className="table__customer">{info.getValue() as string}</span>
             </Link>
           )
         },
@@ -86,8 +86,8 @@ export default function TicketTable({ tickets }: TicketTableProps) {
           const ticket = info.row.original
           const deviceInfo = `${ticket.deviceType}${ticket.deviceBrand ? ` • ${ticket.deviceBrand}` : ''}${ticket.deviceModel ? ` ${ticket.deviceModel}` : ''}`
           return (
-            <Link href={`/tickets/${ticket.id}`} className="ticket-table__link">
-              <span className="ticket-table__device">{deviceInfo}</span>
+            <Link href={`/tickets/${ticket.id}`} className="table__link">
+              <span className="table__device">{deviceInfo}</span>
             </Link>
           )
         },
@@ -100,8 +100,8 @@ export default function TicketTable({ tickets }: TicketTableProps) {
         cell: (info) => {
           const ticket = info.row.original
           return (
-            <Link href={`/tickets/${ticket.id}`} className="ticket-table__link">
-              <span className="ticket-table__date">{formatDate(info.getValue() as string)}</span>
+            <Link href={`/tickets/${ticket.id}`} className="table__link">
+              <span className="table__date">{formatDate(info.getValue() as string)}</span>
             </Link>
           )
         },
@@ -114,8 +114,8 @@ export default function TicketTable({ tickets }: TicketTableProps) {
           const ticket = info.row.original
           const cost = info.getValue() as number | undefined
           return (
-            <Link href={`/tickets/${ticket.id}`} className="ticket-table__link ticket-table__link--cost">
-              <span className="ticket-table__cost">
+            <Link href={`/tickets/${ticket.id}`} className="table__link table__link--cost">
+              <span className="table__cost">
                 {cost ? `$${cost.toFixed(2)}` : '—'}
               </span>
             </Link>
@@ -130,7 +130,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
           const ticket = info.row.original
           const status = info.getValue() as string
         return (
-          <Link href={`/tickets/${ticket.id}`} className="ticket-table__link">
+          <Link href={`/tickets/${ticket.id}`} className="table__link">
             <span className={getStatusClass(status)}>
               {t.common.status[status as keyof typeof t.common.status] || status}
             </span>
@@ -146,7 +146,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
           const ticket = info.row.original
           const priority = info.getValue() as string
         return (
-          <Link href={`/tickets/${ticket.id}`} className="ticket-table__link">
+          <Link href={`/tickets/${ticket.id}`} className="table__link">
             <span className={getPriorityClass(priority)}>
               {t.common.priority[priority as keyof typeof t.common.priority] || priority}
             </span>

@@ -121,6 +121,7 @@ export async function PATCH(request: NextRequest) {
       const primaryColor = formData.get('primaryColor') as string | null
       const secondaryColor = formData.get('secondaryColor') as string | null
       const language = formData.get('language') as string | null
+      const defaultWarrantyPeriodDays = formData.get('defaultWarrantyPeriodDays') as string | null
 
       // Get existing store
       const existingStore = await db.store.findUnique({
@@ -248,9 +249,9 @@ export async function PATCH(request: NextRequest) {
       }
 
       // Update settings if provided
-      const updateSettings: { primaryColor?: string; secondaryColor?: string; language?: string } = {}
+      const updateSettings: { primaryColor?: string; secondaryColor?: string; language?: string; defaultWarrantyPeriodDays?: number } = {}
       
-      if (primaryColor || secondaryColor || language) {
+      if (primaryColor || secondaryColor || language || defaultWarrantyPeriodDays !== null) {
         if (primaryColor) {
           const colorError = validateHexColor(primaryColor, 'Primary color')
           if (colorError) {
@@ -278,6 +279,13 @@ export async function PATCH(request: NextRequest) {
           )
         }
 
+        if (defaultWarrantyPeriodDays !== null && defaultWarrantyPeriodDays.trim() !== '') {
+          const warrantyDays = parseInt(defaultWarrantyPeriodDays.trim())
+          if (!isNaN(warrantyDays) && warrantyDays > 0) {
+            updateSettings.defaultWarrantyPeriodDays = warrantyDays
+          }
+        }
+
         if (primaryColor) updateSettings.primaryColor = primaryColor
         if (secondaryColor) updateSettings.secondaryColor = secondaryColor
         if (language) updateSettings.language = language
@@ -295,7 +303,7 @@ export async function PATCH(request: NextRequest) {
     
     // Handle JSON (colors and language for backward compatibility)
     const body = await request.json()
-    const { primaryColor, secondaryColor, language } = body
+    const { primaryColor, secondaryColor, language, defaultWarrantyPeriodDays } = body
 
     // Validate color format
     if (primaryColor) {
@@ -325,10 +333,16 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    const updateSettings: { primaryColor?: string; secondaryColor?: string; language?: string } = {}
+    const updateSettings: { primaryColor?: string; secondaryColor?: string; language?: string; defaultWarrantyPeriodDays?: number } = {}
     if (primaryColor) updateSettings.primaryColor = primaryColor
     if (secondaryColor) updateSettings.secondaryColor = secondaryColor
     if (language) updateSettings.language = language
+    if (defaultWarrantyPeriodDays !== undefined && defaultWarrantyPeriodDays !== null) {
+      const warrantyDays = typeof defaultWarrantyPeriodDays === 'number' ? defaultWarrantyPeriodDays : parseInt(defaultWarrantyPeriodDays)
+      if (!isNaN(warrantyDays) && warrantyDays > 0) {
+        updateSettings.defaultWarrantyPeriodDays = warrantyDays
+      }
+    }
 
     const updatedSettings = await settingsStorage.createOrUpdate(
       storeId,
