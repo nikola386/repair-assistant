@@ -8,6 +8,7 @@ import { Language, getAllLanguages } from '@/lib/languages'
 import Spinner from '@/components/ui/Spinner'
 import Steps from '@/components/ui/Steps'
 import LogoUpload from '@/components/ui/LogoUpload'
+import SearchableSelect from '@/components/ui/SearchableSelect'
 import { showAlert } from '@/lib/alerts'
 import { DEFAULT_PRIMARY_COLOR, DEFAULT_SECONDARY_COLOR, CURRENCIES } from '@/lib/constants'
 
@@ -436,11 +437,10 @@ export default function OnboardingPage() {
                     <label htmlFor="country" className="form-label">
                       {t.onboarding?.country || 'Country'}
                     </label>
-                    <select
+                    <SearchableSelect
                       id="country"
                       value={country}
-                      onChange={(e) => {
-                        const selectedCode = e.target.value
+                      onChange={(selectedCode) => {
                         const selectedCountry = countries.find(c => c.code === selectedCode)
                         setCountry(selectedCode)
                         // Clear VAT number if country doesn't require VAT
@@ -448,16 +448,15 @@ export default function OnboardingPage() {
                           setVatNumber('')
                         }
                       }}
-                      className="form-input"
+                      options={countries.map((c) => ({
+                        value: c.code,
+                        label: `${c.name}`
+                      }))}
+                      placeholder={t.onboarding?.countryPlaceholder || 'Select a country...'}
+                      searchPlaceholder="Search countries..."
                       disabled={loading}
-                    >
-                      <option value="">{t.onboarding?.countryPlaceholder || 'Select a country...'}</option>
-                      {countries.map((c) => (
-                        <option key={c.id} value={c.code}>
-                          {c.name} {c.requiresVat && '(VAT required)'}
-                        </option>
-                      ))}
-                    </select>
+                      className="form-input"
+                    />
                   </div>
                 </div>
               </div>
