@@ -6,6 +6,7 @@ import CookieBanner from '@/components/ui/CookieBanner'
 import { Providers } from './providers'
 import ProtectedRoutes from '@/components/ProtectedRoutes'
 import { Toaster } from 'react-hot-toast'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: 'Repair Assistant - Streamline Your Electronics Repair Business',
@@ -55,6 +56,7 @@ export default function RootLayout({
                 },
               }}
             />
+            <Analytics />
           </LanguageProvider>
         </Providers>
       </body>
