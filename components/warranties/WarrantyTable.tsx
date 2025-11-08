@@ -212,8 +212,8 @@ export default function WarrantyTable({ warranties, onWarrantyUpdate, isLoading 
               {warranties.map((warranty) => (
                 <tr key={warranty.id}>
                   <td>
-                    <Link href={`/tickets/${warranty.ticketId}`} className="ticket-table__link">
-                      {warranty.ticket?.ticketNumber || 'N/A'}
+                    <Link href={`/tickets/${warranty.ticketId}`} className="table__link">
+                      <span className="table__number">{warranty.ticket?.ticketNumber || 'N/A'}</span>
                     </Link>
                   </td>
                   <td>

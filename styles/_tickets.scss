@@ -999,41 +999,6 @@
       background-color: rgba(255, 215, 0, 0.12);
     }
 
-    .ticket-card__link,
-    .ticket-table__link {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      width: 100%;
-      padding: 0;
-      transition: color 0.2s ease;
-      
-      &:hover {
-        color: var(--primary-yellow);
-      }
-
-      &--cost {
-        text-align: right;
-      }
-    }
-
-    .ticket-table__number,
-    .ticket-table__customer,
-    .ticket-table__device,
-    .ticket-table__date,
-    .ticket-table__cost {
-      display: block;
-    }
-
-    .ticket-table__number {
-      font-family: 'Courier New', monospace;
-    }
-
-    .ticket-table__cost {
-      font-family: 'Courier New', monospace;
-      text-align: right;
-    }
-
     .ticket-card__td {
       padding: 0.75rem;
       vertical-align: middle;
@@ -1226,6 +1191,44 @@
   &__cost {
     font-size: 0.85rem;
   }
+}
+
+// Reusable Table Styles (used across tickets and warranties tables)
+.table__link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+  padding: 0;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: var(--primary-yellow);
+  }
+
+  &--cost {
+    text-align: right;
+  }
+}
+
+.table__number {
+  display: block;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.table__customer,
+.table__device,
+.table__date {
+  display: block;
+}
+
+.table__cost {
+  display: block;
+  font-family: 'Courier New', monospace;
+  text-align: right;
 }
 
 // Ticket Status Badge
