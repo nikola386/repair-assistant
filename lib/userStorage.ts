@@ -24,7 +24,7 @@ export interface CreateUserInput {
   password: string
   name?: string
   storeId?: string
-  storeName?: string // If provided, create a new store with this name
+  storeName?: string
   role?: string
   invitedBy?: string
   invitedAt?: Date
@@ -37,6 +37,7 @@ export class UserStorage {
     const passwordHash = await bcrypt.hash(password, 10)
 
     let finalStoreId = storeId
+    let isNewStore = false
 
     if (storeName && !storeId) {
       const store = await db.store.create({
@@ -45,10 +46,25 @@ export class UserStorage {
         },
       })
       finalStoreId = store.id
+      isNewStore = true
     }
 
     if (!finalStoreId) {
       throw new Error('Either storeId or storeName must be provided when creating a user')
+    }
+
+    let finalRole = role
+    if (!finalRole) {
+      const existingUsers = await db.user.findMany({
+        where: { storeId: finalStoreId },
+        take: 1,
+      })
+      
+      if (isNewStore || existingUsers.length === 0) {
+        finalRole = 'ADMIN'
+      } else {
+        finalRole = 'VIEWER'
+      }
     }
 
     return db.user.create({
@@ -57,7 +73,7 @@ export class UserStorage {
         passwordHash,
         name: name || null,
         storeId: finalStoreId,
-        role: (role || 'VIEWER') as any,
+        role: finalRole as any,
         invitedBy: invitedBy || null,
         invitedAt: invitedAt || null,
       },
