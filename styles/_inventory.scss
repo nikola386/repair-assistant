@@ -1,24 +1,12 @@
 // Inventory Styles
 
 .inventory-page {
-  padding: 120px 0 60px;
-  min-height: 80vh;
+  @extend .page;
   overflow: visible;
   position: relative;
 
   &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-
-    h1 {
-      font-size: 2.5rem;
-      color: var(--text-dark);
-      margin: 0;
-    }
+    @extend .page-header;
   }
 
   &__form {
@@ -44,101 +32,23 @@
   }
 
   &__search {
-    flex: 1;
-    min-width: 200px;
-    display: flex;
-    gap: 0.5rem;
-    align-items: flex-end;
+    @extend .search;
 
     &-input {
-      flex: 1;
-      padding: 0.75rem;
-      border: 1px solid var(--border-gray);
-      border-radius: 4px;
-      font-size: 1rem;
-      font-family: inherit;
-      height: 44px;
-      box-sizing: border-box;
-      transition: border-color 0.3s ease;
-
-      &:focus {
-        outline: none;
-        border-color: var(--primary-yellow);
-        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
-      }
+      @extend .search__input;
     }
 
     &-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75rem;
-      background: var(--primary-yellow);
-      border: 1px solid var(--primary-yellow);
-      border-radius: 4px;
-      cursor: pointer;
-      color: var(--text-dark);
-      transition: all 0.3s ease;
-      min-width: 44px;
-      height: 44px;
-      box-sizing: border-box;
-
-      &:hover {
-        background: var(--primary-yellow-dark);
-        border-color: var(--primary-yellow-dark);
-      }
-
-      &:active {
-        transform: scale(0.95);
-      }
-
-      &:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
-      }
-
-      svg {
-        width: 20px;
-        height: 20px;
-      }
+      @extend .search__button;
     }
   }
 
   &__filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-width: 150px;
-    justify-content: flex-end;
-
-    label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-dark);
-      line-height: 1;
-      height: 1.2rem;
-      display: flex;
-      align-items: flex-end;
-    }
+    @extend .filter-group;
   }
 
   &__filter {
-    padding: 0.75rem;
-    border: 1px solid var(--border-gray);
-    border-radius: 4px;
-    font-size: 1rem;
-    font-family: inherit;
-    background: var(--bg-white);
-    cursor: pointer;
-    height: 44px;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease;
-
-    &:focus {
-      outline: none;
-      border-color: var(--primary-yellow);
-      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
-    }
+    @extend .filter;
   }
 
   &__checkbox-label {
@@ -160,13 +70,7 @@
   &__loading,
   &__empty,
   &__error {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-gray);
-
-    p {
-      margin-top: 1rem;
-    }
+    @extend .empty-state;
   }
 
   &__pagination {
@@ -294,56 +198,14 @@
   }
 
   &__table-container {
-    overflow-x: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px var(--shadow);
-    background: var(--bg-white);
-    -webkit-overflow-scrolling: touch;
-    
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: var(--bg-gray);
-      border-radius: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: var(--border-gray);
-      border-radius: 4px;
-      
-      &:hover {
-        background: var(--primary-yellow);
-      }
-    }
+    @extend .table-container;
   }
 
   &__table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--bg-white);
-    font-size: 0.9rem;
-    position: relative;
-    table-layout: auto;
+    @extend .table;
 
-      thead {
+    thead {
       th {
-        padding: 1rem 0.75rem;
-        text-align: left;
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: var(--text-dark);
-        background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
-        border-bottom: 2px solid var(--border-gray);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);
-        
         // Make actions column narrower
         &:last-child {
           width: 60px;
@@ -352,19 +214,8 @@
       }
     }
 
-      tbody {
-      overflow: visible;
-      position: relative;
-      
+    tbody {
       tr {
-        border-bottom: 1px solid var(--border-gray);
-        transition: background 0.2s ease;
-        position: relative;
-
-        &:hover {
-          background: var(--bg-gray);
-        }
-
         &.inventory-table__row--low-stock {
           background: rgba(255, 69, 0, 0.1);
           
@@ -375,11 +226,6 @@
       }
 
       td {
-        padding: 1rem 0.75rem;
-        color: var(--text-dark);
-        position: relative;
-        overflow: visible;
-        
         // Make actions cell narrower
         &:last-child {
           width: 60px;
@@ -591,119 +437,34 @@
   }
 }
 
-// Inventory Modal
+// Inventory Modal - uses reusable modal component
 .inventory-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  animation: fadeIn 0.2s ease;
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
+  @extend .modal;
 
   &__content {
-    background: var(--white);
-    border-radius: 16px;
-    width: 100%;
+    @extend .modal__content;
     max-width: 800px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.3s ease;
-    overflow: hidden;
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
   }
 
   &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 32px;
-    border-bottom: 2px solid var(--border-gray);
+    @extend .modal__header;
   }
 
   &__title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin: 0;
+    @extend .modal__title;
   }
 
   &__close {
-    background: transparent;
-    border: none;
-    font-size: 2rem;
-    color: var(--text-gray);
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    line-height: 1;
-
-    &:hover {
-      background: var(--bg-gray);
-      color: var(--text-dark);
-    }
-
-    &:active {
-      transform: scale(0.9);
-    }
+    @extend .modal__close;
   }
 
   &__body {
-    padding: 32px;
-    overflow-y: auto;
-    flex: 1;
+    @extend .modal__body;
   }
 }
 
 // Responsive Design
 @media (max-width: 768px) {
-  .inventory-page {
-    &__header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    &__filters {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    &__search {
-      width: 100%;
-    }
-  }
-
   .inventory-table {
     &__table {
       font-size: 0.8rem;
@@ -712,27 +473,6 @@
       tbody td {
         padding: 0.5rem;
       }
-    }
-  }
-
-  .inventory-modal {
-    padding: 10px;
-
-    &__content {
-      max-width: 100%;
-      max-height: 95vh;
-    }
-
-    &__header {
-      padding: 16px 20px;
-    }
-
-    &__title {
-      font-size: 1.25rem;
-    }
-
-    &__body {
-      padding: 20px;
     }
   }
 }

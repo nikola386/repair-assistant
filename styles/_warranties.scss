@@ -1,28 +1,15 @@
 // Warranties System Styles
 
 .warranties-page {
-  padding: 120px 0 60px;
-  min-height: 80vh;
+  @extend .page;
 
   &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-
-    h1 {
-      font-size: 2.5rem;
-      color: var(--text-dark);
-      margin: 0;
-    }
+    @extend .page-header;
   }
 
   &__empty {
-    text-align: center;
+    @extend .empty-state;
     padding: 4rem 2rem;
-    color: var(--text-gray);
     font-size: 1.1rem;
   }
 }
@@ -306,22 +293,10 @@
 
 // Warranty Claims Page
 .warranty-claims-page {
-  padding: 120px 0 60px;
-  min-height: 80vh;
+  @extend .page;
 
   &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-
-    h1 {
-      font-size: 2.5rem;
-      color: var(--text-dark);
-      margin: 0;
-    }
+    @extend .page-header;
   }
 
   &__filter {
@@ -346,9 +321,8 @@
   }
 
   &__empty {
-    text-align: center;
+    @extend .empty-state;
     padding: 4rem 2rem;
-    color: var(--text-gray);
     font-size: 1.1rem;
   }
 
