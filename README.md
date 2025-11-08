@@ -846,4 +846,3 @@ npm run migrate
 - Requires database connection
 - Authentication required for all routes
 - Completely independent from home-app
-
