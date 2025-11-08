@@ -201,16 +201,34 @@ export default function DashboardPage() {
     return labels[p]
   }
 
-  const formatChartDate = (dateString: string): string => {
-    if (dateString.includes('-') && dateString.length === 10) {
-      const date = new Date(dateString)
+  const formatChartDate = (dateString: string | number | Date | null | undefined): string => {
+    // Handle null/undefined
+    if (dateString == null) {
+      return ''
+    }
+    
+    // Convert to string if it's a number or Date
+    let str: string
+    if (typeof dateString === 'number') {
+      str = new Date(dateString).toISOString().split('T')[0]
+    } else if (dateString instanceof Date) {
+      str = dateString.toISOString().split('T')[0]
+    } else if (typeof dateString === 'string') {
+      str = dateString
+    } else {
+      return String(dateString)
+    }
+    
+    // Now safely check if it's a string with includes
+    if (str.includes('-') && str.length === 10) {
+      const date = new Date(str)
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    } else if (dateString.match(/^\d{4}-\d{2}$/)) {
-      const [year, month] = dateString.split('-')
+    } else if (str.match(/^\d{4}-\d{2}$/)) {
+      const [year, month] = str.split('-')
       const date = new Date(parseInt(year), parseInt(month) - 1, 1)
       return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
     }
-    return dateString
+    return str
   }
 
   const getChartTitle = (chartType: ChartType): string => {
