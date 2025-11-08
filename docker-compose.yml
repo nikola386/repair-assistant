@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: repair-assistant-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-repair_tickets}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - repair-assistant-network
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: repair-assistant-app
+    environment:
+      # Database Configuration
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-repair_tickets}?schema=public
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-repair_tickets}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_SSL: ${DB_SSL:-false}
+      
+      # Authentication (Required)
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-this-secret-in-production-minimum-32-characters}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3001}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3001}
+      
+      # Email Configuration (Optional - will use Ethereal test account if not provided)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@repairassistant.com}
+      
+      # Storage (Optional - for file uploads)
+      BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN:-}
+      
+      # Feature Flags
+      DISABLE_REGISTER: ${DISABLE_REGISTER:-false}
+      
+      # Node Environment
+      NODE_ENV: production
+    ports:
+      - "${APP_PORT:-3001}:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      init-db:
+        condition: service_completed_successfully
+    networks:
+      - repair-assistant-network
+    restart: unless-stopped
+
+  # Database Initialization Service
+  init-db:
+    image: node:18-alpine
+    container_name: repair-assistant-init
+    working_dir: /app
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-repair_tickets}?schema=public
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-repair_tickets}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_SSL: ${DB_SSL:-false}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: >
+      sh -c "
+        apk add --no-cache netcat-openbsd &&
+        echo 'Waiting for PostgreSQL to be ready...' &&
+        until nc -z postgres 5432; do sleep 1; done &&
+        echo 'PostgreSQL is ready!' &&
+        echo 'Installing dependencies...' &&
+        npm ci &&
+        echo 'Installing tsx globally for scripts...' &&
+        npm install -g tsx &&
+        echo 'Generating Prisma Client...' &&
+        npx prisma generate &&
+        echo 'Running database migrations...' &&
+        npx prisma migrate deploy &&
+        echo 'Seeding countries...' &&
+        tsx scripts/seed-countries.ts || echo 'Countries already seeded or error occurred' &&
+        echo '✅ Database initialization complete!'
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - repair-assistant-network
+
+  # Script Runner Service (for running utility scripts)
+  scripts:
+    image: node:18-alpine
+    container_name: repair-assistant-scripts
+    working_dir: /app
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-repair_tickets}?schema=public
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-repair_tickets}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_SSL: ${DB_SSL:-false}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-this-secret-in-production-minimum-32-characters}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - repair-assistant-network
+    profiles:
+      - scripts
+    command: tail -f /dev/null  # Keep container running
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  repair-assistant-network:
+    driver: bridge
+

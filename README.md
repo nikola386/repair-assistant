@@ -156,6 +156,48 @@ npm run build
 npm start
 ```
 
+### Docker (Recommended)
+
+The easiest way to run Repair Assistant is using Docker. It automatically sets up the database, runs migrations, and starts the application.
+
+**Prerequisites:**
+- Docker Desktop (or Docker Engine + Docker Compose)
+
+**Quick Start:**
+```bash
+./docker-start.sh
+```
+
+Or manually:
+```bash
+docker-compose up -d --build
+```
+
+The application will be available at `http://localhost:3001` (or your configured port).
+
+**What Docker sets up:**
+- PostgreSQL database with persistent storage
+- Automatic database migrations
+- Countries data seeding
+- Production-ready Next.js application
+
+**Common Commands:**
+```bash
+# View logs
+docker-compose logs -f app
+
+# Stop services
+docker-compose down
+
+# Stop and remove all data
+docker-compose down -v
+
+# Create admin user
+docker-compose run --rm scripts sh -c 'npm ci && npm install -g tsx && tsx scripts/create-user.ts admin@example.com password123 "Admin User"'
+```
+
+For detailed Docker documentation, see [DOCKER.md](./DOCKER.md).
+
 ### Database Scripts
 
 ```bash

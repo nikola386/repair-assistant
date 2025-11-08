@@ -1,6 +1,6 @@
 import { RepairTicket, CreateTicketInput, UpdateTicketInput, PaginatedTicketsResponse, TicketStatus, TicketPriority, Expense, CreateExpenseInput, UpdateExpenseInput } from '../types/ticket'
 import { db } from './db'
-import { del } from '@vercel/blob'
+import { deleteFile } from './storage'
 import { Decimal } from '@prisma/client/runtime/library'
 import { inventoryStorage } from './inventoryStorage'
 // Prisma generates TicketImage type automatically - use it directly
@@ -521,16 +521,13 @@ export const ticketStorage = {
         return false
       }
 
-      // Delete from Vercel Blob
+      // Delete from storage (blob or local)
       if (image.filePath) {
-        // Check if it's a Vercel Blob URL (starts with https://)
-        if (image.filePath.startsWith('https://')) {
-          try {
-            await del(image.filePath)
-          } catch (fileError) {
-            console.error('Error deleting blob:', fileError)
-            // Continue with database deletion even if blob deletion fails
-          }
+        try {
+          await deleteFile(image.filePath)
+        } catch (fileError) {
+          console.error('Error deleting file:', fileError)
+          // Continue with database deletion even if file deletion fails
         }
       }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { userStorage } from '@/lib/userStorage'
-import { put, del } from '@vercel/blob'
+import { uploadFile, deleteFile } from '@/lib/storage'
 import { withAuth } from '@/lib/auth.middleware'
 import {
   validateFileContent,
@@ -76,13 +76,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Delete old profile image from Vercel Blob if exists
+    // Delete old profile image if exists
     if (user.profileImage) {
       try {
-        // Check if it's a Vercel Blob URL (starts with https://)
-        if (user.profileImage.startsWith('https://')) {
-          await del(user.profileImage)
-        }
+        await deleteFile(user.profileImage)
       } catch (error) {
         console.error('Error deleting old profile image:', error)
         // Continue even if deletion fails
@@ -103,14 +100,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload file to Vercel Blob
-    const blob = await put(fileName, processedFile, {
+    // Upload file to storage (blob or local)
+    const fileUrl = await uploadFile(fileName, processedFile, {
       access: 'public',
       contentType: processedFile.type,
     })
 
-    // Update user profile image (store the blob URL)
-    const updatedUser = await userStorage.updateProfileImage(session.user.id, blob.url)
+    // Update user profile image (store the file URL)
+    const updatedUser = await userStorage.updateProfileImage(session.user.id, fileUrl)
 
     // Don't return password hash
     const { passwordHash, ...userWithoutPassword } = updatedUser
@@ -144,13 +141,10 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Delete profile image from Vercel Blob if exists
+    // Delete profile image if exists
     if (user.profileImage) {
       try {
-        // Check if it's a Vercel Blob URL (starts with https://)
-        if (user.profileImage.startsWith('https://')) {
-          await del(user.profileImage)
-        }
+        await deleteFile(user.profileImage)
       } catch (error) {
         console.error('Error deleting profile image file:', error)
         // Continue even if deletion fails

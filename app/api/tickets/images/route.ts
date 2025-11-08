@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ticketStorage } from '@/lib/ticketStorage'
 import { userStorage } from '@/lib/userStorage'
-import { put, del } from '@vercel/blob'
+import { uploadFile } from '@/lib/storage'
 import { requireAuthAndPermission } from '@/lib/api-middleware'
 import { Permission } from '@/lib/permissions'
 import {
@@ -90,18 +90,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload file to Vercel Blob
-    const blob = await put(fileName, processedFile, {
+    // Upload file to storage (blob or local)
+    const fileUrl = await uploadFile(fileName, processedFile, {
       access: 'public',
       contentType: processedFile.type,
     })
 
-    // Save image record to database (store the blob URL)
+    // Save image record to database (store the file URL)
     // Use original filename for user reference, but store processed file info
     const image = await ticketStorage.createImage(
       ticketId,
       file.name, // Keep original filename for user reference
-      blob.url,
+      fileUrl,
       processedFile.size,
       processedFile.type
     )

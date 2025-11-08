@@ -4,7 +4,7 @@ import { userStorage } from '@/lib/userStorage'
 import { requireAuthAndPermission } from '@/lib/api-middleware'
 import { Permission } from '@/lib/permissions'
 import { db } from '@/lib/db'
-import { put, del } from '@vercel/blob'
+import { uploadFile, deleteFile } from '@/lib/storage'
 import { isValidLanguage, SUPPORTED_LANGUAGES } from '@/lib/languages'
 import {
   validateFileContent,
@@ -141,9 +141,7 @@ export async function PATCH(request: NextRequest) {
         // Delete old logo if exists
         if (existingStore.logo) {
           try {
-            if (existingStore.logo.startsWith('https://')) {
-              await del(existingStore.logo)
-            }
+            await deleteFile(existingStore.logo)
           } catch (error) {
             console.error('Error deleting logo:', error)
             // Continue even if deletion fails
@@ -181,9 +179,7 @@ export async function PATCH(request: NextRequest) {
         // Delete old logo if exists
         if (existingStore.logo) {
           try {
-            if (existingStore.logo.startsWith('https://')) {
-              await del(existingStore.logo)
-            }
+            await deleteFile(existingStore.logo)
           } catch (error) {
             console.error('Error deleting old logo:', error)
             // Continue even if deletion fails
@@ -204,13 +200,11 @@ export async function PATCH(request: NextRequest) {
           )
         }
 
-        // Upload file to Vercel Blob
-        const blob = await put(fileName, processedFile, {
+        // Upload file to storage (blob or local)
+        logoUrl = await uploadFile(fileName, processedFile, {
           access: 'public',
           contentType: processedFile.type,
         })
-
-        logoUrl = blob.url
       }
 
       // Build address string from components if available
