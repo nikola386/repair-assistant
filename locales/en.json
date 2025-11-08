@@ -101,6 +101,7 @@
     "registrationError": "Registration failed",
     "namePlaceholder": "Enter your name",
     "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
     "loginError": "Invalid email or password",
     "loading": "Loading...",
     "passwordMismatch": "Passwords do not match",

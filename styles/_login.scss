@@ -152,6 +152,29 @@ select.form-input {
     white-space: nowrap;
 }
 
+.login-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--text-gray);
+
+    p {
+        margin: 0;
+    }
+}
+
+.login-link {
+    color: var(--primary-yellow);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+
+    &:hover {
+        color: #ffd54f;
+        text-decoration: underline;
+    }
+}
+
 // Onboarding specific styles
 .onboarding-step {
     display: flex;

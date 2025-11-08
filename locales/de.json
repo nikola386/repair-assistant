@@ -101,6 +101,7 @@
     "registrationError": "Registrierung fehlgeschlagen",
     "namePlaceholder": "Geben Sie Ihren Namen ein",
     "alreadyHaveAccount": "Bereits ein Konto?",
+    "dontHaveAccount": "Noch kein Konto?",
     "loginError": "Ungültige E-Mail oder Passwort",
     "loading": "Laden...",
     "passwordMismatch": "Passwörter stimmen nicht überein",

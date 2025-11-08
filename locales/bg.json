@@ -101,6 +101,7 @@
     "registrationError": "Неуспешна регистрация",
     "namePlaceholder": "Въведете вашето име",
     "alreadyHaveAccount": "Вече имате акаунт?",
+    "dontHaveAccount": "Нямате акаунт?",
     "loginError": "Невалиден имейл или парола",
     "loading": "Зареждане...",
     "passwordMismatch": "Паролите не съвпадат",

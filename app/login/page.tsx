@@ -202,6 +202,15 @@ function LoginForm() {
                 t.auth?.login || 'Login'
               )}
             </button>
+
+            <div className="login-footer">
+              <p>
+                {t.auth?.dontHaveAccount || "Don't have an account?"}{' '}
+                <a href="/register" className="login-link">
+                  {t.auth?.register || 'Sign Up'}
+                </a>
+              </p>
+            </div>
           </form>
         </div>
       </div>
