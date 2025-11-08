@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
         primaryColor: DEFAULT_PRIMARY_COLOR,
         secondaryColor: DEFAULT_SECONDARY_COLOR,
         language: 'en',
+        defaultWarrantyPeriodDays: 30,
         createdAt: new Date(),
         updatedAt: new Date(),
       }

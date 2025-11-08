@@ -3,6 +3,7 @@ import { requireAuthAndPermission } from '@/lib/api-middleware'
 import { Permission } from '@/lib/permissions'
 import { userStorage } from '@/lib/userStorage'
 import { z } from 'zod'
+import type { UserRole } from '@prisma/client'
 
 const updateSchema = z.object({
   role: z.enum(['ADMIN', 'MANAGER', 'TECHNICIAN', 'VIEWER']).optional(),
@@ -44,7 +45,16 @@ export async function PATCH(
       }
     }
 
-    const updatedUser = await userStorage.update(params.id, data)
+    // Cast role to UserRole enum type
+    const updateData: {
+      role?: UserRole
+      isActive?: boolean
+      name?: string
+    } = {
+      ...data,
+      role: data.role as UserRole | undefined,
+    }
+    const updatedUser = await userStorage.update(params.id, updateData)
 
     return NextResponse.json({
       id: updatedUser.id,
@@ -57,7 +67,7 @@ export async function PATCH(
     console.error('Update user error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { error: 'Invalid request data', details: error.issues },
         { status: 400 }
       )
     }

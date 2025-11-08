@@ -2,7 +2,7 @@ import { db } from './db'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 // Prisma generates User type automatically from schema - use it directly
-import type { User } from '@prisma/client'
+import type { User, UserRole } from '@prisma/client'
 
 // Type for UserInvitation (will be available after Prisma client regeneration)
 interface UserInvitation {
@@ -304,7 +304,7 @@ export class UserStorage {
   }
 
   async update(userId: string, data: {
-    role?: string
+    role?: UserRole
     isActive?: boolean
     name?: string
   }): Promise<User> {

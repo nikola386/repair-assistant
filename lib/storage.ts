@@ -45,10 +45,26 @@ export async function uploadFile(
   if (isBlobStorageAvailable()) {
     // Use Vercel Blob storage
     try {
-      const blob = await put(fileName, file, {
-        access: options?.access || 'public',
+      // Convert File or Buffer for Vercel Blob compatibility
+      // Vercel Blob accepts File, Blob, ArrayBuffer, or Readable streams
+      let fileData: File | ArrayBuffer | Uint8Array
+      if (file instanceof File) {
+        // File is directly compatible
+        fileData = file
+      } else if (Buffer.isBuffer(file)) {
+        // Convert Buffer to Uint8Array for compatibility
+        fileData = new Uint8Array(file)
+      } else {
+        fileData = file
+      }
+      
+      // Type assertion needed due to strict PutBody typing
+      // Vercel Blob put function has strict typing
+      const putOptions = {
+        access: (options?.access || 'public') as 'public' | 'private',
         contentType: options?.contentType,
-      })
+      }
+      const blob = await put(fileName, fileData as any, putOptions as any)
       return blob.url
     } catch (error) {
       console.error('Error uploading to blob storage, falling back to local storage:', error)

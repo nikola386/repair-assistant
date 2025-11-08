@@ -188,6 +188,7 @@ export async function POST(request: NextRequest) {
         primaryColor: primaryColor?.trim() || DEFAULT_PRIMARY_COLOR,
         secondaryColor: secondaryColor?.trim() || DEFAULT_SECONDARY_COLOR,
         language: language?.trim() || 'en',
+        defaultWarrantyPeriodDays: 30,
       },
       update: {
         primaryColor: primaryColor?.trim() || DEFAULT_PRIMARY_COLOR,
