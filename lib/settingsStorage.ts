@@ -8,6 +8,7 @@ export interface UpdateSettingsInput {
   primaryColor?: string
   secondaryColor?: string
   language?: string
+  defaultWarrantyPeriodDays?: number
 }
 
 export class SettingsStorage {
@@ -24,12 +25,14 @@ export class SettingsStorage {
         primaryColor: data.primaryColor ?? undefined,
         secondaryColor: data.secondaryColor ?? undefined,
         language: data.language ?? undefined,
+        defaultWarrantyPeriodDays: data.defaultWarrantyPeriodDays ?? undefined,
       },
       create: {
         storeId,
         primaryColor: data.primaryColor ?? DEFAULT_PRIMARY_COLOR,
         secondaryColor: data.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
         language: data.language ?? 'en',
+        defaultWarrantyPeriodDays: data.defaultWarrantyPeriodDays ?? 30,
       },
     })
   }

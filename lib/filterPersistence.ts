@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   TICKETS_FILTERS: 'tickets_filters',
   TICKETS_SORTING: 'tickets_sorting',
   CLIENTS_FILTERS: 'clients_filters',
+  WARRANTIES_SORTING: 'warranties_sorting',
 }
 
 interface TicketsFilters {
@@ -121,6 +122,31 @@ export const filterPersistence = {
         console.error('Error clearing clients filters:', error)
       }
     }
+  },
+  
+  // Warranties sorting
+  saveWarrantiesSorting: (sorting: TicketsSorting[]) => {
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem(STORAGE_KEYS.WARRANTIES_SORTING, JSON.stringify(sorting))
+      } catch (error) {
+        console.error('Error saving warranties sorting:', error)
+      }
+    }
+  },
+  
+  loadWarrantiesSorting: (): TicketsSorting[] | null => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = sessionStorage.getItem(STORAGE_KEYS.WARRANTIES_SORTING)
+        if (stored) {
+          return JSON.parse(stored)
+        }
+      } catch (error) {
+        console.error('Error loading warranties sorting:', error)
+      }
+    }
+    return null
   },
 }
 

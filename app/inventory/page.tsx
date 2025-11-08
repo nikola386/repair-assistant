@@ -8,6 +8,7 @@ import Spinner from '@/components/ui/Spinner'
 import MultiSelect from '@/components/ui/MultiSelect'
 import InventoryTable from '@/components/inventory/InventoryTable'
 import InventoryForm from '@/components/inventory/InventoryForm'
+import Pagination from '@/components/ui/Pagination'
 import { InventoryItem, CreateInventoryItemInput, UpdateInventoryItemInput } from '@/types/inventory'
 import { showAlert } from '@/lib/alerts'
 
@@ -372,29 +373,17 @@ function InventoryPageContent() {
                   editable={true}
                   isLoading={isLoading}
                 />
-                {pagination.totalPages > 1 && (
-                  <div className="inventory-page__pagination">
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
-                      disabled={pagination.page === 1}
-                    >
-                      {t.common.actions.previous}
-                    </button>
-                    <span>
-                      {t.inventory.page.pageInfo.replace('{page}', pagination.page.toString()).replace('{totalPages}', pagination.totalPages.toString()).replace('{total}', pagination.total.toString())}
-                    </span>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
-                      disabled={pagination.page >= pagination.totalPages}
-                    >
-                      {t.common.actions.next}
-                    </button>
-                  </div>
-                )}
+                <Pagination
+                  currentPage={pagination.page}
+                  totalPages={pagination.totalPages}
+                  onPageChange={(page) => {
+                    const newPagination = { ...pagination, page }
+                    setPagination(newPagination)
+                    syncFiltersToUrl(filters, newPagination, categoryFilter, locationFilter)
+                  }}
+                  disabled={isLoading}
+                  className="inventory-page__pagination-wrapper"
+                />
               </>
             )}
           </div>

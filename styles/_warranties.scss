@@ -1,0 +1,496 @@
+// Warranties System Styles
+
+.warranties-page {
+  padding: 120px 0 60px;
+  min-height: 80vh;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--text-dark);
+      margin: 0;
+    }
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-gray);
+    font-size: 1.1rem;
+  }
+}
+
+// Warranty Card (kept for detail pages or other uses)
+.warranty-card {
+  background: var(--bg-white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--shadow);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-gray);
+  }
+
+  &__ticket {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 1.1rem;
+  }
+
+  &__body {
+    margin-bottom: 1rem;
+  }
+
+  &__customer {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0 0 0.5rem 0;
+  }
+
+  &__device {
+    color: var(--text-gray);
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  &__type {
+    color: var(--text-gray);
+    margin: 0 0 0.5rem 0;
+    font-size: 0.85rem;
+  }
+
+  &__period {
+    color: var(--text-gray);
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  &__footer {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-gray);
+  }
+
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-gray);
+  }
+
+  &__date {
+    // Date styling
+  }
+
+  &__claims {
+    background: var(--bg-gray);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+}
+
+// Warranty Status Badge
+.warranty-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &--active {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  &--expired {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  &--voided {
+    background: #e2e3e5;
+    color: #383d41;
+  }
+
+  &--claimed {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  &--expiring-soon {
+    animation: pulse 2s infinite;
+  }
+}
+
+
+// Warranty Claim Card
+.warranty-claim-card {
+  background: var(--bg-gray);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border-left: 4px solid var(--primary-yellow);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  &__date {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+  }
+
+  &__status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+
+    &--pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    &--approved {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    &--rejected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    &--completed {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+  }
+
+  &__body {
+    // Body content
+  }
+
+  &__issue {
+    color: var(--text-dark);
+    margin: 0 0 1rem 0;
+    line-height: 1.6;
+  }
+
+  &__resolution {
+    color: var(--text-gray);
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+
+    strong {
+      color: var(--text-dark);
+    }
+  }
+
+  &__resolution-date {
+    color: var(--text-gray);
+    font-size: 0.85rem;
+    margin: 0.5rem 0 0 0;
+  }
+}
+
+// Warranty Claim Form
+.warranty-claim-form {
+  background: var(--bg-white);
+  padding: 1.5rem;
+  border-radius: 8px;
+
+  h3 {
+    font-size: 1.3rem;
+    color: var(--text-dark);
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+// Warranty Tables - now using ticket-list table styles
+// The warranties table uses the same styles as tickets table via ticket-list__table classes
+
+.warranty-claims-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-white);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px var(--shadow);
+
+  thead {
+    background: var(--bg-gray);
+  }
+
+  th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 1rem;
+    border-top: 1px solid var(--border-gray);
+    color: var(--text-dark);
+  }
+
+  tr:hover {
+    background: var(--bg-gray);
+  }
+}
+
+.warranty-claim-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &--pending {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  &--approved {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  &--rejected {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  &--completed {
+    background: #d1ecf1;
+    color: #0c5460;
+  }
+}
+
+// Warranty Claims Page
+.warranty-claims-page {
+  padding: 120px 0 60px;
+  min-height: 80vh;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--text-dark);
+      margin: 0;
+    }
+  }
+
+  &__filter {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    background: var(--bg-white);
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--primary-yellow);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-yellow);
+      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+    }
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-gray);
+    font-size: 1.1rem;
+  }
+
+  &__list {
+    margin-top: 2rem;
+  }
+}
+
+// Widget Styles
+.widget {
+  background: var(--bg-white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  &--warranties {
+    // Warranty widget specific styles
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-gray);
+
+    h2 {
+      font-size: 1.2rem;
+      color: var(--text-dark);
+      margin: 0;
+    }
+  }
+
+  &__link {
+    color: var(--primary-yellow);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__content {
+    // Content area
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-gray);
+    font-style: italic;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  &__item {
+    margin-bottom: 0.75rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__item-link {
+    display: block;
+    padding: 0.75rem;
+    background: var(--bg-gray);
+    border-radius: 4px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 215, 0, 0.1);
+      transform: translateX(4px);
+    }
+  }
+
+  &__item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  &__item-title {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+  }
+
+  &__item-meta {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+  }
+}
+
+.dashboard-widgets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+// Ticket Detail Warranty Section
+.ticket-detail__warranty {
+  margin-top: 1rem;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .warranties-page {
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+
+  .warranty-claims-table {
+    font-size: 0.85rem;
+
+    th,
+    td {
+      padding: 0.75rem 0.5rem;
+    }
+  }
+
+  .widget {
+    &__item-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+}
+

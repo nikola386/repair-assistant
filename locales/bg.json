@@ -85,6 +85,7 @@
     "contact": "Контакти",
     "dashboard": "Табло",
     "tickets": "Билети",
+    "warranties": "Гаранции",
     "clients": "Клиенти",
     "inventory": "Склад",
     "reports": "Отчети",
@@ -480,7 +481,9 @@
     "team": "Екип",
     "teamDescription": "Управление на членовете на екипа и техните роли.",
     "teamMembers": "Членове на Екипа",
-    "inviteUser": "Покани Потребител"
+    "inviteUser": "Покани Потребител",
+    "defaultWarrantyPeriod": "Период на гаранция по подразбиране (дни)",
+    "defaultWarrantyPeriodHint": "Това ще се използва като период на гаранция по подразбиране при създаване на гаранции за завършени билети."
   },
   "team": {
     "title": "Екип",
@@ -579,5 +582,96 @@
     "error": "Неуспешно завършване на настройката",
     "back": "Назад",
     "next": "Напред"
+  },
+  "warranties": {
+    "title": "Гаранции",
+    "noWarrantiesFound": "Не са намерени гаранции",
+    "loadingWarranties": "Зареждане на гаранции...",
+    "searchPlaceholder": "Търсене на гаранции...",
+    "table": {
+      "ticketNumber": "Билет №",
+      "customer": "Клиент",
+      "device": "Устройство",
+      "type": "Тип",
+      "period": "Период",
+      "startDate": "Начална Дата",
+      "expiryDate": "Крайна Дата",
+      "status": "Статус",
+      "actions": "Действия",
+      "edit": "Редактирай",
+      "createClaim": "Създай Претенция",
+      "voidWarranty": "Анулирай Гаранция",
+      "editWarranty": "Редактирай Гаранция",
+      "createWarrantyClaim": "Създай Гаранционна Претенция"
+    },
+    "status": {
+      "active": "Активна",
+      "expired": "Изтекла",
+      "voided": "Анулирана",
+      "claimed": "Претендирана",
+      "expiringSoon": "Изтича скоро"
+    },
+    "type": {
+      "parts": "Само Части",
+      "labor": "Само Труд",
+      "both": "Части и Труд"
+    },
+    "form": {
+      "warrantyPeriod": "Период на Гаранция (дни)",
+      "warrantyType": "Тип Гаранция",
+      "terms": "Условия",
+      "termsPlaceholder": "Въведете условия и условия на гаранцията...",
+      "notes": "Бележки",
+      "notesPlaceholder": "Въведете допълнителни бележки...",
+      "periodMinError": "Периодът на гаранцията трябва да бъде поне 1 ден",
+      "updateError": "Грешка при актуализация на гаранция",
+      "createError": "Грешка при създаване на гаранция",
+      "updateSuccess": "Гаранцията е актуализирана успешно"
+    },
+    "claim": {
+      "title": "Гаранционни Претенции",
+      "createClaim": "Създай Претенция",
+      "issueDescription": "Описание на Проблема",
+      "issueDescriptionPlaceholder": "Опишете проблема с ремонтираното устройство...",
+      "issueDescriptionRequired": "Моля, предоставете описание на проблема",
+      "createSuccess": "Гаранционната претенция е създадена успешно",
+      "createError": "Грешка при създаване на гаранционна претенция",
+      "noClaimsFound": "Не са намерени гаранционни претенции",
+      "claimDate": "Дата на Претенция",
+      "warranty": "Гаранция",
+      "warrantyId": "ID на Гаранция:",
+      "resolution": "Разрешение",
+      "status": {
+        "pending": "Изчакваща",
+        "approved": "Одобрена",
+        "rejected": "Отхвърлена",
+        "completed": "Завършена"
+      }
+    },
+    "card": {
+      "type": "Тип:",
+      "period": "Период:",
+      "expires": "Изтича:",
+      "claim": "претенция",
+      "claims": "претенции",
+      "unknownCustomer": "Неизвестен Клиент"
+    },
+    "void": {
+      "confirmMessage": "Сигурни ли сте, че искате да анулирате тази гаранция? Това действие не може да бъде отменено.",
+      "confirmText": "Анулирай",
+      "cancelText": "Отказ",
+      "success": "Гаранцията е анулирана успешно",
+      "error": "Грешка при анулиране на гаранция"
+    },
+    "filter": {
+      "status": "Статус:",
+      "allStatuses": "Всички Статуси"
+    },
+    "widget": {
+      "expiringWarranties": "Изтичащи Гаранции",
+      "viewAll": "Виж Всички",
+      "noExpiringWarranties": "Няма гаранции, изтичащи в следващите {days} дни",
+      "expires": "Изтича:"
+    }
   }
 }

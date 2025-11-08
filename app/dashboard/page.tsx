@@ -35,6 +35,7 @@ import {
   HiUsers,
 } from 'react-icons/hi'
 import { FaWrench, FaStopwatch, FaDollarSign } from 'react-icons/fa'
+import ExpiringWarrantiesWidget from '@/components/warranties/ExpiringWarrantiesWidget'
 
 interface ChartDataPoint {
   date: string
@@ -781,6 +782,11 @@ export default function DashboardPage() {
                   )}
                 </div>
 
+              </div>
+
+              {/* Warranty Widget */}
+              <div className="dashboard-widgets-grid">
+                <ExpiringWarrantiesWidget daysAhead={30} />
               </div>
 
             </div>
