@@ -98,7 +98,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="landing-features">
+      <section id="features" className="landing-features">
         <div className="landing-container">
           <div className="landing-section-header">
             <h2 className="landing-section-title">Everything You Need to Run Your Repair Shop</h2>
@@ -488,11 +488,11 @@ export default function LandingPage() {
             <div className="landing-footer-section">
               <h4 className="landing-footer-title">Features</h4>
               <ul className="landing-footer-links">
-                <li>Repair Tickets</li>
-                <li>Customer Management</li>
-                <li>Inventory Tracking</li>
-                <li>Business Analytics</li>
-                <li>Reports & Invoicing</li>
+                <li><a href="#features">Repair Tickets</a></li>
+                <li><a href="#features">Customer Management</a></li>
+                <li><a href="#features">Inventory Tracking</a></li>
+                <li><a href="#features">Business Analytics</a></li>
+                <li><a href="#features">Reports & Invoicing</a></li>
               </ul>
             </div>
             <div className="landing-footer-section">
