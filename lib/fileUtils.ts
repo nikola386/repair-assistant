@@ -51,7 +51,12 @@ export function generateUniqueFileName(
  */
 export function getFileExtension(fileName: string): string {
   const sanitized = sanitizeFileName(fileName)
-  return sanitized.split('.').pop()?.toLowerCase() || 'bin'
+  const parts = sanitized.split('.')
+  // If there's no dot or only one part (no extension), return 'bin'
+  if (parts.length <= 1) {
+    return 'bin'
+  }
+  return parts.pop()?.toLowerCase() || 'bin'
 }
 
 /**

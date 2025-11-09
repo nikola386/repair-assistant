@@ -7,7 +7,12 @@
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start -p 3001",
     "lint": "next lint",
-    "migrate": "npx tsx ../../scripts/migrate.ts"
+    "migrate": "npx tsx ../../scripts/migrate.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:integration": "jest --testPathPattern=integration"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",
@@ -37,19 +42,28 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.1",
     "@types/bcryptjs": "^2.4.6",
+    "@types/jest": "^29.5.11",
     "@types/node": "^20.14.12",
     "@types/pg": "^8.15.6",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.21",
     "daisyui": "^5.4.2",
+    "dotenv": "^17.2.3",
+    "dotenv-expand": "^12.0.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.5",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5.6",
     "prisma": "^6.18.0",
     "sass": "^1.93.2",
     "tailwindcss": "^4.1.16",
+    "ts-jest": "^29.1.2",
     "typescript": "^5.5.4"
   }
 }
