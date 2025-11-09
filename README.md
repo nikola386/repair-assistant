@@ -352,9 +352,3 @@ npm run migrate
 - `DATABASE_URL`: Full connection string, OR
 - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_SSL`: Individual connection parameters
 
-## Notes
-
-- Requires database connection
-- Authentication required for all routes
-- Completely independent from home-app
-
