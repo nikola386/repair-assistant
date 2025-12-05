@@ -423,9 +423,9 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
               display: flex;
               flex-direction: row;
               align-items: center;
-              padding: 1mm;
+              padding: 3mm;
               box-sizing: border-box;
-              gap: 1.5mm;
+              gap: 2mm;
             }
             .label-qr-code {
               flex-shrink: 0;
@@ -434,8 +434,8 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
               justify-content: center;
             }
             .label-qr-code svg {
-              width: 16mm;
-              height: 16mm;
+              width: 13mm;
+              height: 13mm;
             }
             .label-info {
               flex: 1;
