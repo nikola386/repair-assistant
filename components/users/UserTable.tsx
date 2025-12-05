@@ -383,7 +383,7 @@ export default function UserTable({ users, canEdit, currentUserId, onUpdate }: U
 
       {/* Edit Role Modal */}
       {editingUser && (
-        <div className="inventory-modal" onClick={handleCancelEdit}>
+        <div className="inventory-modal">
           <div 
             className="inventory-modal__content user-modal-content modal-content--small" 
             onClick={(e) => e.stopPropagation()}

@@ -514,7 +514,6 @@ export default function LandingPage() {
       {selectedImage && (
         <div 
           className="landing-image-modal"
-          onClick={closeModal}
           onKeyDown={handleKeyDown}
           role="dialog"
           aria-modal="true"

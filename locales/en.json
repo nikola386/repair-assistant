@@ -161,6 +161,7 @@
     "deviceInfo": "Device",
     "issueDescription": "Issue Description",
     "printQr": "Print QR Code",
+    "printLabel": "Print Label",
     "form": {
       "title": "Create Repair Ticket",
       "customerName": "Customer Name",

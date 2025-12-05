@@ -50,7 +50,6 @@ export default function InviteUserModal({ onClose, onSuccess }: InviteUserModalP
   return (
     <div
       className="inventory-modal"
-      onClick={onClose}
     >
       <div
         className="inventory-modal__content modal-content--medium"

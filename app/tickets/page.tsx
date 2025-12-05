@@ -93,7 +93,6 @@ export default function TicketsPage() {
       {showForm && (
         <div 
           className="ticket-modal" 
-          onClick={() => setShowForm(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-ticket-modal-title"

@@ -161,6 +161,7 @@
     "deviceInfo": "Устройство",
     "issueDescription": "Описание на Проблема",
     "printQr": "Принтирай QR Код",
+    "printLabel": "Принтирай Етикет",
     "form": {
       "title": "Създай Ремонтен Билет",
       "customerName": "Име на Клиента",

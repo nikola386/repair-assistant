@@ -809,7 +809,7 @@ export default function DashboardPage() {
 
       {/* Chart Modal */}
       {openChart && (
-        <div className="chart-modal" onClick={() => setOpenChart(null)}>
+        <div className="chart-modal">
           <div className="chart-modal__content" onClick={(e) => e.stopPropagation()}>
             <div className="chart-modal__header">
               <h2 className="chart-modal__title">{getChartTitle(openChart)}</h2>

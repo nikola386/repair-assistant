@@ -367,7 +367,7 @@ export default function InventoryTable({
 
       {/* Edit Modal */}
       {editingItem && (
-        <div className="inventory-modal" onClick={cancelEdit}>
+        <div className="inventory-modal">
           <div className="inventory-modal__content" onClick={(e) => e.stopPropagation()}>
             <div className="inventory-modal__header">
               <h2 className="inventory-modal__title">{t.inventory.table.editItem}</h2>

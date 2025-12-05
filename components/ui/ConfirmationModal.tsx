@@ -25,12 +25,6 @@ export default function ConfirmationModal({
 }: ConfirmationModalProps) {
   if (!isOpen) return null
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onCancel()
-    }
-  }
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       onCancel()
@@ -40,7 +34,6 @@ export default function ConfirmationModal({
   return (
     <div
       className="confirmation-modal"
-      onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"

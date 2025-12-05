@@ -1141,9 +1141,9 @@
 
   &__qr-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
     padding: 1rem;
     background: var(--bg-gray);
     border-radius: 8px;
@@ -1165,6 +1165,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 8px var(--shadow);
+    flex-shrink: 0;
     width: 120px;
     height: 120px;
 
@@ -1174,9 +1175,55 @@
     }
   }
 
-  &__qr-print {
+  &__qr-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  &__qr-info-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__qr-info-label {
+    font-weight: normal;
+    color: var(--text-gray);
+    margin-bottom: 0.1rem;
+    font-size: 0.85rem;
+  }
+
+  &__qr-info-value {
+    font-weight: normal;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+  }
+
+  &__qr-info-case {
+    .ticket-detail__qr-info-value {
+      font-weight: bold;
+      font-size: 1rem;
+    }
+  }
+
+  &__qr-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.75rem;
+  }
+
+  &__qr-print,
+  &__qr-print-label {
     font-size: 0.85rem;
     padding: 0.5rem 1rem;
+    width: 100%;
     
     @media print {
       display: none;

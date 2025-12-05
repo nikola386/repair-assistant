@@ -378,7 +378,8 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
     }
   }, [currentTicket.id])
 
-  const handlePrintQR = () => {
+
+  const handlePrintLabel = () => {
     if (!ticketUrl || !qrCodeRef.current) return
     
     const printWindow = window.open('', '_blank')
@@ -389,65 +390,127 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
 
     const qrSvgContent = qrSvg.outerHTML
 
+    // Label dimensions: 62mm x 20mm (horizontal)
+    // At 300 DPI: 732px x 236px
+    // At 96 DPI (screen): 234px x 76px
     const printContent = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Print QR Code - ${currentTicket.ticketNumber}</title>
+          <title>Print Label - ${currentTicket.ticketNumber}</title>
           <style>
             * {
               margin: 0;
               padding: 0;
               box-sizing: border-box;
             }
-            body {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              min-height: 100vh;
-              padding: 2rem;
+            @page {
+              size: 62mm 20mm;
+              margin: 0;
             }
-            .qr-print-container {
+            body {
+              width: 62mm;
+              height: 20mm;
+              margin: 0;
+              padding: 0;
+              background: white;
+              font-family: Arial, sans-serif;
+              overflow: hidden;
+            }
+            .label-container {
+              width: 100%;
+              height: 100%;
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              padding: 1mm;
+              box-sizing: border-box;
+              gap: 1.5mm;
+            }
+            .label-qr-code {
+              flex-shrink: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .label-qr-code svg {
+              width: 16mm;
+              height: 16mm;
+            }
+            .label-info {
+              flex: 1;
               display: flex;
               flex-direction: column;
-              align-items: center;
-              gap: 1rem;
-              padding: 2rem;
-              border: 2px solid #000;
-              background: white;
-            }
-            .qr-print-code {
-              background: white;
-              padding: 1rem;
-              border: 1px solid #000;
-              display: flex;
-              align-items: center;
               justify-content: center;
+              gap: 0.5mm;
+              font-size: 6pt;
+              line-height: 1.2;
             }
-            svg {
-              display: block;
+            .label-info-item {
+              display: flex;
+              flex-direction: row;
+              align-items: baseline;
+              gap: 0.5mm;
             }
-            .qr-print-ticket {
-              font-size: 1rem;
+            .label-info-label {
+              font-weight: normal;
+              color: black;
+              white-space: nowrap;
+            }
+            .label-info-value {
+              font-weight: normal;
+              color: black;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .label-case {
+              font-size: 7pt;
+            }
+            .label-case-value {
               font-weight: bold;
-              text-align: center;
             }
             @media print {
               body {
-                padding: 0;
+                width: 62mm;
+                height: 20mm;
               }
-              .qr-print-container {
-                border: none;
-                padding: 1rem;
+              .label-container {
+                width: 62mm;
+                height: 20mm;
+              }
+            }
+            @media screen {
+              body {
+                width: 234px;
+                height: 76px;
+                border: 1px solid #ccc;
+                margin: 20px auto;
+              }
+              .label-container {
+                width: 234px;
+                height: 76px;
               }
             }
           </style>
         </head>
         <body>
-          <div class="qr-print-container">
-            <div class="qr-print-ticket">Ticket: ${currentTicket.ticketNumber}</div>
-            <div class="qr-print-code">
+          <div class="label-container">
+            <div class="label-qr-code">
               ${qrSvgContent}
+            </div>
+            <div class="label-info">
+              <div class="label-info-item label-case">
+                <span class="label-info-label">Case#:</span>
+                <span class="label-info-value label-case-value">${currentTicket.ticketNumber}</span>
+              </div>
+              <div class="label-info-item">
+                <span class="label-info-label">Customer:</span>
+                <span class="label-info-value">${currentTicket.customerName}</span>
+              </div>
+              <div class="label-info-item">
+                <span class="label-info-label">Device:</span>
+                <span class="label-info-value">${currentTicket.deviceBrand || ''} ${currentTicket.deviceModel || currentTicket.deviceType || 'N/A'}</span>
+              </div>
             </div>
           </div>
         </body>
@@ -570,11 +633,28 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                   viewBox={`0 0 120 120`}
                 />
               </div>
+              <div className="ticket-detail__qr-info">
+                <div className="ticket-detail__qr-info-item ticket-detail__qr-info-case">
+                  <span className="ticket-detail__qr-info-label">Case#:</span>
+                  <span className="ticket-detail__qr-info-value">{currentTicket.ticketNumber}</span>
+                </div>
+                <div className="ticket-detail__qr-info-item">
+                  <span className="ticket-detail__qr-info-label">Customer:</span>
+                  <span className="ticket-detail__qr-info-value">{currentTicket.customerName}</span>
+                </div>
+                <div className="ticket-detail__qr-info-item">
+                  <span className="ticket-detail__qr-info-label">Device:</span>
+                  <span className="ticket-detail__qr-info-value">{currentTicket.deviceBrand || ''} {currentTicket.deviceModel || currentTicket.deviceType || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+            <div className="ticket-detail__qr-buttons">
               <button
-                className="btn btn-secondary btn-sm ticket-detail__qr-print"
-                onClick={handlePrintQR}
+                className="btn btn-secondary btn-sm ticket-detail__qr-print-label"
+                onClick={handlePrintLabel}
+                title="Print label sticker"
               >
-                {t.tickets.printQr || 'Print QR Code'}
+                {t.tickets.printLabel || 'Print Label'}
               </button>
             </div>
           </div>

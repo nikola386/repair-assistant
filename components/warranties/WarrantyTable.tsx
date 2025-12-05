@@ -313,7 +313,7 @@ export default function WarrantyTable({ warranties, onWarrantyUpdate, isLoading 
 
       {/* Edit Modal */}
       {editingWarranty && (
-        <div className="inventory-modal" onClick={cancelEdit}>
+        <div className="inventory-modal">
           <div className="inventory-modal__content" onClick={(e) => e.stopPropagation()}>
             <div className="inventory-modal__header">
               <h2 className="inventory-modal__title">{t.warranties.table.editWarranty}</h2>
@@ -344,7 +344,7 @@ export default function WarrantyTable({ warranties, onWarrantyUpdate, isLoading 
 
       {/* Claim Modal */}
       {showClaimForm && (
-        <div className="inventory-modal" onClick={() => setShowClaimForm(null)}>
+        <div className="inventory-modal">
           <div className="inventory-modal__content" onClick={(e) => e.stopPropagation()}>
             <div className="inventory-modal__header">
               <h2 className="inventory-modal__title">{t.warranties.table.createWarrantyClaim}</h2>

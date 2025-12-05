@@ -378,10 +378,6 @@ function InventoryPageContent() {
       {showForm && (
         <div 
           className="inventory-modal" 
-          onClick={() => {
-            setShowForm(false)
-            setAddAnother(false)
-          }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="add-item-modal-title"
