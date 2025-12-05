@@ -7,6 +7,7 @@ import { showAlert } from '../../lib/alerts'
 import { useLanguage } from '../../contexts/LanguageContext'
 import ConfirmationModal from '../ui/ConfirmationModal'
 import { useConfirmation } from '../../lib/useConfirmation'
+import { useCurrency } from '../../lib/useCurrency'
 
 interface ExpenseTableProps {
   ticketId: string
@@ -21,6 +22,7 @@ interface ExpenseTableProps {
 export default function ExpenseTable({ ticketId, initialExpenses = [], onExpensesChange, editable = true, showHeader = true, triggerAdd = false, onAddTriggered }: ExpenseTableProps) {
   const { t } = useLanguage()
   const confirmation = useConfirmation()
+  const { formatCurrency } = useCurrency()
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses)
   const [isAdding, setIsAdding] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -368,7 +370,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                       </div>
                       <div className="inventory-dropdown-item-details">
                         Qty: {item.currentQuantity}
-                        {item.unitPrice && ` • Price: $${item.unitPrice.toFixed(2)}`}
+                        {item.unitPrice && ` • Price: ${formatCurrency(item.unitPrice)}`}
                       </div>
                     </div>
                   ))}
@@ -474,7 +476,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                             className="expense-table__table__edit-input"
                           />
                         </td>
-                        <td>${((parseFloat(editingExpense.quantity) || 0) * (parseFloat(editingExpense.price) || 0)).toFixed(2)}</td>
+                        <td>{formatCurrency((parseFloat(editingExpense.quantity) || 0) * (parseFloat(editingExpense.price) || 0))}</td>
                         <td>
                           <div className="expense-table__table__edit-actions">
                             <button
@@ -500,8 +502,8 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                       <>
                         <td>{expense.name}</td>
                         <td>{expense.quantity}</td>
-                        <td>${expense.price.toFixed(2)}</td>
-                        <td>${(expense.quantity * expense.price).toFixed(2)}</td>
+                        <td>{formatCurrency(expense.price)}</td>
+                        <td>{formatCurrency(expense.quantity * expense.price)}</td>
                         {editable && (
                           <td>
                             <div className="expense-table__table__actions">
@@ -534,7 +536,7 @@ export default function ExpenseTable({ ticketId, initialExpenses = [], onExpense
                       <strong>{t.tickets.expenses.totalExpenses}</strong>
                     </td>
                     <td className="expense-table__table__total-amount">
-                      <strong>${totalExpenses.toFixed(2)}</strong>
+                      <strong>{formatCurrency(totalExpenses)}</strong>
                     </td>
                     {editable && <td></td>}
                   </tr>

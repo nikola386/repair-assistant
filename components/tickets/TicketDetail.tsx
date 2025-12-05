@@ -16,6 +16,7 @@ import { useConfirmation } from '../../lib/useConfirmation'
 import { Warranty } from '../../types/warranty'
 import WarrantyStatusBadge from '../warranties/WarrantyStatusBadge'
 import Link from 'next/link'
+import { useCurrency } from '../../lib/useCurrency'
 
 interface TicketDetailProps {
   ticket: RepairTicket
@@ -26,6 +27,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
   const { t } = useLanguage()
   const router = useRouter()
   const confirmation = useConfirmation()
+  const { formatCurrency } = useCurrency()
   const [isEditing, setIsEditing] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -952,7 +954,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                   className="ticket-detail__edit-input"
                 />
               ) : (
-                <p>{currentTicket.estimatedCost !== undefined ? `$${currentTicket.estimatedCost.toFixed(2)}` : '-'}</p>
+                <p>{currentTicket.estimatedCost !== undefined ? formatCurrency(currentTicket.estimatedCost) : '-'}</p>
               )}
             </div>
             <div>
@@ -970,7 +972,7 @@ export default function TicketDetail({ ticket, onTicketUpdate }: TicketDetailPro
                   className="ticket-detail__edit-input"
                 />
               ) : (
-                <p>{currentTicket.actualCost !== undefined ? `$${currentTicket.actualCost.toFixed(2)}` : '-'}</p>
+                <p>{currentTicket.actualCost !== undefined ? formatCurrency(currentTicket.actualCost) : '-'}</p>
               )}
             </div>
           </div>

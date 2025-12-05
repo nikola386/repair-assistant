@@ -3,6 +3,7 @@
 import { RepairTicket } from '../../types/ticket'
 import { useLanguage } from '../../contexts/LanguageContext'
 import Link from 'next/link'
+import { useCurrency } from '../../lib/useCurrency'
 
 interface TicketCardProps {
   ticket: RepairTicket
@@ -11,6 +12,7 @@ interface TicketCardProps {
 
 export default function TicketCard({ ticket, viewMode = 'grid' }: TicketCardProps) {
   const { t } = useLanguage()
+  const { formatCurrency } = useCurrency()
 
   const getStatusClass = (status: string) => {
     return `ticket-status ticket-status--${status}`
@@ -48,7 +50,7 @@ export default function TicketCard({ ticket, viewMode = 'grid' }: TicketCardProp
           </span>
           {ticket.estimatedCost && (
             <span className="ticket-card__cost">
-              {t.tickets.estimatedCost}: ${ticket.estimatedCost.toFixed(2)}
+              {t.tickets.estimatedCost}: {formatCurrency(ticket.estimatedCost)}
             </span>
           )}
         </div>

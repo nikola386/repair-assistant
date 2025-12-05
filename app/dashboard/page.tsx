@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Navigation from '@/components/layout/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Spinner from '@/components/ui/Spinner'
+import { useCurrency } from '@/lib/useCurrency'
 import {
   LineChart,
   Line,
@@ -76,6 +77,7 @@ type ChartType = 'income' | 'expenses' | 'profit' | null
 export default function DashboardPage() {
   const { t } = useLanguage()
   const router = useRouter()
+  const { formatCurrency, formatCurrencyCompact } = useCurrency()
   const [stats, setStats] = useState<DashboardStats>({
     totalRepairs: 0,
     inProgressRepairs: 0,
@@ -171,14 +173,6 @@ export default function DashboardPage() {
     }
   }
 
-  const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value)
-  }
 
   const formatPercentage = (value: number): string => {
     return `${value.toFixed(1)}%`
@@ -333,8 +327,7 @@ export default function DashboardPage() {
           <YAxis
             tickFormatter={(value) => {
               if (openChart === 'profit' || openChart === 'income' || openChart === 'expenses') {
-                if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`
-                return `$${value}`
+                return formatCurrencyCompact(value)
               }
               return `${value.toFixed(0)}%`
             }}
@@ -619,8 +612,7 @@ export default function DashboardPage() {
                             width={40}
                             tick={{ fontSize: 10 }}
                             tickFormatter={(value) => {
-                              if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`
-                              return `$${value}`
+                              return formatCurrencyCompact(value)
                             }}
                           />
                           <Tooltip
@@ -763,8 +755,7 @@ export default function DashboardPage() {
                             width={40}
                             tick={{ fontSize: 10 }}
                             tickFormatter={(value) => {
-                              if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`
-                              return `$${value}`
+                              return formatCurrencyCompact(value)
                             }}
                           />
                           <Tooltip

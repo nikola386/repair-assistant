@@ -14,6 +14,7 @@ import { useLanguage } from '../../contexts/LanguageContext'
 import Link from 'next/link'
 import { useState, useMemo, useEffect } from 'react'
 import { filterPersistence } from '@/lib/filterPersistence'
+import { useCurrency } from '../../lib/useCurrency'
 
 interface TicketTableProps {
   tickets: RepairTicket[]
@@ -21,6 +22,7 @@ interface TicketTableProps {
 
 export default function TicketTable({ tickets }: TicketTableProps) {
   const { t } = useLanguage()
+  const { formatCurrency } = useCurrency()
   
   const [sorting, setSorting] = useState<SortingState>(() => {
     if (typeof window !== 'undefined') {
@@ -114,7 +116,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
           return (
             <Link href={`/tickets/${ticket.id}`} className="table__link table__link--cost">
               <span className="table__cost">
-                {cost ? `$${cost.toFixed(2)}` : '—'}
+                {cost ? formatCurrency(cost) : '—'}
               </span>
             </Link>
           )
@@ -153,7 +155,7 @@ export default function TicketTable({ tickets }: TicketTableProps) {
         },
       },
     ],
-    [t]
+    [t, formatCurrency]
   )
 
   const table = useReactTable({

@@ -7,6 +7,7 @@ import InventoryForm from './InventoryForm'
 import { useLanguage } from '../../contexts/LanguageContext'
 import ConfirmationModal from '../ui/ConfirmationModal'
 import { useConfirmation } from '../../lib/useConfirmation'
+import { useCurrency } from '../../lib/useCurrency'
 
 interface InventoryTableProps {
   items: InventoryItem[]
@@ -27,6 +28,7 @@ export default function InventoryTable({
 }: InventoryTableProps) {
   const { t } = useLanguage()
   const confirmation = useConfirmation()
+  const { formatCurrency } = useCurrency()
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
   const [adjustingId, setAdjustingId] = useState<string | null>(null)
   const [adjustQuantity, setAdjustQuantity] = useState('')
@@ -247,7 +249,7 @@ export default function InventoryTable({
                   {item.currentQuantity}
                 </td>
                 <td>{item.minQuantity}</td>
-                <td>{item.unitPrice !== undefined ? `$${item.unitPrice.toFixed(2)}` : '-'}</td>
+                <td>{item.unitPrice !== undefined ? formatCurrency(item.unitPrice) : '-'}</td>
                 <td>
                   {isLowStock(item) ? (
                     <span className="inventory-table__status--low">{t.inventory.lowStock}</span>
